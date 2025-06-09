@@ -1,6 +1,6 @@
 <?php
 /**
- * Dashboard da Secretaria Acadêmica
+ * Dashboard da Secrtaria Acadêmica
  */
 
 // Inicializa o sistema
