@@ -1,0 +1,1979 @@
+        <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso de Marketing Digital - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F8F9FA;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 8px 20px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Layout principal - Estrutura em grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 60px 1fr;
+            grid-template-areas:
+                "sidebar header"
+                "sidebar main";
+            height: 100vh;
+        }
+
+        /* Barra superior - Header */
+        .app-header {
+            grid-area: header;
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .header-breadcrumb {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary-purple);
+            font-weight: 500;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 8px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .header-btn:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .header-btn-badge {
+            position: relative;
+        }
+
+        .header-btn-badge::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger-red);
+            border-radius: 50%;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--very-light-purple);
+        }
+
+        .header-user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Sidebar do curso - Layout aprimorado */
+        .course-sidebar {
+            grid-area: sidebar;
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px 25px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .course-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .course-logo i {
+            font-size: 1.7rem;
+        }
+
+        .course-logo h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .course-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .course-info img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .progress-container {
+            margin-top: 5px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--white);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .sidebar-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .sidebar-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-body::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .module-accordion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .module-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .module-header {
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .module-header:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .module-header.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .module-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .module-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .module-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .module-indicator {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .module-progress {
+            font-size: 0.8rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .lessons-list {
+            list-style: none;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .module-item.active .lessons-list {
+            max-height: 1000px;
+        }
+
+        .lesson-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .lesson-item:last-child {
+            border-bottom: none;
+        }
+
+        .lesson-link {
+            display: flex;
+            padding: 12px 25px 12px 65px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            align-items: center;
+        }
+
+        .lesson-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .lesson-link.current {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .lesson-link.completed {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .lesson-icon {
+            position: absolute;
+            left: 30px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .lesson-icon i {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .lesson-link.current .lesson-icon i {
+            color: var(--warning-yellow);
+        }
+
+        .lesson-link.completed .lesson-icon i {
+            color: var(--success-green);
+        }
+
+        .lesson-name {
+            flex: 1;
+        }
+
+        .lesson-status {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .lesson-status.completed {
+            background-color: rgba(40, 167, 69, 0.3);
+        }
+
+        .lesson-status.current {
+            background-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .sidebar-footer {
+            padding: 15px 25px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sidebar-footer-btn {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-footer-btn:hover {
+            color: var(--white);
+        }
+
+        /* Conteúdo principal - Aula em exibição */
+        .course-content {
+            grid-area: main;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .course-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .course-content::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px;
+            flex: 1;
+        }
+
+        /* Vídeo Player Aprimorado */
+        .video-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .video-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .video-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .video-action-btn {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .video-action-btn:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* proporção 16:9 */
+            height: 0;
+            background-color: #000;
+        }
+
+        .video-container iframe,
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-playback-bar {
+            position: relative;
+            height: 4px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .video-playback-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 35%;
+            background-color: var(--primary-purple);
+        }
+
+        .video-controls {
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--white);
+        }
+
+        .control-left, .control-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .video-control-btn {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .video-control-btn:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .video-time {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .playback-speed {
+            padding: 5px 10px;
+            background-color: var(--light-bg);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Conteúdo da Aula e Materiais */
+        .content-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .content-tab {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .content-tab:hover {
+            color: var(--primary-purple);
+        }
+
+        .content-tab.active {
+            color: var(--primary-purple);
+        }
+
+        .content-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-purple);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Conteúdo da aula - Melhorado */
+        .lesson-text {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .lesson-text h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--secondary-purple);
+        }
+
+        .lesson-text p {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .lesson-text h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 30px 0 15px;
+            color: var(--secondary-purple);
+        }
+
+        .lesson-text ul, .lesson-text ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .lesson-text li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .lesson-text img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+
+        .lesson-text blockquote {
+            background-color: var(--very-light-purple);
+            border-left: 4px solid var(--primary-purple);
+            padding: 20px 25px;
+            margin: 25px 0;
+            font-style: italic;
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* Materiais complementares - Grid layout */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .material-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 90, 205, 0.15);
+        }
+
+        .material-header {
+            padding: 20px;
+            background-color: var(--very-light-purple);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .material-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+        }
+
+        .material-title {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin-bottom: 3px;
+        }
+
+        .material-type {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .material-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .material-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            flex: 1;
+        }
+
+        .material-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .material-download {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-purple);
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .material-download:hover {
+            background-color: var(--secondary-purple);
+        }
+
+        /* Discussões - Área de comentários aprimorada */
+        .discussions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .discussions-title {
+            font-size: 1.2rem;
+            color: var(--secondary-purple);
+            font-weight: 600;
+        }
+
+        .discussions-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .filter-label {
+            color: var(--text-muted);
+        }
+
+        .filter-select {
+            background-color: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .discussion-form {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .discussion-input-container {
+            position: relative;
+        }
+
+        .discussion-textarea {
+            width: 100%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.95rem;
+            min-height: 100px;
+            resize: none;
+            transition: border-color var(--transition-speed) ease;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .discussion-textarea:focus {
+            border-color: var(--primary-purple);
+        }
+
+        .discussion-form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .form-tools {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-tool-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: color var(--transition-speed) ease;
+        }
+
+        .form-tool-btn:hover {
+            color: var(--primary-purple);
+        }
+
+        .discussion-submit {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .discussion-submit:hover {
+            background-color: var(--secondary-purple);
+        }
+
+        .comments-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .comment-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comment-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .comment-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .comment-body {
+            padding-left: 57px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+
+        .comment-actions {
+            padding-left: 57px;
+            margin-top: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: color var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .comment-action-btn:hover {
+            color: var(--primary-purple);
+        }
+
+        .load-more-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .load-more-btn {
+            background-color: var(--white);
+            color: var(--primary-purple);
+            border: 1px solid var(--primary-purple);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .load-more-btn:hover {
+            background-color: var(--very-light-purple);
+        }
+
+        /* Navegação entre aulas - Barra inferior fixa */
+        .lesson-navigation {
+            background-color: var(--white);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-indicator {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .nav-button.prev {
+            color: var(--text-muted);
+            background-color: var(--light-bg);
+            border: none;
+        }
+
+        .nav-button.prev:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .nav-button.next {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border: none;
+        }
+
+        .nav-button.next:hover {
+            background-color: var(--secondary-purple);
+        }
+
+        .complete-button {
+            background-color: var(--success-green);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .complete-button:hover {
+            background-color: #218838;
+        }
+
+        /* Mobile responsiveness - Aprimorado */
+        @media (max-width: 992px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main";
+            }
+
+            .course-sidebar {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                width: 300px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .course-sidebar.show {
+                left: 0;
+            }
+
+            .content-wrapper {
+                padding: 20px 15px;
+            }
+
+            .app-header {
+                padding: 0 15px;
+            }
+
+            .materials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .video-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .video-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .control-left, .control-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .comment-body,
+            .comment-actions {
+                padding-left: 0;
+                margin-top: 15px;
+            }
+
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .lesson-navigation {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .nav-indicator {
+                display: none;
+            }
+
+            .nav-buttons {
+                width: 100%;
+            }
+
+            .nav-button {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* Botão para mostrar sidebar em dispositivos móveis */
+        .toggle-sidebar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 900;
+            border: none;
+        }
+
+        .toggle-sidebar:hover {
+            background-color: var(--secondary-purple);
+        }
+
+        @media (max-width: 992px) {
+            .toggle-sidebar {
+                display: flex;
+            }
+        }
+
+        /* Overlay para sidebar mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra superior - Header -->
+        <header class="app-header">
+            <div class="header-breadcrumb">
+                <span class="breadcrumb-item">Cursos</span>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item">Marketing Digital</span>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">Panorama atual e tendências</span>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn header-btn-badge" title="Notificações">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="header-btn" title="Suporte">
+                    <i class="fas fa-headset"></i>
+                </button>
+                <div class="header-user">
+                    <img src="/api/placeholder/36/36" alt="Avatar" class="header-user-avatar">
+                    <span class="header-user-name">Roberto Silva</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar do Curso - Menu de navegação -->
+        <aside class="course-sidebar">
+            <div class="sidebar-container">
+                <div class="sidebar-header">
+                    <div class="course-logo">
+                        <i class="fas fa-bullhorn"></i>
+                        <h2>Marketing Digital</h2>
+                    </div>
+                    <div class="course-info">
+                        <img src="/api/placeholder/24/24" alt="Avatar">
+                        <span>Dra. Ana Oliveira</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-text">
+                            <span>Seu progresso</span>
+                            <span>35%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: 35%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-body">
+                    <ul class="module-accordion">
+                        <!-- Módulo 1 -->
+                        <li class="module-item active">
+                            <div class="module-header active">
+                                <div class="module-header-left">
+                                    <div class="module-icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <span class="module-title">Módulo 1: Introdução</span>
+                                </div>
+                                <div class="module-indicator">
+                                    <span class="module-progress">3/4</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <ul class="lessons-list" style="max-height: 1000px;">
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link completed">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span class="lesson-name">1.1 Boas-vindas ao curso</span>
+                                        <span class="lesson-status completed">Concluído</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link completed">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span class="lesson-name">1.2 O que é Marketing Digital</span>
+                                        <span class="lesson-status completed">Concluído</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link current">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                        <span class="lesson-name">1.3 Panorama atual e tendências</span>
+                                        <span class="lesson-status current">Atual</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                        <span class="lesson-name">1.4 Quiz do módulo 1</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- Módulo 2 -->
+                        <li class="module-item">
+                            <div class="module-header">
+                                <div class="module-header-left">
+                                    <div class="module-icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <span class="module-title">Módulo 2: Estratégias de Conteúdo</span>
+                                </div>
+                                <div class="module-indicator">
+                                    <span class="module-progress">0/4</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                            <ul class="lessons-list">
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">2.1 Criação de conteúdo de valor</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">2.2 SEO: otimização para buscadores</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">2.3 Estratégias para blog e site</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">2.4 Quiz do módulo 2</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- Módulo 3 -->
+                        <li class="module-item">
+                            <div class="module-header">
+                                <div class="module-header-left">
+                                    <div class="module-icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <span class="module-title">Módulo 3: Redes Sociais</span>
+                                </div>
+                                <div class="module-indicator">
+                                    <span class="module-progress">0/4</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                            <ul class="lessons-list">
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">3.1 Estratégias para Facebook e Instagram</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">3.2 LinkedIn e Twitter para negócios</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">3.3 YouTube e conteúdo em vídeo</span>
+                                    </a>
+                                </li>
+                                <li class="lesson-item">
+                                    <a href="#" class="lesson-link">
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <span class="lesson-name">3.4 Quiz do módulo 3</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-footer">
+                    
+                    <a href="aluno_dashboard.html" class="sidebar-footer-btn">
+                        <i class="fas fa-home"></i>
+                        <span>Página Inicial</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal - Aula -->
+        <main class="course-content">
+            <div class="content-wrapper">
+                <!-- Player de Vídeo Aprimorado -->
+                <div class="video-card">
+                    <div class="video-header">
+                        <div>
+                            <h2 class="video-title">Panorama atual e tendências</h2>
+                            <p class="video-subtitle">Módulo 1 - Aula 1.3</p>
+                        </div>
+                        <div class="video-actions">
+                            <button class="video-action-btn">
+                                <i class="fas fa-download"></i>
+                                <span>Baixar</span>
+                            </button>
+                            <button class="video-action-btn">
+                                <i class="fas fa-expand"></i>
+                                <span>Tela Cheia</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="video-container">
+                        <iframe src="https://player.vimeo.com/video/123456789" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="video-playback-bar">
+                        <div class="video-playback-progress"></div>
+                    </div>
+                    
+                    <div class="video-controls">
+                        <div class="control-left">
+                            <button class="video-control-btn">
+                                <i class="fas fa-step-backward"></i>
+                                <span>Anterior</span>
+                            </button>
+                            <button class="video-control-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="video-control-btn">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                            <span class="video-time">12:45 / 25:30</span>
+                        </div>
+                        <div class="control-right">
+                            <span class="playback-speed">1.0x</span>
+                            <button class="video-control-btn">
+                                <i class="fas fa-closed-captioning"></i>
+                            </button>
+                            <button class="video-control-btn">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Abas de Navegação para Conteúdo da Aula -->
+                <div class="content-tabs">
+                    <div class="content-tab active" data-tab="content">Conteúdo da Aula</div>
+                    <div class="content-tab" data-tab="materials">Materiais Complementares</div>
+                    <div class="content-tab" data-tab="discussions">Discussões</div>
+                </div>
+                
+                <!-- Conteúdo da Aula -->
+                <div class="tab-content active" id="content-tab">
+                    <div class="lesson-text">
+                        <h2>Panorama Atual do Marketing Digital</h2>
+                        <p>O marketing digital tem evoluído rapidamente nos últimos anos, transformando completamente a forma como as empresas se comunicam com seu público-alvo. A crescente digitalização da sociedade, acelerada pela pandemia global, criou novos hábitos de consumo e interação que as estratégias de marketing precisam considerar.</p>
+                        
+                        <h3>Principais Tendências em 2025</h3>
+                        <ul>
+                            <li><strong>Inteligência Artificial e Machine Learning:</strong> Algoritmos cada vez mais sofisticados permitem personalização em escala, análise preditiva de comportamentos do consumidor e automação de campanhas com otimização em tempo real.</li>
+                            <li><strong>Marketing de Conteúdo Personalizado:</strong> Conteúdo adaptado às necessidades específicas de cada segmento ou até mesmo de cada consumidor, utilizando dados para entregar a mensagem certa no momento certo.</li>
+                            <li><strong>Vídeo Marketing e Conteúdo Interativo:</strong> Crescimento exponencial do consumo de vídeos em diversas plataformas, com conteúdos cada vez mais interativos e envolventes.</li>
+                            <li><strong>Estratégias Mobile-First:</strong> Desenvolvimento de experiências otimizadas para dispositivos móveis, reconhecendo que grande parte da jornada do consumidor acontece em smartphones.</li>
+                        </ul>
+
+                        <blockquote>
+                            "O futuro do marketing digital está na personalização e na capacidade de criar experiências únicas para cada usuário, aproveitando dados e tecnologia para estabelecer conexões genuínas com o público." - Ana Oliveira, Especialista em Marketing Digital
+                        </blockquote>
+
+                        <h3>Transformação Digital e Impactos no Marketing</h3>
+                        <p>A transformação digital tem impactado profundamente as estratégias de marketing, exigindo que as empresas sejam mais ágeis, adaptáveis e centradas no cliente. As organizações que conseguem integrar dados de múltiplos canais e criar uma visão unificada do cliente obtêm vantagens competitivas significativas.</p>
+                        
+                        <p>O marketing data-driven (orientado por dados) tornou-se essencial, permitindo tomadas de decisão baseadas em informações concretas e não apenas em intuição. Ferramentas de analytics avançadas fornecem insights valiosos para otimizar campanhas e melhorar o ROI.</p>
+                        
+                        <h3>Desafios e Oportunidades</h3>
+                        <p>Com o aumento das preocupações com privacidade e novas regulamentações como LGPD no Brasil e GDPR na Europa, os profissionais de marketing enfrentam o desafio de equilibrar personalização e respeito à privacidade dos usuários. Por outro lado, estas mudanças também representam uma oportunidade para construir relacionamentos mais transparentes e baseados em confiança com os consumidores.</p>
+                    </div>
+                </div>
+                
+                <!-- Materiais Complementares -->
+                <div class="tab-content" id="materials-tab">
+                    <div class="materials-grid">
+                        <!-- Material 1 -->
+                        <div class="material-card">
+                            <div class="material-header">
+                                <div class="material-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div>
+                                    <h3 class="material-title">Tendências de Marketing Digital 2025</h3>
+                                    <div class="material-type">PDF • 28 páginas</div>
+                                </div>
+                            </div>
+                            <div class="material-body">
+                                <p class="material-description">
+                                    Relatório completo sobre as tendências mais importantes que moldarão o futuro do marketing digital nos próximos anos.
+                                </p>
+                                <div class="material-meta">
+                                    <span>2.5 MB</span>
+                                    <span>Atualizado: 02/04/2025</span>
+                                </div>
+                            </div>
+                            <button class="material-download">
+                                <i class="fas fa-download me-2"></i> Baixar Material
+                            </button>
+                        </div>
+                        
+                        <!-- Material 2 -->
+                        <div class="material-card">
+                            <div class="material-header">
+                                <div class="material-icon">
+                                    <i class="fas fa-file-powerpoint"></i>
+                                </div>
+                                <div>
+                                    <h3 class="material-title">Slides da Aula</h3>
+                                    <div class="material-type">PPTX • 15 slides</div>
+                                </div>
+                            </div>
+                            <div class="material-body">
+                                <p class="material-description">
+                                    Apresentação utilizada pela professora durante a aula, com todos os pontos-chave e gráficos.
+                                </p>
+                                <div class="material-meta">
+                                    <span>3.1 MB</span>
+                                    <span>Atualizado: 01/04/2025</span>
+                                </div>
+                            </div>
+                            <button class="material-download">
+                                <i class="fas fa-download me-2"></i> Baixar Material
+                            </button>
+                        </div>
+                        
+                        <!-- Material 3 -->
+                        <div class="material-card">
+                            <div class="material-header">
+                                <div class="material-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div>
+                                    <h3 class="material-title">Links Recomendados</h3>
+                                    <div class="material-type">HTML • Recurso Online</div>
+                                </div>
+                            </div>
+                            <div class="material-body">
+                                <p class="material-description">
+                                    Compilação de artigos, ferramentas e sites relacionados ao tema da aula para aprofundamento.
+                                </p>
+                                <div class="material-meta">
+                                    <span>10 links</span>
+                                    <span>Atualizado: 03/04/2025</span>
+                                </div>
+                            </div>
+                            <button class="material-download">
+                                <i class="fas fa-external-link-alt me-2"></i> Acessar Links
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Discussões -->
+                <div class="tab-content" id="discussions-tab">
+                    <div class="discussions-header">
+                        <h3 class="discussions-title">Discussões da Aula</h3>
+                        <div class="discussions-filter">
+                            <span class="filter-label">Ordenar por:</span>
+                            <select class="filter-select">
+                                <option>Mais recentes</option>
+                                <option>Mais relevantes</option>
+                                <option>Mais comentados</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="discussion-form">
+                        <div class="discussion-input-container">
+                            <textarea class="discussion-textarea" placeholder="Compartilhe suas ideias ou dúvidas sobre esta aula..."></textarea>
+                        </div>
+                        <div class="discussion-form-footer">
+                            <div class="form-tools">
+                                <button class="form-tool-btn" title="Inserir imagem">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                                <button class="form-tool-btn" title="Formatar texto">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button class="form-tool-btn" title="Anexar link">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                            </div>
+                            <button class="discussion-submit">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Enviar Comentário</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="comments-container">
+                        <!-- Comentário 1 -->
+                        <div class="comment-card">
+                            <div class="comment-header">
+                                <div class="comment-user">
+                                    <img src="/api/placeholder/45/45" alt="Avatar" class="comment-avatar">
+                                    <div>
+                                        <div class="comment-author">João Silva</div>
+                                        <div class="comment-role">Aluno</div>
+                                    </div>
+                                </div>
+                                <div class="comment-date">Postado há 2 horas</div>
+                            </div>
+                            <div class="comment-body">
+                                <p>Excelente aula! Adorei como foram abordadas as novas tendências de marketing digital. Estou especialmente interessado em aprofundar os conhecimentos sobre IA aplicada ao marketing. Alguém tem recomendações de leituras adicionais sobre esse tema específico?</p>
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <i class="fas fa-reply"></i>
+                                    <span>Responder</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>Curtir (3)</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Comentário 2 -->
+                        <div class="comment-card">
+                            <div class="comment-header">
+                                <div class="comment-user">
+                                    <img src="/api/placeholder/45/45" alt="Avatar" class="comment-avatar">
+                                    <div>
+                                        <div class="comment-author">Ana Oliveira</div>
+                                        <div class="comment-role">Professora</div>
+                                    </div>
+                                </div>
+                                <div class="comment-date">Postado há 45 minutos</div>
+                            </div>
+                            <div class="comment-body">
+                                <p>Olá João! Obrigada pelo feedback. Sobre IA aplicada ao marketing, recomendo o livro "Marketing 5.0" do Philip Kotler que tem um capítulo dedicado ao tema. Também incluí alguns artigos sobre o assunto na seção de materiais complementares. Na próxima aula vamos aprofundar um pouco mais esse tópico!</p>
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <i class="fas fa-reply"></i>
+                                    <span>Responder</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>Curtir (5)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="load-more-container">
+                        <button class="load-more-btn">Carregar mais comentários</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navegação entre aulas -->
+            <div class="lesson-navigation">
+                <div class="nav-indicator">
+                    Aula 3 de 4 no Módulo 1
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-button prev">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Aula Anterior</span>
+                    </button>
+                    <button class="complete-button">
+                        <i class="fas fa-check"></i>
+                        <span>Marcar como Concluída</span>
+                    </button>
+                    <button class="nav-button next">
+                        <span>Próxima Aula</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Botão para mostrar sidebar em dispositivos móveis -->
+    <button class="toggle-sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para sidebar em dispositivos móveis -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Script para controle de interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Controle de abas de conteúdo
+            const tabs = document.querySelectorAll('.content-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remover classe active de todas as abas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba clicada
+                    tab.classList.add('active');
+                    
+                    // Mostrar o conteúdo correspondente
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+            
+            // Controle de módulos no sidebar (accordion)
+            const moduleHeaders = document.querySelectorAll('.module-header');
+            
+            moduleHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const moduleItem = header.parentElement;
+                    
+                    // Toggle active class
+                    moduleItem.classList.toggle('active');
+                    header.classList.toggle('active');
+                    
+                    // Update icon
+                    const icon = header.querySelector('.module-indicator i');
+                    if (moduleItem.classList.contains('active')) {
+                        icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                    } else {
+                        icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                    }
+                });
+            });
+            
+            // Mobile sidebar toggle
+           // Mobile sidebar toggle
+            const toggleSidebarBtn = document.querySelector('.toggle-sidebar');
+            const sidebar = document.querySelector('.course-sidebar');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
+            
+            toggleSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+                
+                // Adicionar/remover classe no body para prevenir scrolling
+                if (sidebar.classList.contains('show')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            });
+            
+            // Funcionalidade para velocidade de reprodução
+            const playbackSpeed = document.querySelector('.playback-speed');
+            if (playbackSpeed) {
+                const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+                let currentSpeedIndex = 2; // Índice para 1.0x (valor padrão)
+                
+                playbackSpeed.addEventListener('click', () => {
+                    currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+                    const newSpeed = speeds[currentSpeedIndex];
+                    playbackSpeed.textContent = newSpeed + 'x';
+                    
+                    // Aqui você adicionaria a lógica para alterar a velocidade do player
+                    // Se estiver usando API de algum player como Vimeo ou YouTube
+                    // player.setPlaybackRate(newSpeed);
+                });
+            }
+            
+            // Funcionalidade para botões de controle do vídeo
+            const playButton = document.querySelector('.video-control-btn:nth-child(2)');
+            if (playButton) {
+                let isPlaying = false;
+                
+                playButton.addEventListener('click', () => {
+                    isPlaying = !isPlaying;
+                    const icon = playButton.querySelector('i');
+                    
+                    if (isPlaying) {
+                        icon.classList.replace('fa-play', 'fa-pause');
+                        // player.play();
+                    } else {
+                        icon.classList.replace('fa-pause', 'fa-play');
+                        // player.pause();
+                    }
+                });
+            }
+            
+            // Botões de volume
+            const volumeButton = document.querySelector('.video-control-btn:nth-child(3)');
+            if (volumeButton) {
+                let isMuted = false;
+                
+                volumeButton.addEventListener('click', () => {
+                    isMuted = !isMuted;
+                    const icon = volumeButton.querySelector('i');
+                    
+                    if (isMuted) {
+                        icon.classList.replace('fa-volume-up', 'fa-volume-mute');
+                        // player.setMuted(true);
+                    } else {
+                        icon.classList.replace('fa-volume-mute', 'fa-volume-up');
+                        // player.setMuted(false);
+                    }
+                });
+            }
+            
+            // Botão de tela cheia
+            const fullscreenButton = document.querySelector('.video-action-btn:nth-child(2)');
+            if (fullscreenButton) {
+                fullscreenButton.addEventListener('click', () => {
+                    const videoContainer = document.querySelector('.video-container');
+                    
+                    if (!document.fullscreenElement) {
+                        if (videoContainer.requestFullscreen) {
+                            videoContainer.requestFullscreen();
+                        } else if (videoContainer.webkitRequestFullscreen) {
+                            videoContainer.webkitRequestFullscreen();
+                        } else if (videoContainer.msRequestFullscreen) {
+                            videoContainer.msRequestFullscreen();
+                        }
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                    }
+                });
+            }
+            
+            // Botão de marcar como concluída
+            const completeButton = document.querySelector('.complete-button');
+            if (completeButton) {
+                completeButton.addEventListener('click', function() {
+                    // Simular a conclusão da aula atual
+                    const currentLesson = document.querySelector('.lesson-link.current');
+                    if (currentLesson) {
+                        // Alterar o ícone para concluído
+                        const icon = currentLesson.querySelector('.lesson-icon i');
+                        icon.classList.replace('fa-play', 'fa-check');
+                        
+                        // Alterar a classe para concluído
+                        currentLesson.classList.remove('current');
+                        currentLesson.classList.add('completed');
+                        
+                        // Alterar o status
+                        const status = currentLesson.querySelector('.lesson-status');
+                        status.textContent = 'Concluído';
+                        status.classList.remove('current');
+                        status.classList.add('completed');
+                        
+                        // Atualizar o botão para "Concluído"
+                        completeButton.innerHTML = '<i class="fas fa-check"></i><span>Concluído</span>';
+                        completeButton.disabled = true;
+                        
+                        // Atualizar a barra de progresso
+                        const progressBar = document.querySelector('.progress-bar-fill');
+                        const progressText = document.querySelector('.progress-text span:last-child');
+                        
+                        // Simulando atualização de progresso (de 35% para 50%)
+                        progressBar.style.width = '50%';
+                        progressText.textContent = '50%';
+                        
+                        // Atualizar o progresso do módulo
+                        const moduleProgress = document.querySelector('.module-item.active .module-progress');
+                        moduleProgress.textContent = '4/4';
+                        
+                        // Notificação de conclusão
+                        showNotification('Aula concluída com sucesso!');
+                    }
+                });
+            }
+            
+            // Botões de navegação
+            const prevButton = document.querySelector('.nav-button.prev');
+            const nextButton = document.querySelector('.nav-button.next');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', function() {
+                    // Navegar para aula anterior (simulação)
+                    console.log('Navegando para aula anterior');
+                    // window.location.href = 'curso_marketing_aula2.html';
+                });
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    // Navegar para próxima aula (simulação)
+                    console.log('Navegando para próxima aula');
+                    // window.location.href = 'curso_marketing_quiz1.html';
+                });
+            }
+            
+            // Função para mostrar notificações
+            function showNotification(message) {
+                // Criar elemento de notificação
+                const notification = document.createElement('div');
+                notification.className = 'notification-toast';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                // Estilizar o elemento
+                notification.style.position = 'fixed';
+                notification.style.bottom = '30px';
+                notification.style.left = '50%';
+                notification.style.transform = 'translateX(-50%)';
+                notification.style.backgroundColor = 'var(--success-green)';
+                notification.style.color = 'white';
+                notification.style.padding = '12px 25px';
+                notification.style.borderRadius = '8px';
+                notification.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
+                notification.style.zIndex = '9999';
+                notification.style.display = 'flex';
+                notification.style.alignItems = 'center';
+                notification.style.gap = '10px';
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease';
+                
+                // Adicionar ao body
+                document.body.appendChild(notification);
+                
+                // Mostrar com animação
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                }, 100);
+                
+                // Remover após alguns segundos
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Inicializar tooltips se estiver usando Bootstrap 5
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

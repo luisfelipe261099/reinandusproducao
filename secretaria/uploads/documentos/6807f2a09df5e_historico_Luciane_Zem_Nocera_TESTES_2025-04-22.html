@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Documento</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+                line-height: 1.5;
+                margin: 2cm;
+                color: #333;
+                background-color: #fff;
+                position: relative;
+            }
+
+            /* Marca dagua */
+            .watermark {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                text-align: center;
+                opacity: 0.1;
+                z-index: -1;
+                pointer-events: none;
+                transform: rotate(-45deg);
+                font-size: 60px;
+                color: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+
+            th, td {
+                padding: 12px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #6a0dad;
+                color: white;
+                font-weight: 500;
+            }
+
+            /* Cabeçalho do documento */
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+                border-bottom: 2px solid #6a0dad;
+                padding-bottom: 20px;
+                position: relative;
+            }
+
+            .header img {
+                max-height: 80px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                color: #6a0dad;
+                font-size: 22pt;
+                font-weight: 700;
+                margin: 0 0 5px 0;
+                text-transform: uppercase;
+            }
+
+            .header p {
+                color: #555;
+                font-size: 10pt;
+                margin: 5px 0;
+            }
+
+            .header h2 {
+                font-size: 18pt;
+                font-weight: 700;
+                margin: 25px 0 0 0;
+                color: #333;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                border-top: 1px solid #ddd;
+                padding-top: 15px;
+            }
+
+            /* Conteúdo do documento */
+            .content {
+                text-align: justify;
+                margin: 30px 0;
+                line-height: 1.8;
+                font-size: 12pt;
+            }
+
+            .content p {
+                margin: 15px 0;
+            }
+
+            .content strong {
+                font-weight: 700;
+                color: #6a0dad;
+            }
+
+            /* Rodapé do documento */
+            .footer {
+                text-align: center;
+                margin-top: 50px;
+                font-size: 10pt;
+                color: #555;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+            }
+
+            .signature {
+                margin-top: 60px;
+                text-align: center;
+            }
+
+            .signature img {
+                max-height: 60px;
+                margin-bottom: 10px;
+            }
+
+            .signature p {
+                margin: 5px 0;
+            }
+
+            .signature .line {
+                width: 250px;
+                border-bottom: 1px solid #333;
+                margin: 10px auto;
+            }
+
+            /* QR Code */
+            .qrcode {
+                text-align: center;
+                margin-top: 30px;
+            }
+
+            .qrcode img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .qrcode p {
+                font-size: 8pt;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            /* Informações de contato */
+            .contact-info {
+                position: fixed;
+                bottom: 1cm;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 8pt;
+                color: #666;
+                border-top: 1px solid #eee;
+                padding-top: 10px;
+            }
+
+            /* Configurações de impressão */
+            .page-break {
+                page-break-after: always;
+            }
+
+            @media print {
+                body {
+                    margin: 0;
+                    padding: 2cm;
+                }
+                @page {
+                    size: A4 portrait;
+                    margin: 2cm;
+                    /* Remover cabeçalhos e rodapés de impressão */
+                    margin-header: 0;
+                    margin-footer: 0;
+                }
+                /* Ocultar URL, data e outros elementos de impressão */
+                @page :first {
+                    margin-top: 0;
+                }
+            }
+
+            /* Botão de impressão */
+            .print-button {
+                display: block;
+                margin: 20px auto;
+                padding: 12px 24px;
+                background-color: #6a0dad;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: background-color 0.3s ease;
+            }
+
+            .print-button:hover {
+                background-color: #4b0973;
+            }
+
+            @media print {
+                .print-button {
+                    display: none;
+                }
+            }
+        </style>
+        <script>
+            function printDocument() {
+                window.print();
+            }
+        </script>
+    </head>
+    <body>
+        <button class="print-button" onclick="printDocument()">Imprimir Documento</button>
+        
+    <div style="position: relative; font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+        <!-- Estilo para ocultar URLs na impressão -->
+        <style>
+            @media print {
+                @page { size: A4; margin: 2cm; }
+                body:after { display: none; content: none !important; }
+                body { -webkit-print-color-adjust: exact; }
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #6a0dad;
+                color: white;
+                font-weight: bold;
+            }
+        </style>
+        <!-- Marca d'agua -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 80px; color: #f0f0f0; opacity: 0.1; transform: rotate(-45deg); z-index: -1;">FACIÊNCIA</div>
+
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #6a0dad; padding-bottom: 20px;">
+            <img src="https://lfmtecnologia.com/reinandus/secretaria/logo.png" alt="Logo da Instituição" style="max-height: 80px; margin-bottom: 15px;">
+            <h1 style="color: #6a0dad; font-size: 22pt; font-weight: bold; margin: 0 0 5px 0; text-transform: uppercase;">Faciência</h1>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">Credenciada pelo MEC - Portaria nº 147 de 08/03/2022</p>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">Departamento de Pós-Graduação</p>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">CNPJ: 09.038.742.0001-80</p>
+            <h2 style="font-size: 18pt; font-weight: bold; margin: 25px 0 0 0; color: #333; text-transform: uppercase; letter-spacing: 2px; border-top: 1px solid #ddd; padding-top: 15px;">HISTÓRICO ESCOLAR</h2>
+        </div>
+
+        <div style="margin: 30px 0; line-height: 1.8; font-size: 12pt;">
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #6a0dad; font-size: 14pt; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Informações do Aluno</h3>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Nome:</strong> Luciane Zem Nocera TESTES</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">CPF:</strong> 819.233.929-72</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Matrícula:</strong> ID: 207</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Curso:</strong> teste - extensao</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Polo:</strong> Polo Temporário</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Data de Início:</strong> 14/12/2020</p>
+                <p style="margin: 8px 0;"><strong style="color: #6a0dad;">Situação:</strong> Ativo</p>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #6a0dad; font-size: 14pt; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Disciplinas Cursadas</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #6a0dad; color: white; padding: 10px; text-align: left; border: 1px solid #ddd;">Disciplina</th>
+                            <th style="background-color: #6a0dad; color: white; padding: 10px; text-align: center; border: 1px solid #ddd;">Carga Horária</th>
+                            <th style="background-color: #6a0dad; color: white; padding: 10px; text-align: center; border: 1px solid #ddd;">Nota</th>
+                            <th style="background-color: #6a0dad; color: white; padding: 10px; text-align: center; border: 1px solid #ddd;">Frequência</th>
+                            <th style="background-color: #6a0dad; color: white; padding: 10px; text-align: center; border: 1px solid #ddd;">Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Competências Gerenciais</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Direito Coletivo do Trabalho</td><td>0</td><td>9.50</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Direito Comunitário e Internacional do Trabalho</td><td>0</td><td>9.80</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Direito Individual do Trabalho</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Gestão da Inovação e Criatividade</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Gestão Estratégica e Planejamento</td><td>0</td><td>9.00</td><td>88.00%</td><td>Aprovado</td></tr><tr><td>Gestão por Projetos</td><td>0</td><td>9.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Metodologia da Pesquisa Científica</td><td>0</td><td>9.50</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>O Direito Previdenciário e o Trabalhador</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Simulação de Negócios</td><td>0</td><td>8.50</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Teoria Geral do Direito do Trabalho</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr><tr><td>Tópicos Especiais</td><td>0</td><td>10.00</td><td>100.00%</td><td>Aprovado</td></tr>
+                    </tbody>
+                </table>
+            </div></div>
+
+        <div style="text-align: center; margin-top: 50px; font-size: 10pt; color: #555; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p style="margin: 5px 0;">São Paulo, 22 de abril de 2025.</p>
+
+            <div style="margin-top: 40px; text-align: center;">
+                <img src="https://lfmtecnologia.com/reinandus/secretaria/Imagem3.jpg" alt="Assinatura Digital" style="max-height: 60px; margin-bottom: 10px;">
+                <div style="width: 250px; border-bottom: 1px solid #333; margin: 10px auto;"></div>
+                <p style="margin: 5px 0;"><strong>Secretaria Acadêmica</strong></p>
+                <p style="margin: 5px 0;">Faculdade FaCiência</p>
+                <p style="margin: 5px 0;">Departamento de Pós-Graduação</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="font-size: 8pt; color: #666; margin-top: 5px;">Código de Verificação: A91238FB</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 8pt; color: #666;">
+            Rua Visconde de Nácar, 1510 - 10º andar - Centro, Curitiba/PR - CEP 80410-201 - (41) 99256-2500<br>
+            faciencia.edu.br - contato@faciencia.edu.br
+        </div>
+        
+        <!-- Script para remover o caminho do arquivo na impressão -->
+        <script>
+            window.onload = function() {
+                // Remover qualquer texto indesejado que possa aparecer na impressão
+                document.title = "Histórico Escolar";
+                
+                // Adiciona um estilo para ocultar o caminho do arquivo
+                var style = document.createElement("style");
+                style.innerHTML = "@media print { body::after { content: none !important; } body::before { content: none !important; } } a[href]:after { content: none !important; } abbr[title]:after { content: none !important; }";
+                document.head.appendChild(style);
+                
+                // Remove qualquer texto que contenha caminhos de arquivo
+                var content = document.body.innerHTML;
+                content = content.replace(/file:\/\/\/[^\s<>"']+/g, "");
+                document.body.innerHTML = content;
+            }
+        </script>
+    </div>
+    </body>
+    </html>

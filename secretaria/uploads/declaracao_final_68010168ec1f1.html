@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Declaração de Matrícula</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 2cm;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    
+    <div style="position: relative; font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+        <!-- Marca d'agua -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 80px; color: #f0f0f0; opacity: 0.1; transform: rotate(-45deg); z-index: -1;">FACIÊNCIA</div>
+
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #6a0dad; padding-bottom: 20px;">
+            <img src="https://lfmtecnologia.com/reinandus/secretaria/logo.png" alt="Logo da Instituição" style="max-height: 80px; margin-bottom: 15px;">
+            <h1 style="color: #6a0dad; font-size: 22pt; font-weight: bold; margin: 0 0 5px 0; text-transform: uppercase;">Faculdade FaCiência</h1>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">Credenciada pelo MEC - Portaria nº 147 de 08/03/2022</p>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">Departamento de Pós-Graduação</p>
+            <p style="color: #555; font-size: 10pt; margin: 5px 0;">CNPJ: XX.XXX.XXX/0001-XX</p>
+            <h2 style="font-size: 18pt; font-weight: bold; margin: 25px 0 0 0; color: #333; text-transform: uppercase; letter-spacing: 2px; border-top: 1px solid #ddd; padding-top: 15px;">DECLARAÇÃO DE MATRÍCULA</h2>
+        </div>
+
+        <div style="text-align: justify; margin: 30px 0; line-height: 1.8; font-size: 12pt;">
+            <p>Declaramos para os devidos fins que <strong style="color: #6a0dad;">Aluno Teste</strong>,
+            inscrito(a) no CPF <strong style="color: #6a0dad;">123.456.789-00</strong>,
+            com número de matrícula <strong style="color: #6a0dad;">12345</strong>,
+            é aluno(a) regularmente matriculado(a) no Curso de <strong style="color: #6a0dad;">Curso de Teste</strong>
+            desta instituição de ensino, no polo <strong style="color: #6a0dad;">Polo de Teste</strong>.</p>
+
+            <p>O(A) aluno(a) iniciou o curso em <strong style="color: #6a0dad;">01/01/2023</strong>
+            com previsão de término em <strong style="color: #6a0dad;">31/12/2023</strong>.</p><p><strong style="color: #6a0dad;">Observações:</strong> Este é um documento de teste.</p><p>Por ser expressão da verdade, firmamos a presente.</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px; font-size: 10pt; color: #555; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p style="margin: 5px 0;">Curitiba/PR, 17 de abril de 2025.</p>
+
+            <div style="margin-top: 40px; text-align: center;">
+                <img src="https://lfmtecnologia.com/reinandus/secretaria/Imagem3.jpg" alt="Assinatura Digital" style="max-height: 60px; margin-bottom: 10px;">
+                <div style="width: 250px; border-bottom: 1px solid #333; margin: 10px auto;"></div>
+                <p style="margin: 5px 0;"><strong>Secretaria Acadêmica</strong></p>
+                <p style="margin: 5px 0;">Faculdade FaCiência</p>
+                <p style="margin: 5px 0;">Departamento de Pós-Graduação</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="font-size: 8pt; color: #666; margin-top: 5px;">Código de Verificação: ABC12345</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 8pt; color: #666;">
+            Rua Visconde de Nácar, 1510 - 10º andar - Centro, Curitiba/PR - CEP 80410-201 - (41) 99256-2500<br>
+            faciencia.edu.br - contato@faciencia.edu.br
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

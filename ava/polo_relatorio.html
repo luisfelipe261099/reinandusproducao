@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios do Polo - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 10px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .polo-info {
+            text-align: right;
+        }
+
+        .polo-info .polo-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .polo-info .polo-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .card-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary-purple);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .card-link:hover {
+            color: var(--secondary-purple);
+            transform: translateX(3px);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-title {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius);
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn-purple {
+            background-color: var(--primary-purple);
+            border: none;
+            color: white;
+        }
+
+        .btn-purple:hover {
+            background-color: var(--secondary-purple);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-secondary {
+            border: 1px solid #ccc;
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Relatórios Cards Grid */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .report-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            height: 100%;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .report-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 25px auto 15px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--primary-purple), var(--light-purple));
+            color: white;
+        }
+
+        .report-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .report-title {
+            font-weight: 600;
+            font-size: 1.15rem;
+            color: var(--secondary-purple);
+            margin-bottom: 10px;
+        }
+
+        .report-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .report-footer {
+            display: flex;
+            border-top: 1px solid #eee;
+        }
+
+        .report-action {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .report-action:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .report-action + .report-action {
+            border-left: 1px solid #eee;
+        }
+
+        /* Tabelas Estilizadas */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .custom-table thead th {
+            background-color: var(--very-light-purple);
+            color: var(--secondary-purple);
+            font-weight: 600;
+            padding: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .custom-table thead th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        .custom-table thead th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+            transform: scale(1.01);
+        }
+
+        .custom-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .badge.bg-success {
+            background-color: rgba(40, 167, 69, 0.15) !important;
+            color: var(--success-green);
+        }
+
+        .badge.bg-warning {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+            color: #d18700;
+        }
+
+        .badge.bg-danger {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            color: var(--danger-red);
+        }
+
+        .badge.bg-info {
+            background-color: rgba(23, 162, 184, 0.15) !important;
+            color: var(--info-blue);
+        }
+
+        .badge.bg-secondary {
+            background-color: rgba(108, 117, 125, 0.15) !important;
+            color: var(--text-muted);
+        }
+
+        /* Charts & Graphs */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filter-item {
+                width: 100%;
+            }
+        }
+
+        /* Relatório Detalhado Tabela */
+        .detailed-report-card {
+            overflow: auto;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--white);
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            border: 1px solid #eee;
+        }
+
+        .page-link:hover {
+            background-color: var(--very-light-purple);
+        }
+
+        .page-link.active {
+            background-color: var(--primary-purple);
+            color: white;
+            border-color: var(--primary-purple);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Aprimorada -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_aluno.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gestão</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_matriculas.html">
+                            <i class="fas fa-user-plus"></i> Matrículas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_certificados.html">
+                            <i class="fas fa-certificate"></i> Certificados
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_relatorio.html" class="active">
+                            <i class="fas fa-chart-bar"></i> Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_config.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_suporte.html">
+                            <i class="fas fa-headset"></i> Suporte
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Relatórios e Análises</h1>
+                <div class="user-info">
+                    <div class="polo-info">
+                        <div class="polo-name">Polo São Paulo</div>
+                        <div class="polo-role">Administrador</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Filtros de Relatórios -->
+            <section class="filter-section">
+                <h4 class="filter-title">Filtros de Relatório</h4>
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label class="filter-label">Tipo de Relatório</label>
+                        <select class="form-select">
+                            <option selected>Todos os Relatórios</option>
+                            <option>Desempenho de Alunos</option>
+                            <option>Matrículas e Evasão</option>
+                            <option>Certificados Emitidos</option>
+                            <option>Financeiro</option>
+                            <option>Participação em Cursos</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">Período</label>
+                        <select class="form-select">
+                            <option selected>Últimos 30 dias</option>
+                            <option>Este mês</option>
+                            <option>Mês passado</option>
+                            <option>Este trimestre</option>
+                            <option>Este ano</option>
+                            <option>Período personalizado</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">Curso</label>
+                        <select class="form-select">
+                            <option selected>Todos os Cursos</option>
+                            <option>Administração Financeira</option>
+                            <option>Gestão de Pessoas</option>
+                            <option>Marketing Digital</option>
+                            <option>Data Science</option>
+                            <option>Desenvolvimento Web</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label class="filter-label">Data Inicial</label>
+                        <input type="date" class="form-control">
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">Data Final</label>
+                        <input type="date" class="form-control">
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">Status</label>
+                        <select class="form-select">
+                            <option selected>Todos os Status</option>
+                            <option>Ativo</option>
+                            <option>Concluído</option>
+                            <option>Pendente</option>
+                            <option>Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-secondary">Limpar</button>
+                    <button class="btn btn-purple btn-icon">
+                        <i class="fas fa-filter"></i> Aplicar Filtros
+                    </button>
+                </div>
+            </section>
+
+            <!-- Relatórios Disponíveis -->
+            <h4 class="mb-4">Relatórios Disponíveis</h4>
+            <div class="reports-grid">
+                <!-- Relatório de Matrículas -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Relatório de Matrículas</h5>
+                        <p class="report-desc">Acompanhe o número de matrículas, renovações e cancelamentos por período.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relatório de Desempenho -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Desempenho de Alunos</h5>
+                        <p class="report-desc">Análise do progresso acadêmico, notas e taxa de conclusão dos alunos.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relatório Financeiro -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Relatório Financeiro</h5>
+                        <p class="report-desc">Resumo de receitas, pagamentos pendentes e projeções financeiras do polo.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relatório de Certificados -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Certificados Emitidos</h5>
+                        <p class="report-desc">Lista de certificados emitidos, pendentes e em andamento por curso.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+
+              <!-- Relatório de Evasão -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Análise de Evasão</h5>
+                        <p class="report-desc">Monitoramento da taxa de evasão, motivos e estratégias de retenção.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relatório de Participação -->
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="report-info">
+                        <h5 class="report-title">Participação em Cursos</h5>
+                        <p class="report-desc">Análise de frequência, engajamento e participação dos alunos nos cursos.</p>
+                    </div>
+                    <div class="report-footer">
+                        <a href="#" class="report-action">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                        <a href="#" class="report-action">
+                            <i class="fas fa-download"></i> Exportar
+                        </a>
+                    </div>
+                </div>
+                </head>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script para o menu responsivo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para mostrar/ocultar sidebar em dispositivos móveis
+            function toggleSidebar() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            }
+            
+            // Adicionar botão para mobile (menu hamburguer)
+            const mainContent = document.querySelector('.main-content');
+            const mobileMenuBtn = document.createElement('button');
+            mobileMenuBtn.classList.add('mobile-menu-btn');
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            mobileMenuBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background-color: var(--primary-purple);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                width: 40px;
+                height: 40px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                font-size: 1.2rem;
+            `;
+            
+            document.body.appendChild(mobileMenuBtn);
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+            
+            // Overlay para fechar o menu quando clicar fora
+            const overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 999;
+                display: none;
+            `;
+            
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Mostrar/ocultar elementos baseado no tamanho da tela
+            function handleScreenResize() {
+                if (window.innerWidth <= 992) {
+                    mobileMenuBtn.style.display = 'flex';
+                    
+                    // Mostrar overlay apenas quando o menu estiver visível
+                    if (document.querySelector('.sidebar').classList.contains('show')) {
+                        overlay.style.display = 'block';
+                    } else {
+                        overlay.style.display = 'none';
+                    }
+                } else {
+                    mobileMenuBtn.style.display = 'none';
+                    overlay.style.display = 'none';
+                }
+            }
+            
+            // Adicionar event listener para redimensionamento
+            window.addEventListener('resize', handleScreenResize);
+            
+            // Chamar a função uma vez para configurar o estado inicial
+            handleScreenResize();
+        });
+    </script>
+</body>
+</html>

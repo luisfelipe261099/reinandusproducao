@@ -1,0 +1,2524 @@
+{
+	"info": {
+		"_postman_id": "1e882893-2555-4db0-9cb6-6bc9dbf6cdb9",
+		"name": "Api-Cobranca",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13167272"
+	},
+	"item": [
+		{
+			"name": "Autenticação",
+			"item": [
+				{
+					"name": "Obter access_token com secret Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_Id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://sts.itau.com.br/api/oauth/token",
+							"protocol": "https",
+							"host": [
+								"sts",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"api",
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Se você optou pelo fluxo client credentials com client_id e client_secret, essa é a API que precisa ser chamada para obter um access_token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "EmissaoBoleto",
+			"item": [
+				{
+					"name": "EmissaoBoleto",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"data\": {\r\n\t\t\"etapa_processo_boleto\": \"validacao\",\r\n\t\t\"codigo_canal_operacao\": \"API\",\r\n\t\t\"beneficiario\": {\r\n\t\t\t\"id_beneficiario\": {{id_beneficiario}}\r\n\t\t},\r\n\t\t\"dado_boleto\": {\r\n\t\t\t\"descricao_instrumento_cobranca\": \"boleto\",\r\n\t\t\t\"tipo_boleto\": \"a vista\",\r\n\t\t\t\"codigo_carteira\": \"109\",\r\n\t\t\t\"valor_total_titulo\": \"00000000000001000\",\r\n\t\t\t\"codigo_especie\": \"01\",\r\n\t\t\t\"valor_abatimento\": \"000\",\r\n\t\t\t\"data_emissao\": \"2022-05-19\",\r\n\t\t\t\"indicador_pagamento_parcial\": true,\r\n\t\t\t\"quantidade_maximo_parcial\": 0,\r\n\t\t\t\"pagador\": {\r\n\t\t\t\t\"pessoa\": {\r\n\t\t\t\t\t\"nome_pessoa\": \"Pessoa teste\",\r\n\t\t\t\t\t\"tipo_pessoa\": {\r\n\t\t\t\t\t\t\"codigo_tipo_pessoa\": \"F\",\r\n\t\t\t\t\t\t\"numero_cadastro_pessoa_fisica\": \"15231282461\"\r\n\t\t\t\t\t}\r\n\t\t\t\t},\r\n\t\t\t\t\"endereco\": {\r\n\t\t\t\t\t\"nome_logradouro\": \"Rua endereço,71\",\r\n\t\t\t\t\t\"nome_bairro\": \"Bairro\",\r\n\t\t\t\t\t\"nome_cidade\": \"Cidade\",\r\n\t\t\t\t\t\"sigla_UF\": \"PE\",\r\n\t\t\t\t\t\"numero_CEP\": \"51340540\"\r\n\t\t\t\t}\r\n\t\t\t},\r\n\t\t\t\"dados_individuais_boleto\": [{\r\n\t\t\t\t\"numero_nosso_numero\": \"20000002\",\r\n\t\t\t\t\"data_vencimento\": \"2022-05-24\",\r\n\t\t\t\t\"valor_titulo\": \"00000000000119900\",\r\n\t\t\t\t\"texto_uso_beneficiario\": \"2\",\r\n\t\t\t\t\"texto_seu_numero\": \"2\"\r\n\t\t\t}],\r\n\t\t\t\"multa\": {\r\n\t\t\t\t\"codigo_tipo_multa\": \"02\",\r\n\t\t\t\t\"quantidade_dias_multa\": 1,\r\n\t\t\t\t\"percentual_multa\": \"000000100000\"\r\n\t\t\t},\r\n\t\t\t\"juros\": {\r\n\t\t\t\t\"codigo_tipo_juros\": 90,\r\n\t\t\t\t\"quantidade_dias_juros\": 1,\r\n\t\t\t\t\"percentual_juros\": \"000000100000\"\r\n\t\t\t},\r\n\t\t\t\"recebimento_divergente\": {\r\n\t\t\t\t\"codigo_tipo_autorizacao\": \"01\"\r\n\t\t\t},\r\n            \"instrucao_cobranca\": [\r\n                {\r\n                    \"codigo_instrucao_cobranca\": \"1\",\r\n                    \"quantidade_dias_apos_vencimento\":2,\r\n                    \"dia_util\":false\r\n                }        \r\n            ],  \r\n\t\t\t\"protesto\": {\r\n\t\t\t\t\"protesto\": 4,\r\n                \"quantidade_dias_protesto\": 100\r\n\t\t\t},\r\n\t\t\r\n\t\t\t\"desconto_expresso\": false\r\n\t\t}\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "EmissaoBoleto - Nagativacao",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "default"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "default"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"data\": {\r\n\t\t\"etapa_processo_boleto\": \"validacao\",\r\n\t\t\"codigo_canal_operacao\": \"API\",\r\n\t\t\"beneficiario\": {\r\n\t\t\t\"id_beneficiario\": {{id_beneficiario}}\r\n\t\t},\r\n\t\t\"dado_boleto\": {\r\n\t\t\t\"descricao_instrumento_cobranca\": \"boleto\",\r\n\t\t\t\"tipo_boleto\": \"a vista\",\r\n\t\t\t\"codigo_carteira\": \"109\",\r\n\t\t\t\"valor_total_titulo\": \"00000000000001000\",\r\n\t\t\t\"codigo_especie\": \"01\",\r\n\t\t\t\"valor_abatimento\": \"000\",\r\n\t\t\t\"data_emissao\": \"2022-05-19\",\r\n\t\t\t\"indicador_pagamento_parcial\": true,\r\n\t\t\t\"quantidade_maximo_parcial\": 0,\r\n\t\t\t\"pagador\": {\r\n\t\t\t\t\"pessoa\": {\r\n\t\t\t\t\t\"nome_pessoa\": \"Pessoa teste\",\r\n\t\t\t\t\t\"tipo_pessoa\": {\r\n\t\t\t\t\t\t\"codigo_tipo_pessoa\": \"F\",\r\n\t\t\t\t\t\t\"numero_cadastro_pessoa_fisica\": \"05221282461\"\r\n\t\t\t\t\t}\r\n\t\t\t\t},\r\n\t\t\t\t\"endereco\": {\r\n\t\t\t\t\t\"nome_logradouro\": \"Rua endereço,71\",\r\n\t\t\t\t\t\"nome_bairro\": \"Bairro\",\r\n\t\t\t\t\t\"nome_cidade\": \"Cidade\",\r\n\t\t\t\t\t\"sigla_UF\": \"PE\",\r\n\t\t\t\t\t\"numero_CEP\": \"51340540\"\r\n\t\t\t\t}\r\n\t\t\t},\r\n\t\t\t\"dados_individuais_boleto\": [{\r\n\t\t\t\t\"numero_nosso_numero\": \"20000002\",\r\n\t\t\t\t\"data_vencimento\": \"2022-05-24\",\r\n\t\t\t\t\"valor_titulo\": \"00000000000119900\",\r\n\t\t\t\t\"texto_uso_beneficiario\": \"2\",\r\n\t\t\t\t\"texto_seu_numero\": \"2\"\r\n\t\t\t}],\r\n\t\t\t\"multa\": {\r\n\t\t\t\t\"codigo_tipo_multa\": \"02\",\r\n\t\t\t\t\"quantidade_dias_multa\": 1,\r\n\t\t\t\t\"percentual_multa\": \"000000100000\"\r\n\t\t\t},\r\n\t\t\t\"juros\": {\r\n\t\t\t\t\"codigo_tipo_juros\": 90,\r\n\t\t\t\t\"quantidade_dias_juros\": 1,\r\n\t\t\t\t\"percentual_juros\": \"000000100000\"\r\n\t\t\t},\r\n\t\t\t\"recebimento_divergente\": {\r\n\t\t\t\t\"codigo_tipo_autorizacao\": \"01\"\r\n\t\t\t},\r\n\t\t\t\"protesto\": {\r\n\t\t\t\t\"protesto\": 4,\r\n                \"quantidade_dias_protesto\": 100\r\n\t\t\t},\r\n\t\t\t\"negativacao\": {\r\n\t\t\t\t\"negativacao\": 5,\r\n\t\t\t\t\"quantidade_dias_negativacao\": 0\r\n\t\t\t},\t\t\r\n\t\t\t\"desconto_expresso\": false\r\n\t\t}\r\n\t}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "ConsultaDeDetalheDoTitulo",
+			"item": [
+				{
+					"name": "ConsultaTItulos",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							},
+							{
+								"key": "x-apigw-api-id",
+								"value": "dlpaohrvn6",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://secure.api.cloud.itau.com.br/boletoscash/v2/boletos?id_beneficiario={{id_beneficiario}}&codigo_carteira=109&nosso_numero=20000002",
+							"protocol": "https",
+							"host": [
+								"secure",
+								"api",
+								"cloud",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"boletoscash",
+								"v2",
+								"boletos"
+							],
+							"query": [
+								{
+									"key": "id_beneficiario",
+									"value": "{{id_beneficiario}}"
+								},
+								{
+									"key": "codigo_carteira",
+									"value": "109"
+								},
+								{
+									"key": "nosso_numero",
+									"value": "20000002"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MovTitulos(Sem Acesso Em Desenvolvimento)",
+			"item": [
+				{
+					"name": "MovimentacaoTitulo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "https://secure.api.cloud.itau.com.br/boletoscash/v2/boletos?id_beneficiario={{id_beneficiario}}&codigo_carteira=109&nosso_numero=20000002&data_inclusao=2022-05-23&view=specific",
+							"protocol": "https",
+							"host": [
+								"secure",
+								"api",
+								"cloud",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"boletoscash",
+								"v2",
+								"boletos"
+							],
+							"query": [
+								{
+									"key": "id_beneficiario",
+									"value": "{{id_beneficiario}}"
+								},
+								{
+									"key": "codigo_carteira",
+									"value": "109"
+								},
+								{
+									"key": "nosso_numero",
+									"value": "20000002"
+								},
+								{
+									"key": "data_inclusao",
+									"value": "2022-05-23"
+								},
+								{
+									"key": "view",
+									"value": "specific"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AlteracoesEInstrucoes",
+			"item": [
+				{
+					"name": "BaixaImediata",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "default"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/baixa",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"baixa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ValorMominal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"valor_titulo\": \"250.00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/valor_nominal",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"valor_nominal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Juros",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"juros\": {\r\n        \"codigo_tipo_juros\": \"90\",\r\n        \"quantidade_dias_juros\": 2,\r\n        \"percentual_juros\": \"15.00000\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/juros",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"juros"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"juros\": {\r\n        \"codigo_tipo_juros\": \"93\",\r\n        \"quantidade_dias_juros\": 1,\r\n        \"valor_juros\": \"150.00\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/juros",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"juros"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"juros\": {\r\n        \"codigo_tipo_juros\": \"90\",\r\n        \"quantidade_dias_juros\": 2,\r\n        \"percentual_juros\": \"15.00000\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/juros",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"juros"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "DataVencimento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"data_vencimento\": \"2022-05-31\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/data_vencimento",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"data_vencimento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Desconto",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"90\",\r\n        \"descontos\": [\r\n            {\r\n                \"percentual_desconto\": \"10.00000\"\r\n            }\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/81610015315310920000002/desconto",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"81610015315310920000002",
+								"desconto"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"91\",\r\n        \"descontos\": [\r\n            {\r\n                \"valor_desconto\": \"10.00\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada3",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"02\",\r\n        \"descontos\": [\r\n            {\r\n                \"quantidade_dias_desconto\": 3,\r\n                \"percentual_desconto\": \"10.00000\"\r\n            },\r\n            {\r\n                \"quantidade_dias_desconto\": 1,\r\n                \"percentual_desconto\": \"30.00000\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada4",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"02\",\r\n        \"descontos\":[{\r\n          \"quantidade_dias_desconto\": 5,\r\n          \"percentual_desconto\": \"10.00000\"\r\n        },\r\n        {\r\n          \"quantidade_dias_desconto\": 3,\r\n          \"percentual_desconto\": \"5.00000\"\r\n        },\r\n        {\r\n          \"quantidade_dias_desconto\": 1,\r\n          \"percentual_desconto\": \"2.00000\"\r\n        }]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada5",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"01\",\r\n        \"descontos\": [\r\n            {\r\n                \"quantidade_dias_desconto\": 2,\r\n                \"valor_desconto\": \"10.00\"\r\n            },\r\n            {\r\n                \"quantidade_dias_desconto\": 5,\r\n                \"valor_desconto\": \"20.00\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada6",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"01\",\r\n        \"descontos\": [\r\n            {\r\n                \"quantidade_dias_desconto\": 3,\r\n                \"valor_desconto\": \"10.00\"\r\n            },\r\n            {\r\n                \"quantidade_dias_desconto\": 1,\r\n                \"valor_desconto\": \"50.00\"\r\n            },\r\n            {\r\n                \"quantidade_dias_desconto\": 2,\r\n                \"valor_desconto\": \"40.00\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada7",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"desconto\": {\r\n        \"codigo_tipo_desconto\": \"00\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/desconto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"desconto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Abatimento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"valor_abatimento\": \"10.00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/81610015315310920000002/abatimento",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"81610015315310920000002",
+								"abatimento"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"valor_abatimento\": \"10.00\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/abatimento",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"abatimento"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"valor_abatimento\": \"0\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/abatimento",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"abatimento"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Multa",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n \"multa\": {\r\n        \"codigo_tipo_multa\": \"01\",\r\n        \"quantidade_dias_multa\": 1,\r\n        \"valor_multa\": \"10.00\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/multa",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"multa"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"multa\": {\r\n        \"codigo_tipo_multa\": \"02\",\r\n        \"quantidade_dias_multa\": 1,\r\n        \"percentual_multa\": \"1.00000\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/abatimento",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"abatimento"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada3",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"multa\": {\r\n        \"codigo_tipo_multa\": \"02\",\r\n        \"quantidade_dias_multa\": 1,\r\n        \"percentual_multa\": \"10.00000\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/multa",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"multa"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada4",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"multa\": {\r\n        \"codigo_tipo_multa\": \"03\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/multa",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"multa"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Protesto",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"protesto\": {\r\n        \"codigo_tipo_protesto\": 1,\r\n        \"quantidade_dias_protesto\": 1\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/protesto",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"protesto"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"protesto\": {\r\n        \"codigo_tipo_protesto\": 1,\r\n        \"quantidade_dias_protesto\": 1\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/protesto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"protesto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"protesto\": {\r\n        \"codigo_tipo_protesto\": 9\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/protesto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"protesto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada3",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"protesto\": {\r\n        \"codigo_tipo_protesto\": 4\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/protesto",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"protesto"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "SeuNumero",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"texto_seu_numero\": \"1234567890\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/seu_numero",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"seu_numero"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DataLimitePagamento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data_limite_pagamento\": \"2022-06-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/data_limite_pagamento",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"data_limite_pagamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Negativacao",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"negativacao\": {\r\n        \"codigo_tipo_negativacao\": 2,\r\n        \"quantidade_dias_negativacao\": 23\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/negativacao",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"negativacao"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"negativacao\": {\r\n        \"codigo_tipo_negativacao\": 2,\r\n        \"quantidade_dias_negativacao\": 23\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/negativacao",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"negativacao"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"negativacao\": {\r\n        \"codigo_tipo_negativacao\": 5\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/negativacao",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"negativacao"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada3",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"negativacao\": {\r\n        \"codigo_tipo_negativacao\": 10\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/negativacao",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"negativacao"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Pagador",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"pagador\": {\r\n    \"pessoa\": {\r\n      \"nome_pessoa\": \"Maria da Conceicao Silva\",\r\n      \"tipo_pessoa\": {\r\n        \"codigo_tipo_pessoa\": \"F\",\r\n        \"numero_cadastro_pessoa_fisica\": \"15535059560\"\r\n      }\r\n    },\r\n   \"endereco\": {\r\n      \"nome_logradouro\": \"Av do Estado, 5533\",\r\n      \"nome_bairro\": \"Mooca\",\r\n      \"nome_cidade\": \"São Paulo\",\r\n      \"sigla_uf\": \"SP\",\r\n      \"numero_cep\": \"12345678\"\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/pagador",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"pagador"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"pagador\": {\r\n    \"pessoa\": {\r\n      \"nome_pessoa\": \"Sulamita Silvestre de Almeida Santos\",\r\n      \"tipo_pessoa\": {\r\n        \"codigo_tipo_pessoa\": \"F\",\r\n        \"numero_cadastro_pessoa_fisica\": \"15535059560\"\r\n      }\r\n    },\r\n    \"endereco\": {\r\n      \"nome_logradouro\": \"Rua Nova Cruz, 15 \",\r\n      \"nome_bairro\": \"COHAB\",\r\n      \"nome_cidade\": \"Recife\",\r\n      \"sigla_uf\": \"PE\",\r\n      \"numero_cep\": \"51340540\"\r\n    }\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/pagador",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"pagador"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"pagador\": {\r\n        \"pessoa\": {\r\n            \"nome_pessoa\": \"João Silva\",\r\n            \"tipo_pessoa\": {\r\n                \"codigo_tipo_pessoa\": \"J\",\r\n                \"numero_cadastro_nacional_pessoa_juridica\": \"33378990006846\"\r\n            }\r\n        },\r\n        \"endereco\": {\r\n            \"nome_logradouro\": \"Av do Estado, 5533\",\r\n            \"nome_bairro\": \"Mooca\",\r\n            \"nome_cidade\": \"São Paulo\",\r\n            \"sigla_uf\": \"SP\",\r\n            \"numero_cep\": \"12345678\"\r\n        },\r\n        \"texto_endereco_email\": \"joao@itau.com.br\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/pagador",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"pagador"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "RecebimentoDivergente",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-itau-apikey",
+								"value": "{{client_Id}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-correlationID",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "x-itau-flowID",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 2,\r\n    \"percentual_minimo\": \"10.00000\",\r\n    \"percentual_maximo\": \"100.00000\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+							"protocol": "https",
+							"host": [
+								"api",
+								"itau",
+								"com",
+								"br"
+							],
+							"path": [
+								"cash_management",
+								"v2",
+								"boletos",
+								"{{id_boleto}}",
+								"recebimento_divergente"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Entrada1",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 2,\r\n    \"percentual_minimo\": \"10.00000\",\r\n    \"percentual_maximo\": \"100.00000\"\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"recebimento_divergente"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada2",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 1\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"recebimento_divergente"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada3",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 3\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"recebimento_divergente"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada4",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 4,\r\n    \"percentual_minimo\": \"10.00000\"\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"recebimento_divergente"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Entrada5",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-itau-apikey",
+										"value": "{{client_Id}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-correlationID",
+										"value": "{{$guid}}",
+										"type": "text"
+									},
+									{
+										"key": "x-itau-flowID",
+										"value": "{{$guid}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"recebimento_divergente\": {\r\n    \"codigo_tipo_autorizacao\": 4,\r\n    \"valor_minimo\": \"10.00\"\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.itau.com.br/cash_management/v2/boletos/{{id_boleto}}/recebimento_divergente",
+									"protocol": "https",
+									"host": [
+										"api",
+										"itau",
+										"com",
+										"br"
+									],
+									"path": [
+										"cash_management",
+										"v2",
+										"boletos",
+										"{{id_boleto}}",
+										"recebimento_divergente"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		}
+	]
+}

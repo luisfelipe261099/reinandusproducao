@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.29",
+        "tecnickcom/tcpdf": "^6.9",
+        "spipu/html2pdf": "^5.3",
+        "dompdf/dompdf": "^3.1"
+    }
+}

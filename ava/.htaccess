@@ -1,0 +1,24 @@
+# Permitir acesso direto aos arquivos PHP
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /ava/
+    
+    # Não redirecionar arquivos e diretórios existentes
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # Redirecionar para dashboard.php se o arquivo não existir
+    RewriteRule ^$ dashboard.php [L]
+</IfModule>
+
+# Definir o tipo de documento para PHP
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Permitir acesso a todos os arquivos na pasta
+<Files *>
+    Order Allow,Deny
+    Allow from all
+</Files>

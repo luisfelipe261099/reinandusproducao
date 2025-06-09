@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Aluno - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna com Design Inovador */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 30%;
+            background-image: url('/api/placeholder/300/300');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-banner h2 {
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .welcome-banner p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+            max-width: 70%;
+        }
+
+        .welcome-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .welcome-stat {
+            flex: 1;
+            min-width: 150px;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(5px);
+        }
+
+        .welcome-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .welcome-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .card-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary-purple);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .card-link:hover {
+            color: var(--secondary-purple);
+            transform: translateX(3px);
+        }
+
+        /* Course Cards */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .course-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 90, 205, 0.15);
+        }
+
+        .course-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .course-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+        }
+
+        .course-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-purple);
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .course-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .progress-custom {
+            height: 10px;
+            background-color: rgba(106, 90, 205, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .progress-custom .progress-bar {
+            background-color: var(--primary-purple);
+            border-radius: 5px;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .course-progress {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .course-badge {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: var(--primary-purple);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .btn-continue {
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-continue:hover {
+            background: linear-gradient(to right, var(--secondary-purple), var(--primary-purple));
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+        }
+
+        /* Next Classes */
+        .class-item {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all var(--transition-speed) ease;
+            border-left: 5px solid var(--primary-purple);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .class-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .class-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .class-info {
+            flex: 1;
+        }
+
+        .class-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+        }
+
+        .class-course {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .class-time {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: var(--primary-purple);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .class-time i {
+            font-size: 0.9rem;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.2);
+            margin-bottom: 30px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .stats-card::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-header h4 {
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .stat-info h6 {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            font-size: 1.4rem;
+            color: var(--white);
+        }
+
+        /* Certificates Card */
+        .certificates-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .certificate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(106, 90, 205, 0.1);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .certificate-item:hover {
+            transform: translateX(5px);
+        }
+
+        .certificate-item:last-child {
+            border-bottom: none;
+        }
+
+        .certificate-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .certificate-name i {
+            color: var(--primary-purple);
+            font-size: 1.2rem;
+        }
+
+        .certificate-badge {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: var(--primary-purple);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .certificate-badge.in-progress {
+            background-color: rgba(23, 162, 184, 0.15);
+            color: var(--info-blue);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .welcome-banner p {
+                max-width: 100%;
+            }
+
+            .welcome-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .welcome-stat {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Moderna -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="aluno_dashboard.html" class="active">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li>
+                    <a href="meuscursos.html">
+                        <i class="fas fa-book"></i> Meus Cursos
+                    </a>
+                </li>
+                <li>
+                    <a href="calendario.html">
+                        <i class="fas fa-calendar-alt"></i> Calendário
+                    </a>
+                </li>
+                <li>
+                    <a href="desempenho.html">
+                        <i class="fas fa-chart-line"></i> Desempenho
+                    </a>
+                </li>
+                <li>
+                    <a href="certificado.html">
+                        <i class="fas fa-certificate"></i> Certificados
+                    </a>
+                </li>
+                <li>
+                    <a href="material.html">
+                        <i class="fas fa-file-alt"></i> Materiais
+                    </a>
+                </li>
+                <li>
+                    <a href="mensagens.html">
+                        <i class="fas fa-comment-alt"></i> Mensagens
+                    </a>
+                </li>
+                <li>
+                    <a href="perfil.html">
+                        <i class="fas fa-user-cog"></i> Perfil
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html" class="text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Painel do Aluno</h1>
+                <div class="user-info">
+                    <div class="student-info">
+                        <div class="student-name">Maria Silva</div>
+                        <div class="student-email">maria.silva@email.com</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Banner de Boas-vindas com Estatísticas -->
+            <section class="welcome-banner">
+                <div class="welcome-content">
+                    <h2>Olá, Maria!</h2>
+                    <p>Bem-vinda de volta. Você está fazendo ótimos progressos nos seus cursos. Continue assim!</p>
+                    
+                    <div class="welcome-stats">
+                        <div class="welcome-stat">
+                            <div class="welcome-stat-value">42%</div>
+                            <div class="welcome-stat-label">Progresso Geral</div>
+                        </div>
+                        <div class="welcome-stat">
+                            <div class="welcome-stat-value">85h</div>
+                            <div class="welcome-stat-label">Horas de Estudo</div>
+                        </div>
+                        <div class="welcome-stat">
+                            <div class="welcome-stat-value">2</div>
+                            <div class="welcome-stat-label">Certificados</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Layout de Duas Colunas para Conteúdo -->
+            <div class="row g-4">
+                <!-- Coluna Principal (Cursos e Aulas) -->
+                <div class="col-lg-8">
+                    <!-- Cursos em Andamento -->
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Cursos em Andamento</h4>
+                            <a href="meuscursos.html" class="card-link">
+                                Ver Todos <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="courses-grid">
+                            <!-- Curso 1 -->
+                            <div class="course-card">
+                                <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                                    <span class="course-tag">Intermediário</span>
+                                </div>
+                                <div class="course-content">
+                                    <h3 class="course-title">Marketing Digital Avançado</h3>
+                                    <div class="progress progress-custom">
+                                        <div class="progress-bar" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <div class="course-stats">
+                                        <span class="course-progress">65% Concluído</span>
+                                        <span class="course-badge">12 aulas restantes</span>
+                                    </div>
+                                    <a href="curso_marketing.html" class="btn btn-continue">
+                                        <i class="fas fa-play-circle"></i> Continuar Curso
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Curso 2 -->
+                            <div class="course-card">
+                                <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                                    <span class="course-tag">Iniciante</span>
+                                </div>
+                                <div class="course-content">
+                                    <h3 class="course-title">Desenvolvimento Web Full Stack</h3>
+                                    <div class="progress progress-custom">
+                                        <div class="progress-bar" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <div class="course-stats">
+                                        <span class="course-progress">35% Concluído</span>
+                                        <span class="course-badge">24 aulas restantes</span>
+                                    </div>
+                                    <a href="curso_web.html" class="btn btn-continue">
+                                        <i class="fas fa-play-circle"></i> Continuar Curso
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Próximas Aulas -->
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Próximas Aulas</h4>
+                            <a href="calendario.html" class="card-link">
+                                Ver Calendário <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Aula 1 -->
+                        <div class="class-item">
+                            <div class="class-info">
+                                <h5 class="class-title">Estratégias de Marketing Digital</h5>
+                                <div class="class-course">Marketing Digital Avançado</div>
+                            </div>
+                            <span class="class-time">
+                                <i class="fas fa-clock"></i> Hoje, 19:00
+                            </span>
+                        </div>
+                        
+                        <!-- Aula 2 -->
+                        <div class="class-item" style="border-left-color: var(--light-purple);">
+                            <div class="class-info">
+                                <h5 class="class-title">Introdução ao JavaScript</h5>
+                                <div class="class-course">Desenvolvimento Web Full Stack</div>
+                            </div>
+                            <span class="class-time">
+                                <i class="fas fa-clock"></i> Amanhã, 20:00
+                            </span>
+                        </div>
+                        
+                        <!-- Aula 3 -->
+                        <div class="class-item" style="border-left-color: var(--info-blue);">
+                            <div class="class-info">
+                                <h5 class="class-title">SEO para Websites</h5>
+                                <div class="class-course">Marketing Digital Avançado</div>
+                            </div>
+                            <span class="class-time">
+                                <i class="fas fa-calendar-alt"></i> Quarta, 19:00
+                            </span>
+                        </div>
+                        
+                        <!-- Aula 4 -->
+                        <div class="class-item" style="border-left-color: var(--success-green);">
+                            <div class="class-info">
+                                <h5 class="class-title">Frameworks Front-End</h5>
+                                <div class="class-course">Desenvolvimento Web Full Stack</div>
+                            </div>
+                            <span class="class-time">
+                                <i class="fas fa-calendar-alt"></i> Sexta, 18:30
+                            </span>
+                        </div>
+                    </section>
+
+                    <!-- Atividades Recentes -->
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Atividades Recentes</h4>
+                            <a href="#" class="card-link">
+                                Ver Histórico <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="list-group">
+                            <div class="list-group-item list-group-item-action d-flex gap-3 align-items-center">
+                                <div class="rounded-circle p-2" style="background-color: rgba(106, 90, 205, 0.1);">
+                                    <i class="fas fa-book-open text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 fw-medium">Concluiu a aula "Análise de Concorrentes"</p>
+                                        <small class="text-muted">Hoje, 10:45</small>
+                                    </div>
+                                    <small class="text-muted">Marketing Digital Avançado</small>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item list-group-item-action d-flex gap-3 align-items-center">
+                                <div class="rounded-circle p-2" style="background-color: rgba(23, 162, 184, 0.1);">
+                                    <i class="fas fa-file-alt text-info"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 fw-medium">Enviou o exercício "HTML Semântico"</p>
+                                        <small class="text-muted">Ontem, 16:20</small>
+                                    </div>
+                                    <small class="text-muted">Desenvolvimento Web Full Stack</small>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item list-group-item-action d-flex gap-3 align-items-center">
+                                <div class="rounded-circle p-2" style="background-color: rgba(40, 167, 69, 0.1);">
+                                    <i class="fas fa-award text-success"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 fw-medium">Ganhou o emblema "Consistente"</p>
+                                        <small class="text-muted">Ontem, 09:15</small>
+                                    </div>
+                                    <small class="text-muted">7 dias consecutivos de estudos</small>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item list-group-item-action d-flex gap-3 align-items-center">
+                                <div class="rounded-circle p-2" style="background-color: rgba(106, 90, 205, 0.1);">
+                                    <i class="fas fa-comment-alt text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 fw-medium">Participou do fórum "Tendências de Marketing"</p>
+                                        <small class="text-muted">3 dias atrás</small>
+                                    </div>
+                                    <small class="text-muted">Marketing Digital Avançado</small>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Coluna Lateral (Estatísticas e Certificados) -->
+                <div class="col-lg-4">
+                    <!-- Estatísticas do Aluno -->
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <h4>Suas Estatísticas</h4>
+                            <a href="desempenho.html" class="text-white opacity-75 text-decoration-none">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-info">
+                                <h6>Cursos Concluídos</h6>
+                                <div class="stat-value">2</div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-info">
+                                <h6>Horas de Estudo</h6>
+                                <div class="stat-value">85</div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-info">
+                                <h6>Progresso Geral</h6>
+                                <div class="stat-value">42%</div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificados -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Seus Certificados</h4>
+                            <a href="certificado.html" class="card-link">
+                                Ver Todos <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <ul class="certificates-list">
+                            <li class="certificate-item">
+                                <div class="certificate-name">
+                                    <i class="fas fa-certificate"></i>
+                                    Marketing Digital Básico
+                                </div>
+                                <div class="certificate-badge">Obtido</div>
+                            </li>
+                            <li class="certificate-item">
+                                <div class="certificate-name">
+                                    <i class="fas fa-certificate"></i>
+                                    Introdução à Programação
+                                </div>
+                                <div class="certificate-badge">Obtido</div>
+                            </li>
+                            <li class="certificate-item">
+                                <div class="certificate-name">
+                                    <i class="fas fa-certificate"></i>
+                                    Desenvolvimento Web
+                                </div>
+                                <div class="certificate-badge in-progress">Em Progresso (35%)</div>
+                            </li>
+                            <li class="certificate-item">
+                                <div class="certificate-name">
+                                    <i class="fas fa-certificate"></i>
+                                    Marketing Digital Avançado
+                                </div>
+                                <div class="certificate-badge in-progress">Em Progresso (65%)</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Emblemas e Conquistas -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Emblemas e Conquistas</h4>
+                            <a href="#" class="card-link">
+                                Ver Todos <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(106, 90, 205, 0.1);">
+                                    <i class="fas fa-award fa-2x text-primary mb-2"></i>
+                                    <div class="small fw-medium">Consistente</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(40, 167, 69, 0.1);">
+                                    <i class="fas fa-star fa-2x text-success mb-2"></i>
+                                    <div class="small fw-medium">Excelência</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(23, 162, 184, 0.1);">
+                                    <i class="fas fa-bolt fa-2x text-info mb-2"></i>
+                                    <div class="small fw-medium">Veloz</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(255, 193, 7, 0.1);">
+                                    <i class="fas fa-comment-dots fa-2x text-warning mb-2"></i>
+                                    <div class="small fw-medium">Participativo</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(220, 53, 69, 0.1);">
+                                    <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                                    <div class="small fw-medium">Dedicado</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 rounded" style="background-color: rgba(108, 117, 125, 0.1);">
+                                    <i class="fas fa-lock fa-2x text-secondary mb-2"></i>
+                                    <div class="small fw-medium">Bloqueado</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Próximos Deadlines -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Prazos Importantes</h4>
+                            <a href="calendario.html" class="card-link">
+                                Ver Calendário <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-medium">Projeto Final</div>
+                                    <small class="text-muted">Marketing Digital Avançado</small>
+                                </div>
+                                <span class="badge rounded-pill" style="background-color: var(--danger-red);">Em 3 dias</span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-medium">Quiz de HTML/CSS</div>
+                                    <small class="text-muted">Desenvolvimento Web</small>
+                                </div>
+                                <span class="badge rounded-pill" style="background-color: var(--warning-yellow); color: var(--text-dark);">Em 7 dias</span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-medium">Avaliação Semestral</div>
+                                    <small class="text-muted">Todos os cursos</small>
+                                </div>
+                                <span class="badge rounded-pill" style="background-color: var(--info-blue);">Em 14 dias</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner de Promoção e Recomendação de Cursos -->
+            <section class="dashboard-card" style="background: linear-gradient(135deg, #f3e7ff, #e7eeff);">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h3 style="color: var(--secondary-purple);">Recomendados para você</h3>
+                        <p class="text-muted mb-4">Com base nos seus interesses e cursos atuais, selecionamos estas opções:</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex gap-3 align-items-center p-3 rounded bg-white shadow-sm">
+                                    <div style="width: 50px; height: 50px; min-width: 50px;" class="rounded bg-primary d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-chart-pie text-white fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Análise de Dados com Python</h6>
+                                        <p class="text-muted mb-0 small">Complementa seus estudos de marketing</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-3 align-items-center p-3 rounded bg-white shadow-sm">
+                                    <div style="width: 50px; height: 50px; min-width: 50px;" class="rounded bg-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-mobile-alt text-white fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Desenvolvimento Mobile</h6>
+                                        <p class="text-muted mb-0 small">Próximo passo após Web Development</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                        <a href="catalogo_cursos.html" class="btn btn-continue px-4 py-3">
+                            <i class="fas fa-search"></i> Explorar mais cursos
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle com Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Desempenho - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .bg-purple {
+            background-color: var(--primary-purple);
+        }
+
+        .bg-blue {
+            background-color: var(--info-blue);
+        }
+
+        .bg-green {
+            background-color: var(--success-green);
+        }
+
+        .bg-yellow {
+            background-color: var(--warning-yellow);
+        }
+
+        .bg-red {
+            background-color: var(--danger-red);
+        }
+
+        .summary-text h4 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-text p {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        /* Estilos específicos para o relatório de desempenho */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+            background-color: var(--light-bg);
+            margin-bottom: 30px;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .performance-table th {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            font-weight: 600;
+            border: none;
+        }
+
+        .performance-table td {
+            vertical-align: middle;
+        }
+
+        .performance-table tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        .export-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 20px;
+        }
+
+        .performance-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .performance-stat-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .performance-stat-title {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .performance-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .performance-stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        .performance-progress {
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .low-performance {
+            color: var(--danger-red);
+        }
+
+        .medium-performance {
+            color: var(--warning-yellow);
+        }
+
+        .high-performance {
+            color: var(--success-green);
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .filter-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .date-filter {
+                flex-wrap: wrap;
+            }
+
+            .performance-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html" class="active">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Relatório de Desempenho</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Resumo de Desempenho -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon bg-blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>8.742</h4>
+                        <p>Alunos Ativos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-green">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>78.5%</h4>
+                        <p>Taxa de Conclusão</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>85.3%</h4>
+                        <p>Satisfação dos Alunos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-red">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>12.7%</h4>
+                        <p>Taxa de Evasão</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="admin-card">
+                <div class="report-header">
+                    <h4 class="m-0">Análise de Desempenho</h4>
+                    <button class="btn btn-primary export-button">
+                        <i class="fas fa-file-export"></i>
+                        Exportar Relatório
+                    </button>
+                </div>
+
+                <div class="filter-box">
+                    <select class="form-select">
+                        <option selected>Todos os Polos</option>
+                        <option>Polo São Paulo</option>
+                        <option>Polo Rio de Janeiro</option>
+                        <option>Polo Belo Horizonte</option>
+                        <option>Polo Curitiba</option>
+                    </select>
+                    
+                    <select class="form-select">
+                        <option selected>Todos os Cursos</option>
+                        <option>Desenvolvimento Web</option>
+                        <option>Marketing Digital</option>
+                        <option>UX/UI Design</option>
+                        <option>Gestão de Negócios</option>
+                        <option>Inglês para Negócios</option>
+                    </select>
+                    
+                    <div class="date-filter">
+                        <div>Período:</div>
+                        <input type="date" class="form-control" value="2024-01-01">
+                        <div>até</div>
+                        <input type="date" class="form-control" value="2024-04-30">
+                        <button class="btn btn-outline-primary">Aplicar</button>
+                    </div>
+                </div>
+
+                <!-- Estatísticas de Desempenho -->
+                <div class="performance-stats">
+                    <div class="performance-stat-card">
+                        <div class="performance-stat-title">Média de Notas</div>
+                        <div class="performance-stat-value">8.3</div>
+                        <div class="performance-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            0.5 em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="performance-stat-card">
+                        <div class="performance-stat-title">Tempo Médio de Estudo</div>
+                        <div class="performance-stat-value">4.2h</div>
+                        <div class="performance-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            0.8h em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="performance-stat-card">
+                        <div class="performance-stat-title">Taxa de Engajamento</div>
+                        <div class="performance-stat-value">76.8%</div>
+                        <div class="performance-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            4.2% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="performance-stat-card">
+                        <div class="performance-stat-title">Taxa de Aprovação</div>
+                        <div class="performance-stat-value">92.5%</div>
+                        <div class="performance-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            1.5% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos de Desempenho -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Evolução de Desempenho por Curso (2024)</h5>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #6A5ACD;"></span>
+                                        <span>Desenvolvimento Web</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #4682B4;"></span>
+                                        <span>Marketing Digital</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #2E8B57;"></span>
+                                        <span>UX/UI Design</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha - Evolução de Desempenho</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Distribuição de Notas</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras - Distribuição</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Engajamento vs. Conclusão</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Dispersão</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Taxa de Evasão por Mês</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desempenho por Curso -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Desempenho por Curso</h5>
+                    <div class="table-responsive">
+                        <table class="table performance-table">
+                            <thead>
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Alunos</th>
+                                    <th>Média de Notas</th>
+                                    <th>Taxa de Conclusão</th>
+                                    <th>Engajamento</th>
+                                    <th>Satisfação</th>
+                                    <th>Evasão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Desenvolvimento Web</strong></td>
+                                    <td>1,865</td>
+                                    <td class="high-performance">8.7</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>82%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 79%" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>79%</small>
+                                    </td>
+                                    <td class="high-performance">90%</td>
+                                    <td class="low-performance">9.5%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Marketing Digital</strong></td>
+                                    <td>1,542</td>
+                                    <td class="high-performance">8.4</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>80%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 77%" aria-valuenow="77" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>77%</small>
+                                    </td>
+                                    <td class="high-performance">87%</td>
+                                    <td class="low-performance">11.2%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>UX/UI Design</strong></td>
+                                    <td>1,238</td>
+                                    <td class="high-performance">8.9</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>85%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>82%</small>
+                                    </td>
+                                    <td class="high-performance">91%</td>
+                                    <td class="low-performance">8.3%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gestão de Negócios</strong></td>
+                                    <td>1,655</td>
+                                    <td class="medium-performance">7.8</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 72%" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>72%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>68%</small>
+                                    </td>
+                                    <td class="medium-performance">78%</td>
+                                    <td class="medium-performance">15.8%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Inglês para Negócios</strong></td>
+                                    <td>1,425</td>
+                                    <td class="medium-performance">7.6</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 69%" aria-valuenow="69" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>69%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>65%</small>
+                                    </td>
+                                    <td class="medium-performance">76%</td>
+                                    <td class="medium-performance">18.9%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Data Science</strong></td>
+                                    <td>1,017</td>
+                                    <td class="high-performance">9.2</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 88%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>88%</small>
+                                    </td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 86%" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>86%</small>
+                                    </td>
+                                    <td class="high-performance">94%</td>
+                                    <td class="low-performance">7.2%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Desempenho por Polo -->
+            <section class="admin-card">
+                <h4 class="mb-4">Análise por Polo</h4>
+                
+                <div class="row">
+                    <div class="col-md-7 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Comparativo de Desempenho por Polo</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Radar - Comparativo de Polos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Distribuição de Alunos por Polo</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Pizza - Distribuição</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="mb-3">Desempenho por Polo</h5>
+                    <div class="table-responsive">
+                        <table class="table performance-table">
+                            <thead>
+                                <tr>
+                                    <th>Polo</th>
+                                    <th>Alunos Ativos</th>
+                                    <th>Média de Notas</th>
+                                    <th>Taxa de Conclusão</th>
+                                    <th>Satisfação</th>
+                                    <th>Evasão</th>
+                                    <th>Professores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>São Paulo</strong></td>
+                                    <td>2,845</td>
+                                    <td class="high-performance">8.5</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 81%" aria-valuenow="81" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>81%</small>
+                                    </td>
+                                    <td class="high-performance">88%</td>
+                                    <td class="low-performance">11.2%</td>
+                                    <td>42</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rio de Janeiro</strong></td>
+                                    <td>2,180</td>
+                                    <td class="high-performance">8.2</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 78%" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>78%</small>
+                                    </td>
+                                    <td class="high-performance">85%</td>
+                                    <td class="low-performance">12.8%</td>
+                                    <td>35</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Belo Horizonte</strong></td>
+                                    <td>1,580</td>
+                                    <td class="high-performance">8.4</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 79%" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>79%</small>
+                                    </td>
+                                    <td class="high-performance">86%</td>
+                                    <td class="low-performance">11.5%</td>
+                                    <td>28</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Curitiba</strong></td>
+                                    <td>1,285</td>
+                                    <td class="high-performance">8.6</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>82%</small>
+                                    </td>
+                                    <td class="high-performance">87%</td>
+                                    <td class="low-performance">10.3%</td>
+                                    <td>23</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Porto Alegre</strong></td>
+                                    <td>852</td>
+                                    <td class="medium-performance">7.9</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 74%" aria-valuenow="74" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>74%</small>
+                                    </td>
+                                    <td class="medium-performance">83%</td>
+                                    <td class="medium-performance">15.8%</td>
+                                    <td>17</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Estatísticas de Professores -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Desempenho dos Professores Destacados</h5>
+                    <div class="table-responsive">
+                        <table class="table performance-table">
+                            <thead>
+                                <tr>
+                                    <th>Professor</th>
+                                    <th>Curso</th>
+                                    <th>Polo</th>
+                                    <th>Alunos</th>
+                                    <th>Avaliação Média</th>
+                                    <th>Taxa de Aprovação</th>
+                                    <th>Engajamento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ana Silva</strong></td>
+                                    <td>UX/UI Design</td>
+                                    <td>São Paulo</td>
+                                    <td>285</td>
+                                    <td class="high-performance">9.4</td>
+                                    <td>97%</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>92%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Carlos Mendes</strong></td>
+                                    <td>Desenvolvimento Web</td>
+                                    <td>Rio de Janeiro</td>
+                                    <td>312</td>
+                                    <td class="high-performance">9.2</td>
+                                    <td>95%</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>90%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amanda Oliveira</strong></td>
+                                    <td>Data Science</td>
+                                    <td>São Paulo</td>
+                                    <td>240</td>
+                                    <td class="high-performance">9.5</td>
+                                    <td>98%</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 94%" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>94%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rafael Costa</strong></td>
+                                    <td>Marketing Digital</td>
+                                    <td>Belo Horizonte</td>
+                                    <td>265</td>
+                                    <td class="high-performance">9.0</td>
+                                    <td>94%</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 88%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>88%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Juliana Santos</strong></td>
+                                    <td>Gestão de Negócios</td>
+                                    <td>Curitiba</td>
+                                    <td>230</td>
+                                    <td class="high-performance">8.8</td>
+                                    <td>91%</td>
+                                    <td>
+                                        <div class="progress performance-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>85%</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Observações e Recomendações -->
+            <section class="admin-card">
+                <h4 class="mb-3">Observações e Recomendações</h4>
+                
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="fas fa-info-circle me-2"></i>Análise do Período</h5>
+                    <p>O relatório de desempenho apresenta uma melhoria significativa na taxa de conclusão em relação ao trimestre anterior, com um aumento de 3.2%. A taxa de engajamento também cresceu, impulsionada principalmente pelos cursos de UX/UI Design e Data Science.</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Pontos de Atenção</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Engajamento em Gestão de Negócios</strong>
+                                <p class="mb-0">O curso de Gestão de Negócios apresenta taxa de engajamento de 68%, abaixo da média geral de 76.8%, o que pode estar contribuindo para a maior taxa de evasão.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Evasão em Inglês para Negócios</strong>
+                                <p class="mb-0">O curso de Inglês para Negócios possui a maior taxa de evasão (18.9%), significativamente acima da média geral de 12.7%.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Desempenho do Polo Porto Alegre</strong>
+                                <p class="mb-0">O Polo Porto Alegre apresenta métricas abaixo da média em todos os indicadores, com taxa de conclusão de 74% e evasão de 15.8%.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5>Recomendações</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Revisão Estrutural dos Cursos Críticos</strong>
+                                <p class="mb-0">Realizar uma revisão do conteúdo e metodologia dos cursos de Gestão de Negócios e Inglês para Negócios, com foco em aumentar o engajamento e reduzir a evasão.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Tutoria Específica</strong>
+                                <p class="mb-0">Implementar programa de tutoria específica para alunos com risco de evasão, especialmente no Polo Porto Alegre e nos cursos críticos identificados.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Compartilhamento de Boas Práticas</strong>
+                                <p class="mb-0">Organizar workshops entre os professores de destaque e os demais para compartilhamento de práticas pedagógicas bem-sucedidas, especialmente nos cursos de UX/UI Design e Data Science.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Revisão dos Materiais de Estudo</strong>
+                                <p class="mb-0">Revisar e atualizar os materiais de estudo dos cursos com baixo engajamento, incorporando mais recursos interativos e práticos que possam melhorar a experiência de aprendizado.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        // Toggle para sidebar mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+        
+        // Código para inicialização dos gráficos (simulação)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aqui seria implementado o código real para os gráficos usando Chart.js
+            // com dados vindos do backend
+        });
+    </script>
+</body>
+</html>

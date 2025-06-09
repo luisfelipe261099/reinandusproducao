@@ -1,0 +1,1568 @@
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração de Polos - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .bg-purple {
+            background-color: var(--primary-purple);
+        }
+
+        .bg-blue {
+            background-color: var(--info-blue);
+        }
+
+        .bg-green {
+            background-color: var(--success-green);
+        }
+
+        .bg-yellow {
+            background-color: var(--warning-yellow);
+        }
+
+        .bg-red {
+            background-color: var(--danger-red);
+        }
+
+        .summary-text h4 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-text p {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        .polo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .filter-dropdown .btn {
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Estilos específicos para cards de polo */
+        .polo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .polo-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .polo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .polo-card-header {
+            padding: 15px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .polo-card-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .polo-card-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            color: white;
+        }
+
+        .polo-card-body {
+            padding: 20px;
+        }
+
+        .polo-card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .polo-stat {
+            background-color: var(--light-bg);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .polo-stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .polo-stat-label {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .polo-card-license {
+            background-color: rgba(106, 90, 205, 0.1);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        .license-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .license-type {
+            font-weight: 600;
+            color: var(--primary-purple);
+        }
+
+        .license-expiry {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .polo-card-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .polo-actions .btn {
+            border-radius: 20px;
+            font-size: 0.85rem;
+            padding: 5px 15px;
+        }
+
+        .polo-utilization {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .progress-thin {
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-premium {
+            background-color: #8A2BE2;
+            color: white;
+        }
+
+        .badge-standard {
+            background-color: #4682B4;
+            color: white;
+        }
+
+        .badge-basic {
+            background-color: #20B2AA;
+            color: white;
+        }
+
+        .badges-container {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .modal-header {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .modal-subheader {
+            background-color: var(--light-bg);
+            padding: 10px 20px;
+            margin: -16px -16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-content-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .nav-tabs-custom {
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 10px 15px;
+            margin-right: 5px;
+            border-radius: 0;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            color: var(--primary-purple);
+            border-bottom: 2px solid var(--primary-purple);
+            background-color: transparent;
+        }
+
+        /* Estilos para o modo de visualização em tabela */
+        .table-view-header {
+            background-color: var(--light-bg);
+            font-weight: 600;
+            border: none;
+        }
+
+        .polo-table tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .polo-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-purple);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .polo-name-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-view-btn {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .toggle-view-btn button {
+            border: none;
+            background-color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .toggle-view-btn button.active {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .toggle-view-btn button:first-child {
+            border-right: 1px solid #ddd;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .search-filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .polo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html" class="active">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Gerenciamento de Polos</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Resumo dos Polos -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>12</h4>
+                        <p>Total de Polos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>9</h4>
+                        <p>Polos Ativos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-yellow">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>3</h4>
+                        <p>Licenças Expirando</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-red">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>3</h4>
+                        <p>Polos Inativos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="admin-card">
+                <div class="polo-header">
+                    <h4 class="m-0">Polos Cadastrados</h4>
+                    <div class="d-flex gap-3">
+                        <div class="toggle-view-btn">
+                            <button class="active" id="cardViewBtn">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button id="tableViewBtn">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPoloModal">
+                            <i class="fas fa-plus me-2"></i>Adicionar Polo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Buscar polo...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter"></i> Status
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Todos</a></li>
+                            <li><a class="dropdown-item" href="#">Ativos</a></li>
+                            <li><a class="dropdown-item" href="#">Inativos</a></li>
+                            <li><a class="dropdown-item" href="#">Licença Expirando</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tag"></i> Plano
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Todos</a></li>
+                            <li><a class="dropdown-item" href="#">Premium</a></li>
+                            <li><a class="dropdown-item" href="#">Standard</a></li>
+                            <li><a class="dropdown-item" href="#">Basic</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort"></i> Ordenar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Nome (A-Z)</a></li>
+                            <li><a class="dropdown-item" href="#">Nome (Z-A)</a></li>
+                            <li><a class="dropdown-item" href="#">Alunos (Mais)</a></li>
+                            <li><a class="dropdown-item" href="#">Alunos (Menos)</a></li>
+                            <li><a class="dropdown-item" href="#">Cursos (Mais)</a></li>
+                            <li><a class="dropdown-item" href="#">Data de criação</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Visualização em Cards -->
+                <div id="cardView" class="polo-grid">
+                    <!-- Card Polo 1 -->
+                    <div class="polo-card">
+                        <div class="polo-card-header">
+                            <h5 class="polo-card-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Polo São Paulo
+                            </h5>
+                            <div class="badges-container">
+                                <span class="polo-card-badge bg-success">Ativo</span>
+                                <span class="license-badge badge-premium">Premium</span>
+                            </div>
+                        </div>
+                        <div class="polo-card-body">
+                            <div class="polo-card-stats">
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">423</div>
+                                    <div class="polo-stat-label">Alunos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">15</div>
+                                    <div class="polo-stat-label">Cursos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">12</div>
+                                    <div class="polo-stat-label">Professores</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-card-license">
+                                <div class="license-info">
+                                    <div class="license-type">Plano Premium</div>
+                                    <div class="license-expiry">Vence em 15/12/2024</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-utilization">
+                                <div class="progress-label">
+                                    <span>Alunos</span>
+                                    <span>423/500</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                                </div>
+                                
+                                <div class="progress-label mt-2">
+                                    <span>Cursos</span>
+                                    <span>15/25</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-info" style="width: 60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="polo-card-footer">
+                            <div class="polo-contact">
+                                <small><i class="fas fa-user me-1"></i> Carlos Oliveira</small>
+                            </div>
+                            <div class="polo-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Polo 2 -->
+                    <div class="polo-card">
+                        <div class="polo-card-header">
+                            <h5 class="polo-card-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Polo Rio de Janeiro
+                            </h5>
+                            <div class="badges-container">
+                                <span class="polo-card-badge bg-warning text-dark">Expirando</span>
+                                <span class="license-badge badge-standard">Standard</span>
+                            </div>
+                        </div>
+                        <div class="polo-card-body">
+                            <div class="polo-card-stats">
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">356</div>
+                                    <div class="polo-stat-label">Alunos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">12</div>
+                                    <div class="polo-stat-label">Cursos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">8</div>
+                                    <div class="polo-stat-label">Professores</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-card-license">
+                                <div class="license-info">
+                                    <div class="license-type">Plano Standard</div>
+                                    <div class="license-expiry text-warning">Vence em 15 dias</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-utilization">
+                                <div class="progress-label">
+                                    <span>Alunos</span>
+                                    <span>356/400</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" style="width: 89%"></div>
+                                </div>
+                                
+                                <div class="progress-label mt-2">
+                                    <span>Cursos</span>
+                                    <span>12/15</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" style="width: 80%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="polo-card-footer">
+                            <div class="polo-contact">
+                                <small><i class="fas fa-user me-1"></i> Ana Ferreira</small>
+                            </div>
+                            <div class="polo-actions">
+                                <button class="btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Polo 3 -->
+                    <div class="polo-card">
+                        <div class="polo-card-header">
+                            <h5 class="polo-card-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Polo Belo Horizonte
+                            </h5>
+                            <div class="badges-container">
+                                <span class="polo-card-badge bg-success">Ativo</span>
+                                <span class="license-badge badge-premium">Premium</span>
+                            </div>
+                        </div>
+                        <div class="polo-card-body">
+                            <div class="polo-card-stats">
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">487</div>
+                                    <div class="polo-stat-label">Alunos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">10</div>
+                                    <div class="polo-stat-label">Cursos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">7</div>
+                                    <div class="polo-stat-label">Professores</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-card-license">
+                                <div class="license-info">
+                                    <div class="license-type">Plano Premium</div>
+                                    <div class="license-expiry">Vence em 15/01/2025</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-utilization">
+                                <div class="progress-label">
+                                    <span>Alunos</span>
+                                    <span>487/500</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-danger" style="width: 97%"></div>
+                                </div>
+                                
+                                <div class="progress-label mt-2">
+                                    <span>Cursos</span>
+                                    <span>10/25</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-success" style="width: 40%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="polo-card-footer">
+                            <div class="polo-contact">
+                                <small><i class="fas fa-user me-1"></i> Roberto Santos</small>
+                            </div>
+                            <div class="polo-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Polo 4 -->
+                    <div class="polo-card">
+                        <div class="polo-card-header">
+                            <h5 class="polo-card-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Polo Curitiba
+                            </h5>
+                            <div class="badges-container">
+                                <span class="polo-card-badge bg-secondary">Inativo</span>
+                                <span class="license-badge badge-basic">Basic</span>
+                            </div>
+                        </div>
+                        <div class="polo-card-body">
+                            <div class="polo-card-stats">
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">245</div>
+                                    <div class="polo-stat-label">Alunos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">8</div>
+                                    <div class="polo-stat-label">Cursos</div>
+                                </div>
+                                <div class="polo-stat">
+                                    <div class="polo-stat-value">5</div>
+                                    <div class="polo-stat-label">Professores</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-card-license">
+                                <div class="license-info">
+                                    <div class="license-type">Plano Basic</div>
+                                    <div class="license-expiry text-danger">Expirou em 20/01/2024</div>
+                                </div>
+                            </div>
+                            
+                            <div class="polo-utilization">
+                                <div class="progress-label">
+                                    <span>Alunos</span>
+                                    <span>245/300</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-secondary" style="width: 82%"></div>
+                                </div>
+                                
+                                <div class="progress-label mt-2">
+                                    <span>Cursos</span>
+                                    <span>8/10</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-secondary" style="width: 80%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="polo-card-footer">
+                            <div class="polo-contact">
+                                <small><i class="fas fa-user me-1"></i> Juliana Costa</small>
+                            </div>
+                            <div class="polo-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualização em Tabela (inicialmente oculta) -->
+                <div id="tableView" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table polo-table">
+                            <thead>
+                                <tr class="table-view-header">
+                                    <th>Polo</th>
+                                    <th>Status</th>
+                                    <th>Plano</th>
+                                    <th>Alunos</th>
+                                    <th>Cursos</th>
+                                    <th>Responsável</th>
+                                    <th>Vencimento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="polo-name-info">
+                                            <div class="polo-avatar">SP</div>
+                                            <div>
+                                                <div class="fw-bold">Polo São Paulo</div>
+                                                <small class="text-muted">ID: SP001</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td><span class="license-badge badge-premium">Premium</span></td>
+                                    <td>
+                                        <div>423/500</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>15/25</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-info" style="width: 60%"></div>
+                                        </div>
+                                    </td>
+                                    <td>Carlos Oliveira</td>
+                                    <td>15/12/2024</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="polo-name-info">
+                                            <div class="polo-avatar">RJ</div>
+                                            <div>
+                                                <div class="fw-bold">Polo Rio de Janeiro</div>
+                                                <small class="text-muted">ID: RJ001</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-pill bg-warning text-dark">Expirando</span></td>
+                                    <td><span class="license-badge badge-standard">Standard</span></td>
+                                    <td>
+                                        <div>356/400</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-warning" style="width: 89%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>12/15</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-warning" style="width: 80%"></div>
+                                        </div>
+                                    </td>
+                                    <td>Ana Ferreira</td>
+                                    <td>30/11/2024</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="polo-name-info">
+                                            <div class="polo-avatar">BH</div>
+                                            <div>
+                                                <div class="fw-bold">Polo Belo Horizonte</div>
+                                                <small class="text-muted">ID: BH001</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td><span class="license-badge badge-premium">Premium</span></td>
+                                    <td>
+                                        <div>487/500</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-danger" style="width: 97%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>10/25</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-success" style="width: 40%"></div>
+                                        </div>
+                                    </td>
+                                    <td>Roberto Santos</td>
+                                    <td>15/01/2025</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="polo-name-info">
+                                            <div class="polo-avatar">CT</div>
+                                            <div>
+                                                <div class="fw-bold">Polo Curitiba</div>
+                                                <small class="text-muted">ID: CT001</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-pill bg-secondary">Inativo</span></td>
+                                    <td><span class="license-badge badge-basic">Basic</span></td>
+                                    <td>
+                                        <div>245/300</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-secondary" style="width: 82%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>8/10</div>
+                                        <div class="progress progress-thin mt-1">
+                                            <div class="progress-bar bg-secondary" style="width: 80%"></div>
+                                        </div>
+                                    </td>
+                                    <td>Juliana Costa</td>
+                                    <td>Expirado</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#poloDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div>Mostrando 4 de 12 polos</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Próximo</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de Detalhes do Polo -->
+    <div class="modal fade" id="poloDetailModal" tabindex="-1" aria-labelledby="poloDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poloDetailModalLabel">Detalhes do Polo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-subheader">
+                        <h5 class="m-0">Polo São Paulo</h5>
+                        <div>
+                            <span class="status-pill bg-success me-2">Ativo</span>
+                            <span class="license-badge badge-premium">Premium</span>
+                        </div>
+                    </div>
+
+                    <!-- Abas para diferentes informações -->
+                    <ul class="nav nav-tabs nav-tabs-custom" id="poloDetailTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Informações</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab">Licença</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button" role="tab">Cursos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">Alunos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Estatísticas</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="poloDetailTabsContent">
+                        <!-- Aba de Informações Gerais -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Informações Gerais</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th style="width: 30%">Nome:</th>
+                                            <td>Polo São Paulo</td>
+                                        </tr>
+                                        <tr>
+                                            <th>ID:</th>
+                                            <td>SP001</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Data de Criação:</th>
+                                            <td>10/01/2023</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status:</th>
+                                            <td><span class="status-pill bg-success">Ativo</span></td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <h6 class="mb-3 mt-4">Localização</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th style="width: 30%">Endereço:</th>
+                                            <td>Av. Paulista, 1000</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Bairro:</th>
+                                            <td>Bela Vista</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Cidade/UF:</th>
+                                            <td>São Paulo/SP</td>
+                                        </tr>
+                                        <tr>
+                                            <th>CEP:</th>
+                                            <td>01310-100</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Contato</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th style="width: 30%">Responsável:</th>
+                                            <td>Carlos Oliveira</td>
+                                        </tr>
+                                        <tr>
+                                            <th>E-mail:</th>
+                                            <td>carlos@polosaopaulo.com.br</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Telefone:</th>
+                                            <td>(11) 3456-7890</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Whatsapp:</th>
+                                            <td>(11) 98765-4321</td>
+                                        </tr>
+                                    </table>
+
+                                    <h6 class="mb-3 mt-4">Acesso ao Sistema</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th style="width: 30%">Usuário Admin:</th>
+                                            <td>admin.saopaulo</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Último acesso:</th>
+                                            <td>Hoje, 10:45</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status:</th>
+                                            <td><span class="badge bg-success">Online</span></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Outras abas do modal vão aqui -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editPoloModal">Editar Polo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Polo -->
+    <div class="modal fade" id="addPoloModal" tabindex="-1" aria-labelledby="addPoloModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPoloModalLabel">Adicionar Novo Polo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Importante:</strong> Para ativar o polo, será necessário adquirir uma licença.
+                    </div>
+                    
+                    <form>
+                        <!-- Informações Básicas -->
+                        <h5 class="border-bottom pb-2 mb-3">Informações Básicas</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloName" class="form-label">Nome do Polo</label>
+                                    <input type="text" class="form-control" id="poloName" placeholder="Ex: Polo São Paulo">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloCode" class="form-label">Código do Polo</label>
+                                    <input type="text" class="form-control" id="poloCode" placeholder="Ex: SP001">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="poloStatus">
+                                        <option value="active">Ativo</option>
+                                        <option value="inactive">Inativo</option>
+                                        <option value="pending">Pendente</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloLogo" class="form-label">Logo do Polo</label>
+                                    <input type="file" class="form-control" id="poloLogo">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Endereço -->
+                        <h5 class="border-bottom pb-2 mb-3">Endereço</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloAddress" class="form-label">Endereço</label>
+                                    <input type="text" class="form-control" id="poloAddress">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloNeighborhood" class="form-label">Bairro</label>
+                                    <input type="text" class="form-control" id="poloNeighborhood">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloCity" class="form-label">Cidade</label>
+                                    <input type="text" class="form-control" id="poloCity">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="poloState" class="form-label">Estado</label>
+                                            <select class="form-select" id="poloState">
+                                                <option selected disabled>Selecione...</option>
+                                                <option>SP</option>
+                                                <option>RJ</option>
+                                                <option>MG</option>
+                                                <option>RS</option>
+                                                <!-- Outros estados -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="poloZip" class="form-label">CEP</label>
+                                            <input type="text" class="form-control" id="poloZip">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contato -->
+                        <h5 class="border-bottom pb-2 mb-3">Contato</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloManager" class="form-label">Responsável</label>
+                                    <input type="text" class="form-control" id="poloManager">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloEmail" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="poloEmail">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloPhone" class="form-label">Telefone</label>
+                                    <input type="text" class="form-control" id="poloPhone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloWhatsapp" class="form-label">WhatsApp</label>
+                                    <input type="text" class="form-control" id="poloWhatsapp">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Acesso ao Sistema -->
+                        <h5 class="border-bottom pb-2 mb-3">Acesso ao Sistema</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloUsername" class="form-label">Nome de Usuário</label>
+                                    <input type="text" class="form-control" id="poloUsername">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloPassword" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="poloPassword">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="poloAdminEmail" class="form-label">E-mail do Administrador</label>
+                                    <input type="email" class="form-control" id="poloAdminEmail">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="poloConfirmPassword" class="form-label">Confirmar Senha</label>
+                                    <input type="password" class="form-control" id="poloConfirmPassword">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Adicionar Polo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS e Dependências -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Alternar entre visualização de cards e tabela
+        document.getElementById('cardViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').style.display = 'grid';
+            document.getElementById('tableView').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('tableViewBtn').classList.remove('active');
+        });
+        
+        document.getElementById('tableViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').style.display = 'none';
+            document.getElementById('tableView').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('cardViewBtn').classList.remove('active');
+        });
+
+        // Mobile Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão de hambúrguer para mobile quando o viewport for pequeno
+            if (window.innerWidth < 992) {
+                const mainContent = document.querySelector('.main-content');
+                const hamburgerBtn = document.createElement('button');
+                hamburgerBtn.classList.add('btn', 'btn-primary', 'position-fixed', 'd-md-none');
+                hamburgerBtn.style.top = '10px';
+                hamburgerBtn.style.left = '10px';
+                hamburgerBtn.style.zIndex = '1001';
+                hamburgerBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                
+                document.body.appendChild(hamburgerBtn);
+                
+                hamburgerBtn.addEventListener('click', function() {
+                    const sidebar = document.querySelector('.sidebar');
+                    sidebar.classList.toggle('show');
+                });
+                
+                // Fechar sidebar ao clicar fora
+                document.addEventListener('click', function(event) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const hamburgerBtn = document.querySelector('.d-md-none');
+                    
+                    if (!sidebar.contains(event.target) && event.target !== hamburgerBtn && sidebar.classList.contains('show')) {
+                        sidebar.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

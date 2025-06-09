@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <title>Histórico Acadêmico</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --roxo-principal: #6a1b9a;
+                --roxo-claro: #9c4dcc;
+                --roxo-escuro: #38006b;
+                --cinza-claro: #f8f9fa;
+                --cinza-medio: #e9ecef;
+                --verde-aprovado: #198754;
+                --vermelho-reprovado: #dc3545;
+                --texto-principal: #212529;
+                --texto-secundario: #495057;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                font-family: "Poppins", sans-serif;
+                color: var(--texto-principal);
+                line-height: 1.5;
+                background-color: white;
+                font-size: 10pt;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .container {
+                width: 21cm;
+                min-height: 29.7cm;
+                margin: 0 auto;
+                padding: 1.5cm 1.8cm 3.5cm 1.8cm; /* Aumentando o padding inferior para o rodapé */
+                position: relative;
+                background-color: white;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1.5em;
+                border-bottom: 2px solid var(--roxo-principal);
+                padding-bottom: 0.8em;
+            }
+
+            .logo {
+                width: 160px;
+                height: auto;
+                margin-right: 1.5em;
+            }
+
+            .title-container {
+                flex-grow: 1;
+            }
+
+            .document-title {
+                font-size: 1.6em;
+                font-weight: 600;
+                color: var(--roxo-principal);
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                margin: 0;
+            }
+
+            .document-subtitle {
+                font-size: 0.85em;
+                color: var(--texto-secundario);
+                margin-top: 0.2em;
+            }
+
+            .student-info {
+                background-color: var(--cinza-claro);
+                border-left: 4px solid var(--roxo-principal);
+                padding: 0.8em;
+                margin-bottom: 1.5em;
+                border-radius: 4px;
+            }
+
+            .student-info-row {
+                display: flex;
+                flex-wrap: wrap;
+                margin-bottom: 0.5em;
+            }
+
+            .student-info-item {
+                flex: 1;
+                min-width: 200px;
+                padding-right: 1em;
+                margin-bottom: 0.3em;
+            }
+
+            .student-info p {
+                margin: 0.3em 0;
+                font-size: 0.9em;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .student-info strong {
+                color: var(--roxo-principal);
+                display: inline-block;
+                width: 70px;
+            }
+
+            .table-container {
+                margin: 1em 0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.85em;
+            }
+
+            thead {
+                background-color: var(--roxo-principal);
+                color: white;
+            }
+
+            th, td {
+                padding: 0.5em 0.7em;
+                border: 1px solid var(--cinza-medio);
+                text-align: left;
+            }
+
+            th {
+                font-weight: 500;
+                text-transform: uppercase;
+                font-size: 0.85em;
+            }
+
+            tr:nth-child(even) {
+                background-color: var(--cinza-claro);
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            tfoot {
+                font-weight: 600;
+                background-color: var(--roxo-escuro);
+                color: white;
+            }
+
+            .situacao-aprovado {
+                color: var(--verde-aprovado);
+                font-weight: 600;
+            }
+
+            .situacao-reprovado {
+                color: var(--vermelho-reprovado);
+                font-weight: 600;
+            }
+
+            .signature-container {
+                margin-top: 1.5em;
+                display: flex;
+                justify-content: center;
+            }
+
+            .signature {
+                text-align: center;
+                width: 40%;
+            }
+
+            .signature-line {
+                width: 100%;
+                height: 1px;
+                background-color: var(--roxo-principal);
+                margin: 0.3em 0;
+            }
+
+            .signature p {
+                font-size: 0.75em;
+                margin: 0.2em 0;
+            }
+
+            .signature .position {
+                font-weight: 600;
+                color: var(--roxo-principal);
+            }
+
+            .legend {
+                margin: 1em 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1em;
+                font-size: 0.75em;
+            }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                margin-right: 1em;
+            }
+
+            .legend-color {
+                width: 12px;
+                height: 12px;
+                margin-right: 0.5em;
+                border-radius: 2px;
+            }
+
+            .verification {
+                margin-top: 1em;
+                text-align: center;
+                font-size: 0.7em;
+                padding: 0.7em;
+                background-color: var(--cinza-medio);
+                border-radius: 4px;
+                border-left: 4px solid var(--roxo-principal);
+                margin-bottom: 2em; /* Adicionando margem inferior para separar do rodapé */
+            }
+
+            .verification p {
+                margin: 0.2em 0;
+            }
+
+            .verification-code {
+                font-weight: 700;
+                color: var(--roxo-principal);
+                font-size: 1.1em;
+                letter-spacing: 1px;
+            }
+
+            .footer {
+                /* Removendo posicionamento absoluto */
+                margin-top: 2em;
+                text-align: center;
+                font-size: 0.65em;
+                color: var(--texto-secundario);
+                padding-top: 1em;
+                border-top: 1px solid var(--cinza-medio);
+                width: 100%;
+            }
+
+            /* Para quebra de página quando necessário */
+            @media print {
+                .page-break {
+                    page-break-before: always;
+                }
+
+                /* Evita que o rodapé seja cortado */
+                .footer {
+                    margin-top: 2em;
+                }
+
+                /* Garantir que o cabeçalho da tabela repita em novas páginas */
+                thead {
+                    display: table-header-group;
+                }
+
+                /* Garantir que o rodapé da tabela fique no final da tabela */
+                tfoot {
+                    display: table-footer-group;
+                }
+            }
+
+            .watermark {
+                position: fixed; /* Fixed em vez de absolute para funcionar em múltiplas páginas */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 8em;
+                color: rgba(106, 27, 154, 0.04);
+                font-weight: 700;
+                white-space: nowrap;
+                pointer-events: none;
+                text-transform: uppercase;
+                z-index: -1; /* Garantir que fique atrás do conteúdo */
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="watermark">Faciência</div>
+
+            <header class="header">
+                <img src="https://www.faciencia.edu.br/logo.png?v=1745601920310" alt="Faciência Logo" class="logo">
+                <div class="title-container">
+                    <h1 class="document-title">Histórico Acadêmico</h1>
+                    <p class="document-subtitle">Registro oficial de desempenho do estudante</p>
+                </div>
+            </header>
+
+            <section class="student-info">
+                <div class="student-info-row">
+                    <div class="student-info-item">
+                        <p><strong>Aluno:</strong>  FABIO PERICLES RIBEIRO JOSE</p>
+                    </div>
+                    <div class="student-info-item">
+                        <p><strong>CPF:</strong> 450.525.988-90</p>
+                    </div>
+                </div>
+                <div class="student-info-row">
+                    <div class="student-info-item" style="flex: 2;">
+                        <p><strong>Curso:</strong> Defesa em Crimes de Lavagem de Capitais</p>
+                    </div>
+                    <div class="student-info-item">
+                        <p><strong>Polo:</strong> Polo Temporário</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="45%">Disciplina</th>
+                            <th width="15%" class="text-center">Carga Horária</th>
+                            <th width="15%" class="text-center">Nota</th>
+                            <th width="25%" class="text-center">Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+            <td>COMO CONSEGUIR CLIENTES</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>COMO PROTEGER-SE DURANTE A ATUAÃ‡ÃƒO</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>DEBATE E CONSTRUÃ‡ÃƒO DEFENSIVA EM CASOS CONCRETOS</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>ESTUDO DE CASOS</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>LAVAGEM DE CAPITAIS, ASPECTOS TEÃ“RICOS</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>MARKETING DIGITAL</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>MARKETING JURÃDICO</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>PARCERIAS</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>PRÃTICA NA ATUAÃ‡ÃƒO PROCESSUAL</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr><tr>
+            <td>RECURSOS CONTRA SEQUESTRO E INDISPONIBILIDADE DE BENS</td>
+            <td class="text-center">0</td>
+            <td class="text-center">9,6</td>
+            <td class="text-center situacao-aprovado">Aprovado</td>
+        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total / Média Geral</th>
+                            <th class="text-center">0</th>
+                            <th class="text-center">9,6</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--verde-aprovado);"></div>
+                    <span>Aprovado: nota ≥ 7,0</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--vermelho-reprovado);"></div>
+                    <span>Reprovado: nota < 7,0</span>
+                </div>
+            </div>
+
+            <div class="signature-container">
+                <div class="signature">
+                    <p>14/05/2025</p>
+                    <img src="Captura de tela 2025-04-25 142745.png" alt="Assinatura Digital" style="max-height: 50px; margin: 5px 0;">
+                    <div class="signature-line"></div>
+                    <p class="position">Secretaria Acadêmica</p>
+                    <p>Faciência</p>
+                </div>
+            </div>
+
+            <div class="verification">
+                <p>Código de verificação: <span class="verification-code">423692</span></p>
+                <p>Para verificar a autenticidade deste documento, acesse <strong>www.faciencia.edu.br/verificar</strong> e informe o código acima.</p>
+            </div>
+
+            <!-- Rodapé agora não tem posição absoluta e flui com o conteúdo -->
+            <footer class="footer">
+                <p>Faciência - Faculdade de Ciências e Tecnologia</p>
+                <p>CNPJ: 09.038.742/0001-80 • Tel: (41) 9 9256-2500 • Email: secretaria@faciencia.edu.br</p>
+                <p>Rua Visconde de Nacar, 1510 – 10° Andar – Conj. 1003 – Centro – Curitiba/PR</p>
+            </footer>
+        </div>
+    </body>
+    </html>

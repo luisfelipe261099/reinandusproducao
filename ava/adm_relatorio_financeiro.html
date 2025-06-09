@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Financeiro - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .bg-purple {
+            background-color: var(--primary-purple);
+        }
+
+        .bg-blue {
+            background-color: var(--info-blue);
+        }
+
+        .bg-green {
+            background-color: var(--success-green);
+        }
+
+        .bg-yellow {
+            background-color: var(--warning-yellow);
+        }
+
+        .bg-red {
+            background-color: var(--danger-red);
+        }
+
+        .summary-text h4 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-text p {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        /* Estilos específicos para o relatório financeiro */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+            background-color: var(--light-bg);
+            margin-bottom: 30px;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .financial-table th {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            font-weight: 600;
+            border: none;
+        }
+
+        .financial-table td {
+            vertical-align: middle;
+        }
+
+        .financial-table tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .financial-amount {
+            font-weight: 600;
+        }
+
+        .amount-positive {
+            color: var(--success-green);
+        }
+
+        .amount-negative {
+            color: var(--danger-red);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        .export-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 20px;
+        }
+
+        .summary-row {
+            background-color: var(--light-bg);
+            font-weight: 600;
+        }
+
+        .financial-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .financial-stat-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .financial-stat-title {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .financial-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .financial-stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        .polo-select {
+            min-width: 200px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .filter-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .date-filter {
+                flex-wrap: wrap;
+            }
+
+            .financial-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html" class="active">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Relatório Financeiro</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Resumo Financeiro -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon bg-green">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>R$ 287.450,00</h4>
+                        <p>Receita Total (2024)</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-blue">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>R$ 36.890,00</h4>
+                        <p>Receita Mensal (Abril)</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>R$ 146.520,00</h4>
+                        <p>Renovações Previstas</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-red">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>R$ 8.750,00</h4>
+                        <p>Pagamentos Atrasados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="admin-card">
+                <div class="report-header">
+                    <h4 class="m-0">Análise Financeira</h4>
+                    <button class="btn btn-primary export-button">
+                        <i class="fas fa-file-export"></i>
+                        Exportar Relatório
+                    </button>
+                </div>
+
+                <div class="filter-box">
+                    <select class="form-select polo-select">
+                        <option selected>Todos os Polos</option>
+                        <option>Polo São Paulo</option>
+                        <option>Polo Rio de Janeiro</option>
+                        <option>Polo Belo Horizonte</option>
+                        <option>Polo Curitiba</option>
+                    </select>
+                    
+                    <div class="date-filter">
+                        <div>Período:</div>
+                        <input type="date" class="form-control" value="2024-01-01">
+                        <div>até</div>
+                        <input type="date" class="form-control" value="2024-04-30">
+                        <button class="btn btn-outline-primary">Aplicar</button>
+                    </div>
+                    
+                    <select class="form-select">
+                        <option selected>Todas as Categorias</option>
+                        <option>Licenças</option>
+                        <option>Matrículas</option>
+                        <option>Renovações</option>
+                        <option>Certificados</option>
+                    </select>
+                </div>
+
+                <!-- Estatísticas Financeiras -->
+                <div class="financial-stats">
+                    <div class="financial-stat-card">
+                        <div class="financial-stat-title">Taxa de Renovação</div>
+                        <div class="financial-stat-value">85.3%</div>
+                        <div class="financial-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            3.2% em relação ao mês anterior
+                        </div>
+                    </div>
+                    <div class="financial-stat-card">
+                        <div class="financial-stat-title">Ticket Médio</div>
+                        <div class="financial-stat-value">R$ 587,50</div>
+                        <div class="financial-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            5.8% em relação ao mês anterior
+                        </div>
+                    </div>
+                    <div class="financial-stat-card">
+                        <div class="financial-stat-title">Receita por Aluno</div>
+                        <div class="financial-stat-value">R$ 122,58</div>
+                        <div class="financial-stat-trend trend-down">
+                            <i class="fas fa-arrow-down me-1"></i>
+                            1.2% em relação ao mês anterior
+                        </div>
+                    </div>
+                    <div class="financial-stat-card">
+                        <div class="financial-stat-title">Taxa de Inadimplência</div>
+                        <div class="financial-stat-value">3.7%</div>
+                        <div class="financial-stat-trend trend-down">
+                            <i class="fas fa-arrow-down me-1"></i>
+                            0.8% em relação ao mês anterior
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Receita Mensal (2024)</h5>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #6A5ACD;"></span>
+                                        <span>Licenças</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #4682B4;"></span>
+                                        <span>Matrículas</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #2E8B57;"></span>
+                                        <span>Renovações</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras - Receita Mensal</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Distribuição de Receita</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Pizza</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Desempenho por Polo</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras Horizontais</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Tendência de Renovações</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transações Recentes -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Transações Recentes</h5>
+                    <div class="table-responsive">
+                        <table class="table financial-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Polo</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#TRX-7890</td>
+                                    <td>25/04/2024</td>
+                                    <td>Renovação de Licença Premium</td>
+                                    <td>São Paulo</td>
+                                    <td>Licenças</td>
+                                    <td class="financial-amount amount-positive">R$ 11.988,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7889</td>
+                                    <td>22/04/2024</td>
+                                    <td>Matrícula - Desenvolvimento Web</td>
+                                    <td>Rio de Janeiro</td>
+                                    <td>Matrículas</td>
+                                    <td class="financial-amount amount-positive">R$ 899,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7888</td>
+                                    <td>20/04/2024</td>
+                                    <td>Matrícula - Marketing Digital</td>
+                                    <td>São Paulo</td>
+                                    <td>Matrículas</td>
+                                    <td class="financial-amount amount-positive">R$ 799,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7887</td>
+                                    <td>18/04/2024</td>
+                                    <td>Renovação de Licença Standard</td>
+                                    <td>Belo Horizonte</td>
+                                    <td>Licenças</td>
+                                    <td class="financial-amount amount-positive">R$ 7.188,00</td>
+                                    <td><span class="status-badge bg-warning text-dark">Pendente</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7886</td>
+                                    <td>15/04/2024</td>
+                                    <td>Matrícula - UX/UI Design</td>
+                                    <td>São Paulo</td>
+                                    <td>Matrículas</td>
+                                    <td class="financial-amount amount-positive">R$ 999,00</td>
+                                    <td><span class="status-badge bg-danger">Falhou</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7885</td>
+                                    <td>12/04/2024</td>
+                                    <td>Reembolso - Curso Cancelado</td>
+                                    <td>Curitiba</td>
+                                    <td>Estornos</td>
+                                    <td class="financial-amount amount-negative">- R$ 599,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7884</td>
+                                    <td>10/04/2024</td>
+                                    <td>Matrícula - Inglês para Negócios</td>
+                                    <td>Rio de Janeiro</td>
+                                    <td>Matrículas</td>
+                                    <td class="financial-amount amount-positive">R$ 699,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#TRX-7883</td>
+                                    <td>08/04/2024</td>
+                                    <td>Matrícula - Gestão de Negócios</td>
+                                    <td>Belo Horizonte</td>
+                                    <td>Matrículas</td>
+                                    <td class="financial-amount amount-positive">R$ 849,00</td>
+                                    <td><span class="status-badge bg-success">Concluído</span></td>
+                                </tr>
+                                <tr class="summary-row">
+                                    <td colspan="5" class="text-end">Total do Período:</td>
+                                    <td class="financial-amount amount-positive">R$ 22.922,00</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>Mostrando 8 de 124 transações</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Próximo</a>
+                                </li>
+                                </ul>
+                        </nav>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Previsões e Projeções -->
+            <section class="admin-card">
+                <h4 class="mb-4">Previsões Financeiras</h4>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Projeção de Receita (Próximos 6 meses)</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha - Projeção</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Análise de ROI por Categoria</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table financial-table">
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th>Receita Prevista</th>
+                                <th>Renovações</th>
+                                <th>Novas Matrículas</th>
+                                <th>Licenças</th>
+                                <th>Crescimento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Maio 2024</td>
+                                <td class="financial-amount">R$ 38.500,00</td>
+                                <td>R$ 22.680,00</td>
+                                <td>R$ 8.320,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>4.3%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Junho 2024</td>
+                                <td class="financial-amount">R$ 40.120,00</td>
+                                <td>R$ 24.890,00</td>
+                                <td>R$ 7.730,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>4.2%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Julho 2024</td>
+                                <td class="financial-amount">R$ 36.780,00</td>
+                                <td>R$ 21.350,00</td>
+                                <td>R$ 7.930,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-down"><i class="fas fa-arrow-down me-1"></i>8.3%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Agosto 2024</td>
+                                <td class="financial-amount">R$ 42.150,00</td>
+                                <td>R$ 25.480,00</td>
+                                <td>R$ 9.170,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>14.6%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Setembro 2024</td>
+                                <td class="financial-amount">R$ 45.300,00</td>
+                                <td>R$ 27.120,00</td>
+                                <td>R$ 10.680,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>7.5%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Outubro 2024</td>
+                                <td class="financial-amount">R$ 47.890,00</td>
+                                <td>R$ 29.460,00</td>
+                                <td>R$ 10.930,00</td>
+                                <td>R$ 7.500,00</td>
+                                <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>5.7%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Observações e Recomendações -->
+            <section class="admin-card">
+                <h4 class="mb-3">Observações e Recomendações</h4>
+                
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="fas fa-info-circle me-2"></i>Análise do Período</h5>
+                    <p>O relatório financeiro apresenta um crescimento consistente na receita mensal, com uma projeção positiva para os próximos meses. A taxa de renovação de 85.3% está acima da meta estabelecida de 80%.</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Pontos de Atenção</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Pagamentos Atrasados</strong>
+                                <p class="mb-0">Existem R$ 8.750,00 em pagamentos atrasados que precisam ser acompanhados pela equipe financeira.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Falhas de Pagamento</strong>
+                                <p class="mb-0">Houve um aumento de 2.3% nas falhas de pagamento em comparação ao mês anterior, principalmente no Polo São Paulo.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5>Recomendações</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Campanha de Recuperação</strong>
+                                <p class="mb-0">Implementar uma campanha de recuperação para os alunos com pagamentos atrasados, oferecendo condições especiais de parcelamento.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Diversificação de Métodos de Pagamento</strong>
+                                <p class="mb-0">Adicionar novos métodos de pagamento para reduzir a taxa de falha nas transações e melhorar a experiência do usuário.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Pacotes Promocionais</strong>
+                                <p class="mb-0">Criar pacotes promocionais para o próximo trimestre visando aumentar as matrículas durante o período de menor demanda (julho).</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        // Toggle para sidebar mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile (quando implementado)
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+        
+        // Aqui seria implementado o código para os gráficos usando Chart.js
+        // Exemplo simples para demonstração
+        document.addEventListener('DOMContentLoaded', function() {
+            // Código para inicializar os gráficos
+            // (Simulação - em uma implementação real, os dados viriam do backend)
+        });
+    </script>
+</body>
+</html>

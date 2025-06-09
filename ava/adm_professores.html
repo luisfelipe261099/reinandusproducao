@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Professores - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 10px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-info {
+            text-align: right;
+        }
+
+        .admin-info .admin-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .admin-info .admin-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .card-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary-purple);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .card-link:hover {
+            color: var(--secondary-purple);
+            transform: translateX(3px);
+        }
+
+        /* Search and Filter Section */
+        .filter-section {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-container {
+            flex: 2;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-container i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 45px;
+            border-radius: var(--border-radius);
+            border: 1px solid #e0e0e0;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.1);
+            outline: none;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn-purple {
+            background-color: var(--primary-purple);
+            border: none;
+            color: white;
+        }
+
+        .btn-purple:hover {
+            background-color: var(--secondary-purple);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-secondary {
+            border: 1px solid #ccc;
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tabelas Estilizadas */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .custom-table thead th {
+            background-color: var(--very-light-purple);
+            color: var(--secondary-purple);
+            font-weight: 600;
+            padding: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .custom-table thead th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        .custom-table thead th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+            transform: scale(1.01);
+        }
+
+        .custom-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .badge.bg-success {
+            background-color: rgba(40, 167, 69, 0.15) !important;
+            color: var(--success-green);
+        }
+
+        .badge.bg-warning {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+            color: #d18700;
+        }
+
+        .badge.bg-danger {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            color: var(--danger-red);
+        }
+
+        .badge.bg-info {
+            background-color: rgba(23, 162, 184, 0.15) !important;
+            color: var(--info-blue);
+        }
+
+        .badge.bg-secondary {
+            background-color: rgba(108, 117, 125, 0.15) !important;
+            color: var(--text-muted);
+        }
+
+        /* Professor Cards */
+        .professors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .professor-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .professor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 90, 205, 0.15);
+        }
+
+        .professor-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid var(--very-light-purple);
+        }
+
+        .professor-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--very-light-purple);
+        }
+
+        .professor-title h5 {
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            color: var(--secondary-purple);
+        }
+
+        .professor-title p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .professor-info {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .professor-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .professor-stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .professor-subjects {
+            margin-bottom: 15px;
+        }
+
+        .professor-subjects-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .subject-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .subject-badge {
+            background-color: var(--very-light-purple);
+            color: var(--secondary-purple);
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .professor-footer {
+            display: flex;
+            border-top: 1px solid var(--very-light-purple);
+        }
+
+        .professor-action {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .professor-action:hover {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+        }
+
+        .professor-action + .professor-action {
+            border-left: 1px solid var(--very-light-purple);
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--white);
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            border: 1px solid #eee;
+        }
+
+        .page-link:hover {
+            background-color: var(--very-light-purple);
+        }
+
+        .page-link.active {
+            background-color: var(--primary-purple);
+            color: white;
+            border-color: var(--primary-purple);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .professors-icon {
+            background: linear-gradient(135deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .courses-icon {
+            background: linear-gradient(135deg, #17a2b8, #4dc0d1);
+        }
+
+        .active-icon {
+            background: linear-gradient(135deg, #28a745, #5dd879);
+        }
+
+        .reviews-icon {
+            background: linear-gradient(135deg, #ffc107, #ffe066);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* Modal styles */
+        .modal-content {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background-color: var(--primary-purple);
+            color: white;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--very-light-purple);
+            padding: 15px 25px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .professors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-container, .filter-item {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral - Igual ao da página dashboard -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html" class="active">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Gerenciamento de Professores</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">5</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Estatísticas de Professores -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon professors-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">48</div>
+                        <div class="stat-label">Total de Professores</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon courses-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">32</div>
+                        <div class="stat-label">Cursos Ativos</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon active-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">42</div>
+                        <div class="stat-label">Professores Ativos</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon reviews-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">4.8</div>
+                        <div class="stat-label">Avaliação Média</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtros e Busca -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-input" placeholder="Buscar professor por nome ou disciplina...">
+                    </div>
+                    
+                    <div class="filter-item">
+                        <select class="form-select">
+                            <option selected>Todas as Áreas</option>
+                            <option>Administração</option>
+                            <option>Tecnologia</option>
+                            <option>Educação</option>
+                            <option>Saúde</option>
+                            <option>Ciências Sociais</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <select class="form-select">
+                            <option selected>Todos os Status</option>
+                            <option>Ativo</option>
+                            <option>Inativo</option>
+                            <option>Em Férias</option>
+                            <option>Afastado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-secondary">Limpar Filtros</button>
+                    <button class="btn btn-purple btn-icon">
+                        <i class="fas fa-user-plus"></i> Adicionar Professor
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Grid de Professores -->
+            <div class="professors-grid">
+                <!-- Professor 1 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Dr. Carlos Santos">
+                        <div class="professor-title">
+                            <h5>Dr. Carlos Santos</h5>
+                            <p>Professor de Administração</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">342</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.8</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Adm. Financeira</span>
+                                <span class="subject-badge">Gestão Estratégica</span>
+                                <span class="subject-badge">Marketing</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Professor 2 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Dra. Ana Oliveira">
+                        <div class="professor-title">
+                            <h5>Dra. Ana Oliveira</h5>
+                            <p>Professora de Tecnologia</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">6</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">287</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.9</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Ciência de Dados</span>
+                                <span class="subject-badge">Programação</span>
+                                <span class="subject-badge">IA</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Professor 3 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Prof. João Lima">
+                        <div class="professor-title">
+                            <h5>Prof. João Lima</h5>
+                            <p>Professor de Educação</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">221</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.7</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Metodologia</span>
+                                <span class="subject-badge">Pedagogia</span>
+                                <span class="subject-badge">Ensino EAD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Professor 4 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Dra. Mariana Costa">
+                        <div class="professor-title">
+                            <h5>Dra. Mariana Costa</h5>
+                            <p>Professora de Saúde</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">4</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">198</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.6</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Enfermagem</span>
+                                <span class="subject-badge">Nutrição</span>
+                                <span class="subject-badge">Gestão de Saúde</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Professor 5 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Prof. Rodrigo Silva">
+                        <div class="professor-title">
+                            <h5>Prof. Rodrigo Silva</h5>
+                            <p>Professor de Direito</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">3</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">176</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.5</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Dir. Civil</span>
+                                <span class="subject-badge">Dir. Empresarial</span>
+                                <span class="subject-badge">Dir. Digital</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Professor 6 -->
+                <div class="professor-card">
+                    <div class="professor-header">
+                        <img src="/api/placeholder/70/70" class="professor-avatar" alt="Prof. Marcos Almeida">
+                        <div class="professor-title">
+                            <h5>Prof. Marcos Almeida</h5>
+                            <p>Professor de Ciências Sociais</p>
+                        </div>
+                    </div>
+                    <div class="professor-info">
+                        <div class="professor-stats">
+                            <div class="professor-stat">
+                                <div class="stat-value">4</div>
+                                <div class="stat-label">Cursos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">163</div>
+                                <div class="stat-label">Alunos</div>
+                            </div>
+                            <div class="professor-stat">
+                                <div class="stat-value">4.3</div>
+                                <div class="stat-label">Avaliação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="professor-subjects">
+                            <div class="professor-subjects-title">Disciplinas</div>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Sociologia</span>
+                                <span class="subject-badge">Antropologia</span>
+                                <span class="subject-badge">História</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professor-footer">
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        <a href="#" class="professor-action">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paginação -->
+            <div class="pagination-container">
+                <div class="page-info">
+                    Mostrando 1-6 de 48 professores
+                </div>
+                <div class="pagination">
+                    <a href="#" class="page-link" aria-label="Página anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <a href="#" class="page-link active">1</a>
+                    <a href="#" class="page-link">2</a>
+                    <a href="#" class="page-link">3</a>
+                    <a href="#" class="page-link">4</a>
+                    <a href="#" class="page-link" aria-label="Próxima página">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Análise de Professores -->
+            <section class="admin-card mt-5">
+                <div class="card-header-custom">
+                    <h4>Análise de Desempenho dos Professores</h4>
+                    <div>
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-download me-2"></i>Exportar
+                        </button>
+                        <select class="form-select d-inline-block" style="width: auto;">
+                            <option selected>Último Trimestre</option>
+                            <option>Último Semestre</option>
+                            <option>Último Ano</option>
+                            <option>Período Personalizado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Área</th>
+                                <th>Cursos Ativos</th>
+                                <th>Alunos</th>
+                                <th>Engajamento</th>
+                                <th>Conclusões</th>
+                                <th>Avaliação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dra. Ana Oliveira</td>
+                                <td>Tecnologia</td>
+                                <td>6</td>
+                                <td>287</td>
+                                <td>92%</td>
+                                <td>78%</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">4.9</div>
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Dr. Carlos Santos</td>
+                                <td>Administração</td>
+                                <td>8</td>
+                                <td>342</td>
+                                <td>88%</td>
+                                <td>81%</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">4.8</div>
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Prof. João Lima</td>
+                                <td>Educação</td>
+                                <td>5</td>
+                                <td>221</td>
+                                <td>90%</td>
+                                <td>76%</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">4.7</div>
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Dra. Mariana Costa</td>
+                                <td>Saúde</td>
+                                <td>4</td>
+                                <td>198</td>
+                                <td>85%</td>
+                                <td>72%</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">4.6</div>
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Prof. Rodrigo Silva</td>
+                                <td>Direito</td>
+                                <td>3</td>
+                                <td>176</td>
+                                <td>82%</td>
+                                <td>70%</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">4.5</div>
+                                        <div>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Modal para Adicionar Professor -->
+    <div class="modal fade" id="addProfessorModal" tabindex="-1" aria-labelledby="addProfessorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProfessorModalLabel">Adicionar Novo Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="professorNome" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="professorNome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="professorEmail" class="form-label">E-mail</label>
+                                <input type="email" class="form-control" id="professorEmail" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="professorTitulacao" class="form-label">Titulação</label>
+                                <select class="form-select" id="professorTitulacao" required>
+                                    <option value="" selected disabled>Selecione a titulação</option>
+                                    <option value="especialista">Especialista</option>
+                                    <option value="mestre">Mestre</option>
+                                    <option value="doutor">Doutor</option>
+                                    <option value="posdoutor">Pós-Doutor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="professorArea" class="form-label">Área de Atuação</label>
+                                <select class="form-select" id="professorArea" required>
+                                    <option value="" selected disabled>Selecione a área</option>
+                                    <option value="administracao">Administração</option>
+                                    <option value="tecnologia">Tecnologia</option>
+                                    <option value="educacao">Educação</option>
+                                    <option value="saude">Saúde</option>
+                                    <option value="direito">Direito</option>
+                                    <option value="cienciassociais">Ciências Sociais</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="professorDisciplinas" class="form-label">Disciplinas</label>
+                            <select class="form-select" id="professorDisciplinas" multiple>
+                                <option value="admfinanceira">Administração Financeira</option>
+                                <option value="gestaoestrat">Gestão Estratégica</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="cienciadados">Ciência de Dados</option>
+                                <option value="programacao">Programação</option>
+                                <option value="ia">Inteligência Artificial</option>
+                                <option value="metodologia">Metodologia</option>
+                                <option value="pedagogia">Pedagogia</option>
+                                <option value="ensinoead">Ensino EAD</option>
+                                <option value="enfermagem">Enfermagem</option>
+                                <option value="nutricao">Nutrição</option>
+                                <option value="gestaosaude">Gestão de Saúde</option>
+                                <option value="dircivil">Direito Civil</option>
+                                <option value="dirempresarial">Direito Empresarial</option>
+                                <option value="dirdigital">Direito Digital</option>
+                                <option value="sociologia">Sociologia</option>
+                                <option value="antropologia">Antropologia</option>
+                                <option value="historia">História</option>
+                            </select>
+                            <small class="form-text text-muted">Pressione Ctrl para selecionar múltiplas disciplinas</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="professorCurriculo" class="form-label">Mini Currículo</label>
+                            <textarea class="form-control" id="professorCurriculo" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="professorFoto" class="form-label">Foto</label>
+                                <input type="file" class="form-control" id="professorFoto">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="professorStatus" class="form-label">Status</label>
+                                <select class="form-select" id="professorStatus" required>
+                                    <option value="ativo" selected>Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                    <option value="ferias">Em Férias</option>
+                                    <option value="afastado">Afastado</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="professorTelefone" class="form-label">Telefone</label>
+                                <input type="tel" class="form-control" id="professorTelefone">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="professorDataContratacao" class="form-label">Data de Contratação</label>
+                                <input type="date" class="form-control" id="professorDataContratacao">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="professorDisponibilidade">
+                            <label class="form-check-label" for="professorDisponibilidade">
+                                Disponível para novos cursos
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Professor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Detalhes do Professor -->
+    <div class="modal fade" id="professorDetailModal" tabindex="-1" aria-labelledby="professorDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="professorDetailModalLabel">Detalhes do Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img src="/api/placeholder/120/120" class="rounded-circle mb-3" alt="Foto do Professor">
+                        <h4 id="detailProfessorName">Dr. Carlos Santos</h4>
+                        <p class="text-muted" id="detailProfessorTitle">Professor de Administração</p>
+                        <div class="badge bg-success me-2">Professor Ativo</div>
+                        <div class="badge bg-primary">Disponível para Novos Cursos</div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Informações de Contato</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-envelope me-2"></i> carlos.santos@faciencia.edu.br</li>
+                                <li><i class="fas fa-phone me-2"></i> (11) 98765-4321</li>
+                                <li><i class="fas fa-calendar-alt me-2"></i> Contratado em: 10/03/2020</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Especialidades</h6>
+                            <div class="subject-badges">
+                                <span class="subject-badge">Adm. Financeira</span>
+                                <span class="subject-badge">Gestão Estratégica</span>
+                                <span class="subject-badge">Marketing</span>
+                                <span class="subject-badge">Empreendedorismo</span>
+                                <span class="subject-badge">Finanças</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Mini Currículo</h6>
+                        <p>Doutor em Administração pela Universidade de São Paulo (USP), com pós-doutorado em Finanças pela INSEAD. Possui mais de 15 anos de experiência em gestão financeira e estratégica. Autor de 3 livros e diversos artigos publicados em revistas científicas internacionais. Consultor de empresas nas áreas de planejamento estratégico e gestão financeira.</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header">Cursos Ministrados</div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Administração Financeira
+                                            <span class="badge bg-primary rounded-pill">48 alunos</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Gestão Estratégica
+                                            <span class="badge bg-primary rounded-pill">42 alunos</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Marketing
+                                            <span class="badge bg-primary rounded-pill">56 alunos</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Empreendedorismo
+                                            <span class="badge bg-primary rounded-pill">39 alunos</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Avaliações dos Alunos</div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <h2 class="me-3 mb-0">4.8</h2>
+                                        <div>
+                                            <div>
+                                                <i class="fas fa-star text-warning"></i>
+                                                <i class="fas fa-star text-warning"></i>
+                                                <i class="fas fa-star text-warning"></i>
+                                                <i class="fas fa-star text-warning"></i>
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            </div>
+                                            <small class="text-muted">Baseado em 156 avaliações</small>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                                    </div>
+                                    <small class="d-block text-muted mb-3">85% dos alunos recomendam este professor</small>
+                                    <p><i class="fas fa-quote-left text-muted me-2"></i>Excelente professor, muito didático e com grande domínio do conteúdo. Suas aulas são dinâmicas e ele sempre responde às dúvidas rapidamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary">Editar Professor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Editar Professor -->
+    <div class="modal fade" id="editProfessorModal" tabindex="-1" aria-labelledby="editProfessorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfessorModalLabel">Editar Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editProfessorNome" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="editProfessorNome" value="Dr. Carlos Santos" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editProfessorEmail" class="form-label">E-mail</label>
+                                <input type="email" class="form-control" id="editProfessorEmail" value="carlos.santos@faciencia.edu.br" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editProfessorTitulacao" class="form-label">Titulação</label>
+                                <select class="form-select" id="editProfessorTitulacao" required>
+                                    <option value="especialista">Especialista</option>
+                                    <option value="mestre">Mestre</option>
+                                    <option value="doutor" selected>Doutor</option>
+                                    <option value="posdoutor">Pós-Doutor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editProfessorArea" class="form-label">Área de Atuação</label>
+                                <select class="form-select" id="editProfessorArea" required>
+                                    <option value="administracao" selected>Administração</option>
+                                    <option value="tecnologia">Tecnologia</option>
+                                    <option value="educacao">Educação</option>
+                                    <option value="saude">Saúde</option>
+                                    <option value="direito">Direito</option>
+                                    <option value="cienciassociais">Ciências Sociais</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editProfessorDisciplinas" class="form-label">Disciplinas</label>
+                            <select class="form-select" id="editProfessorDisciplinas" multiple>
+                                <option value="admfinanceira" selected>Administração Financeira</option>
+                                <option value="gestaoestrat" selected>Gestão Estratégica</option>
+                                <option value="marketing" selected>Marketing</option>
+                                <option value="cienciadados">Ciência de Dados</option>
+                                <option value="programacao">Programação</option>
+                                <option value="ia">Inteligência Artificial</option>
+                                <option value="metodologia">Metodologia</option>
+                                <option value="pedagogia">Pedagogia</option>
+                                <option value="ensinoead">Ensino EAD</option>
+                                <option value="enfermagem">Enfermagem</option>
+                                <option value="nutricao">Nutrição</option>
+                                <option value="gestaosaude">Gestão de Saúde</option>
+                                <option value="dircivil">Direito Civil</option>
+                                <option value="dirempresarial">Direito Empresarial</option>
+                                <option value="dirdigital">Direito Digital</option>
+                                <option value="sociologia">Sociologia</option>
+                                <option value="antropologia">Antropologia</option>
+                                <option value="historia">História</option>
+                            </select>
+                            <small class="form-text text-muted">Pressione Ctrl para selecionar múltiplas disciplinas</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editProfessorCurriculo" class="form-label">Mini Currículo</label>
+                            <textarea class="form-control" id="editProfessorCurriculo" rows="4">Doutor em Administração pela Universidade de São Paulo (USP), com pós-doutorado em Finanças pela INSEAD. Possui mais de 15 anos de experiência em gestão financeira e estratégica. Autor de 3 livros e diversos artigos publicados em revistas científicas internacionais. Consultor de empresas nas áreas de planejamento estratégico e gestão financeira.</textarea>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editProfessorFoto" class="form-label">Atualizar Foto</label>
+                                <input type="file" class="form-control" id="editProfessorFoto">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editProfessorStatus" class="form-label">Status</label>
+                                <select class="form-select" id="editProfessorStatus" required>
+                                    <option value="ativo" selected>Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                    <option value="ferias">Em Férias</option>
+                                    <option value="afastado">Afastado</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editProfessorTelefone" class="form-label">Telefone</label>
+                                <input type="tel" class="form-control" id="editProfessorTelefone" value="(11) 98765-4321">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editProfessorDataContratacao" class="form-label">Data de Contratação</label>
+                                <input type="date" class="form-control" id="editProfessorDataContratacao" value="2020-03-10">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="editProfessorDisponibilidade" checked>
+                            <label class="form-check-label" for="editProfessorDisponibilidade">
+                                Disponível para novos cursos
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script para o menu responsivo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para mostrar/ocultar sidebar em dispositivos móveis
+            function toggleSidebar() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+                
+                // Toggle overlay
+                if (sidebar.classList.contains('show')) {
+                    overlay.style.display = 'block';
+                } else {
+                    overlay.style.display = 'none';
+                }
+            }
+            
+            // Adicionar botão para mobile (menu hamburguer)
+            const mainContent = document.querySelector('.main-content');
+            const mobileMenuBtn = document.createElement('button');
+            mobileMenuBtn.classList.add('mobile-menu-btn');
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            mobileMenuBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background-color: var(--primary-purple);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                width: 40px;
+                height: 40px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                font-size: 1.2rem;
+            `;
+            
+            document.body.appendChild(mobileMenuBtn);
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+            
+            // Overlay para fechar o menu quando clicar fora
+            const overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 999;
+                display: none;
+            `;
+            
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Mostrar/ocultar elementos baseado no tamanho da tela
+            function handleScreenResize() {
+                if (window.innerWidth <= 992) {
+                    mobileMenuBtn.style.display = 'flex';
+                } else {
+                    mobileMenuBtn.style.display = 'none';
+                    overlay.style.display = 'none';
+                    
+                    // Reset sidebar state on larger screens
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar.classList.contains('show')) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            }
+            
+            // Adicionar event listener para redimensionamento
+            window.addEventListener('resize', handleScreenResize);
+            
+            // Chamar a função uma vez para configurar o estado inicial
+            handleScreenResize();
+            
+            // Ativar os modais
+            const addProfessorBtn = document.querySelector('.btn-purple.btn-icon');
+            if (addProfessorBtn) {
+                addProfessorBtn.addEventListener('click', function() {
+                    const addProfessorModal = new bootstrap.Modal(document.getElementById('addProfessorModal'));
+                    addProfessorModal.show();
+                });
+            }
+            
+            // Links para detalhes do professor
+            const detailLinks = document.querySelectorAll('.professor-action');
+            detailLinks.forEach(link => {
+                if (link.textContent.trim().includes('Detalhes')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const professorDetailModal = new bootstrap.Modal(document.getElementById('professorDetailModal'));
+                        professorDetailModal.show();
+                    });
+                } else if (link.textContent.trim().includes('Editar')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const editProfessorModal = new bootstrap.Modal(document.getElementById('editProfessorModal'));
+                        editProfessorModal.show();
+                    });
+                }
+            });
+            
+            // Botão de editar no modal de detalhes
+            const editButtonInDetail = document.querySelector('#professorDetailModal .modal-footer .btn-primary');
+            if (editButtonInDetail) {
+                editButtonInDetail.addEventListener('click', function() {
+                    // Fechar modal de detalhes
+                    const detailModal = bootstrap.Modal.getInstance(document.getElementById('professorDetailModal'));
+                    detailModal.hide();
+                    
+                    // Abrir modal de edição
+                    setTimeout(() => {
+                        const editModal = new bootstrap.Modal(document.getElementById('editProfessorModal'));
+                        editModal.show();
+                    }, 500);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

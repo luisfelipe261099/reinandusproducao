@@ -1,0 +1,41 @@
+/* 
+ * Este arquivo CSS desativa explicitamente o comportamento de hover no menu lateral
+ * Ele tem precedência sobre qualquer JavaScript que possa estar tentando implementar esse comportamento
+ */
+
+/* Desativa a transição de largura no hover */
+.sidebar-collapsed.sidebar-hover-expanded,
+.sidebar-collapsed:hover {
+    width: 70px !important; /* Mantém a largura do menu colapsado mesmo no hover */
+}
+
+/* Garante que os labels permaneçam ocultos no hover */
+.sidebar-collapsed .sidebar-label,
+.sidebar-collapsed:hover .sidebar-label {
+    display: none !important;
+}
+
+/* Garante que o logo completo permaneça oculto no hover */
+.sidebar-collapsed .sidebar-logo-full,
+.sidebar-collapsed:hover .sidebar-logo-full {
+    display: none !important;
+}
+
+/* Desativa qualquer animação ou transição que possa estar sendo aplicada no hover */
+.sidebar-collapsed:hover * {
+    transition: none !important;
+}
+
+/* Garante que o menu só expanda quando o botão de toggle for clicado */
+.sidebar-collapsed:not(.sidebar-expanded) {
+    width: 70px !important;
+}
+
+/* Garante que o conteúdo principal permaneça ajustado quando o menu estiver colapsado */
+.sidebar-collapsed:not(.sidebar-expanded) ~ .main-content,
+.sidebar-collapsed:not(.sidebar-expanded) ~ .flex-1.flex.flex-col.overflow-hidden,
+.sidebar-collapsed:not(.sidebar-expanded) ~ #content-wrapper,
+.sidebar-collapsed:not(.sidebar-expanded) ~ div:not(#sidebar) {
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
+}

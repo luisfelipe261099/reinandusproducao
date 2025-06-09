@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Alunos - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 10px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .polo-info {
+            text-align: right;
+        }
+
+        .polo-info .polo-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .polo-info .polo-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        /* Tabelas Estilizadas */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .custom-table thead th {
+            background-color: var(--very-light-purple);
+            color: var(--secondary-purple);
+            font-weight: 600;
+            padding: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .custom-table thead th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        .custom-table thead th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+            transform: scale(1.01);
+        }
+
+        .custom-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .stat-card.total-students {
+            background: linear-gradient(135deg, rgba(106, 90, 205, 0.08), rgba(106, 90, 205, 0.01));
+        }
+
+        .stat-card.active-students {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(40, 167, 69, 0.01));
+        }
+
+        .stat-card.new-students {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.08), rgba(23, 162, 184, 0.01));
+        }
+
+        .stat-card.graduated-students {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 193, 7, 0.01));
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.total-students .stat-icon {
+            background: linear-gradient(135deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .stat-card.active-students .stat-icon {
+            background: linear-gradient(135deg, #28a745, #5dd879);
+        }
+
+        .stat-card.new-students .stat-icon {
+            background: linear-gradient(135deg, #17a2b8, #4dc0d1);
+        }
+
+        .stat-card.graduated-students .stat-icon {
+            background: linear-gradient(135deg, #ffc107, #ffe066);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        /* Filtros e Pesquisa */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 50px;
+            border: 1px solid #eee;
+            background-color: var(--white);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--light-purple);
+            border-color: var(--light-purple);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filters-dropdown {
+            min-width: 160px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Badges e Status */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .badge.bg-success {
+            background-color: rgba(40, 167, 69, 0.15) !important;
+            color: var(--success-green);
+        }
+
+        .badge.bg-warning {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+            color: #d18700;
+        }
+
+        .badge.bg-danger {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            color: var(--danger-red);
+        }
+
+        .badge.bg-info {
+            background-color: rgba(23, 162, 184, 0.15) !important;
+            color: var(--info-blue);
+        }
+
+        .badge.bg-secondary {
+            background-color: rgba(108, 117, 125, 0.15) !important;
+            color: var(--text-muted);
+        }
+
+        /* Botões e Ações */
+        .btn-group .btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-right: 5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-red);
+            border-color: var(--danger-red);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-red);
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-purple);
+            border-color: var(--secondary-purple);
+        }
+
+        .btn-sm {
+            font-size: 0.85rem;
+        }
+
+        /* Progress */
+        .progress-thin {
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 25px;
+        }
+
+        .nav-tabs .nav-link {
+            margin-bottom: -1px;
+            border: 1px solid transparent;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+            padding: 12px 20px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: #e9ecef #e9ecef #dee2e6;
+            color: var(--primary-purple);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-purple);
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+            font-weight: 600;
+        }
+
+        /* Student Cards */
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .student-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 90, 205, 0.15);
+        }
+
+        .student-header {
+            background: linear-gradient(135deg, var(--primary-purple), var(--light-purple));
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--white);
+        }
+
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: white;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-basic-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .student-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .student-detail-icon {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+            font-size: 0.95rem;
+        }
+
+        .student-detail-content {
+            flex: 1;
+        }
+
+        .student-detail-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .student-detail-value {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .student-actions {
+            margin-top: auto;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .filters-bar {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+            }
+
+            .student-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Aprimorada -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_aluno.html" class="active">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gestão</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_matriculas.html">
+                            <i class="fas fa-user-plus"></i> Matrículas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_certificados.html">
+                            <i class="fas fa-certificate"></i> Certificados
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_relatorio.html">
+                            <i class="fas fa-chart-bar"></i> Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_config.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_suporte.html">
+                            <i class="fas fa-headset"></i> Suporte
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Gerenciamento de Alunos</h1>
+                <div class="user-info">
+                    <div class="polo-info">
+                        <div class="polo-name">Polo São Paulo</div>
+                        <div class="polo-role">Administrador</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Estatísticas de Alunos -->
+            <section class="stats-grid">
+                <div class="stat-card total-students">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">423</div>
+                        <div class="stat-label">Total de Alunos</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            9.2% desde o último trimestre
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card active-students">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">387</div>
+                        <div class="stat-label">Alunos Ativos</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            7.5% desde o último trimestre
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card new-students">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">47</div>
+                        <div class="stat-label">Novos Alunos (Mês)</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            5 mais que no mês anterior
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card graduated-students">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">89</div>
+                        <div class="stat-label">Alunos Formados</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            12 mais que no mês anterior
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtros e Barra de Ações -->
+            <section class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Buscar alunos...">
+                </div>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Todos os Cursos</option>
+                    <option>Marketing Digital</option>
+                    <option>Desenvolvimento Web</option>
+                    <option>UX/UI Design</option>
+                    <option>Gestão de Negócios</option>
+                    <option>Inglês para Negócios</option>
+                </select>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Todos os Status</option>
+                    <option>Ativo</option>
+                    <option>Inativo</option>
+                    <option>Formado</option>
+                    <option>Em atraso</option>
+                </select>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-icon">
+                        <i class="fas fa-user-plus"></i> Novo Aluno
+                    </button>
+                    <button class="btn btn-outline-primary btn-icon">
+                        <i class="fas fa-file-export"></i> Exportar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Visualização em Abas -->
+            <section class="dashboard-card">
+                <ul class="nav nav-tabs" id="studentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-view" type="button" role="tab" aria-controls="list-view" aria-selected="true">
+                            <i class="fas fa-list me-2"></i> Lista
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="grid-tab" data-bs-toggle="tab" data-bs-target="#grid-view" type="button" role="tab" aria-controls="grid-view" aria-selected="false">
+                            <i class="fas fa-th-large me-2"></i> Cards
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-view" type="button" role="tab" aria-controls="stats-view" aria-selected="false">
+                            <i class="fas fa-chart-pie me-2"></i> Estatísticas
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="studentTabsContent">
+                    <!-- Visualização em Lista -->
+                    <div class="tab-pane fade show active" id="list-view" role="tabpanel" aria-labelledby="list-tab">
+                        <div class="table-responsive">
+                            <table class="table custom-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%">Aluno</th>
+                                        <th>Curso</th>
+                                        <th>Progresso</th>
+                                        <th>Última Atividade</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">João Silva</div>
+                                                    <div class="small text-muted">joao.silva@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Marketing Digital Avançado</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 78%" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>78%</small>
+                                        </td>
+                                        <td>15/05/2024</td>
+                                        <td><span class="badge bg-success">Ativo</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Maria Souza</div>
+                                                    <div class="small text-muted">maria.souza@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Desenvolvimento Web Full Stack</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>65%</small>
+                                        </td>
+                                        <td>13/05/2024</td>
+                                        <td><span class="badge bg-success">Ativo</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Pedro Santos</div>
+                                                    <div class="small text-muted">pedro.santos@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Gestão de Negócios Digitais</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 42%" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>42%</small>
+                                        </td>
+                                        <td>10/05/2024</td>
+                                        <td><span class="badge bg-success">Ativo</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Ana Oliveira</div>
+                                                    <div class="small text-muted">ana.oliveira@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>UX/UI Design</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 55%" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>55%</small>
+                                        </td>
+                                        <td>08/05/2024</td>
+                                        <td><span class="badge bg-success">Ativo</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Carlos Mendes</div>
+                                                    <div class="small text-muted">carlos.mendes@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Inglês para Negócios</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>92%</small>
+                                        </td>
+                                        <td>05/05/2024</td>
+                                        <td><span class="badge bg-success">Ativo</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Juliana Ferreira</div>
+                                                    <div class="small text-muted">juliana.ferreira@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Marketing Digital Avançado</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>25%</small>
+                                        </td>
+                                        <td>20/04/2024</td>
+                                        <td><span class="badge bg-warning">Em atraso</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Roberto Alves</div>
+                                                    <div class="small text-muted">roberto.alves@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Desenvolvimento Web Full Stack</td>
+                                        <td>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small>100%</small>
+                                        </td>
+                                        <td>02/05/2024</td>
+                                        <td><span class="badge bg-info">Formado</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>Mostrando 7 de 423 alunos</div>
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Próximo</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Visualização em Cards -->
+                    <div class="tab-pane fade" id="grid-view" role="tabpanel" aria-labelledby="grid-tab">
+                        <div class="student-grid">
+                            <!-- Card do Aluno 1 -->
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-avatar">
+                                        <img src="/api/placeholder/60/60" alt="Avatar">
+                                    </div>
+                                    <div class="student-basic-info">
+                                        <div class="student-name">João Silva</div>
+                                        <div class="student-email">joao.silva@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="student-content">
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Curso</div>
+                                            <div class="student-detail-value">Marketing Digital Avançado</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Progresso</div>
+                                            <div class="student-detail-value">
+                                                <div class="progress progress-thin mt-1">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 78%" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small>78% Concluído</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Data de Matrícula</div>
+                                            <div class="student-detail-value">15/02/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Última Atividade</div>
+                                            <div class="student-detail-value">15/05/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Status</div>
+                                            <div class="student-detail-value">
+                                                <span class="badge bg-success">Ativo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-actions">
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil Completo">
+                                                <i class="fas fa-user"></i> Perfil
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                            <i class="fas fa-envelope"></i> Mensagem
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card do Aluno 2 -->
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-avatar">
+                                        <img src="/api/placeholder/60/60" alt="Avatar">
+                                    </div>
+                                    <div class="student-basic-info">
+                                        <div class="student-name">Maria Souza</div>
+                                        <div class="student-email">maria.souza@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="student-content">
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Curso</div>
+                                            <div class="student-detail-value">Desenvolvimento Web Full Stack</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Progresso</div>
+                                            <div class="student-detail-value">
+                                                <div class="progress progress-thin mt-1">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small>65% Concluído</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Data de Matrícula</div>
+                                            <div class="student-detail-value">10/03/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Última Atividade</div>
+                                            <div class="student-detail-value">13/05/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Status</div>
+                                            <div class="student-detail-value">
+                                                <span class="badge bg-success">Ativo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-actions">
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil Completo">
+                                                <i class="fas fa-user"></i> Perfil
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                            <i class="fas fa-envelope"></i> Mensagem
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card do Aluno 3 -->
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-avatar">
+                                        <img src="/api/placeholder/60/60" alt="Avatar">
+                                    </div>
+                                    <div class="student-basic-info">
+                                        <div class="student-name">Pedro Santos</div>
+                                        <div class="student-email">pedro.santos@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="student-content">
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Curso</div>
+                                            <div class="student-detail-value">Gestão de Negócios Digitais</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Progresso</div>
+                                            <div class="student-detail-value">
+                                                <div class="progress progress-thin mt-1">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 42%" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small>42% Concluído</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Data de Matrícula</div>
+                                            <div class="student-detail-value">05/04/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Última Atividade</div>
+                                            <div class="student-detail-value">10/05/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Status</div>
+                                            <div class="student-detail-value">
+                                                <span class="badge bg-success">Ativo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-actions">
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil Completo">
+                                                <i class="fas fa-user"></i> Perfil
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                            <i class="fas fa-envelope"></i> Mensagem
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card do Aluno 4 -->
+                            <div class="student-card">
+                                <div class="student-header">
+                                    <div class="student-avatar">
+                                        <img src="/api/placeholder/60/60" alt="Avatar">
+                                    </div>
+                                    <div class="student-basic-info">
+                                        <div class="student-name">Ana Oliveira</div>
+                                        <div class="student-email">ana.oliveira@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="student-content">
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Curso</div>
+                                            <div class="student-detail-value">UX/UI Design</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Progresso</div>
+                                            <div class="student-detail-value">
+                                                <div class="progress progress-thin mt-1">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 55%" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small>55% Concluído</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Data de Matrícula</div>
+                                            <div class="student-detail-value">02/04/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Última Atividade</div>
+                                            <div class="student-detail-value">08/05/2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="student-detail">
+                                        <div class="student-detail-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="student-detail-content">
+                                            <div class="student-detail-label">Status</div>
+                                            <div class="student-detail-value">
+                                                <span class="badge bg-success">Ativo</span>
+                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="student-actions">
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Perfil Completo">
+                                                <i class="fas fa-user"></i> Perfil
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Mensagem">
+                                            <i class="fas fa-envelope"></i> Mensagem
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>Mostrando 4 de 423 alunos</div>
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Próximo</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Visualização de Estatísticas -->
+                    <div class="tab-pane fade" id="stats-view" role="tabpanel" aria-labelledby="stats-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-4">
+                                <div class="dashboard-card h-100">
+                                    <h5 class="mb-3">Distribuição por Curso</h5>
+                                    <div class="chart-container">
+                                        <p class="text-muted text-center">Gráfico de Pizza - Distribuição de Alunos por Curso</p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>Marketing Digital Avançado</div>
+                                            <div class="badge bg-primary">82 alunos</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>Desenvolvimento Web</div>
+                                            <div class="badge bg-info">65 alunos</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>UX/UI Design</div>
+                                            <div class="badge bg-success">58 alunos</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>Gestão de Negócios</div>
+                                            <div class="badge bg-warning">47 alunos</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>Outros Cursos</div>
+                                            <div class="badge bg-secondary">171 alunos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="dashboard-card h-100">
+                                    <h5 class="mb-3">Progresso Médio dos Alunos</h5>
+                                    <div class="chart-container">
+                                        <p class="text-muted text-center">Gráfico de Barras - Progresso Médio por Curso</p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Marketing Digital Avançado</span>
+                                                <span>68%</span>
+                                            </div>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Desenvolvimento Web</span>
+                                                <span>72%</span>
+                                            </div>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 72%" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>UX/UI Design</span>
+                                                <span>65%</span>
+                                            </div>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Gestão de Negócios</span>
+                                                <span>58%</span>
+                                            </div>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 58%" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="dashboard-card h-100">
+                                    <h5 class="mb-3">Atividade dos Alunos (Últimos 30 dias)</h5>
+                                    <div class="chart-container">
+                                        <p class="text-muted text-center">Gráfico de Linha - Atividade Diária</p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>Média diária de acessos</div>
+                                            <div class="badge bg-primary">285 acessos</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>Dia com maior atividade</div>
+                                            <div class="badge bg-success">Segunda-feira</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>Horário com maior atividade</div>
+                                            <div class="badge bg-info">19h - 22h</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="dashboard-card h-100">
+                                    <h5 class="mb-3">Distribuição por Status</h5>
+                                    <div class="chart-container">
+                                        <p class="text-muted text-center">Gráfico de Donut - Status dos Alunos</p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div><span class="badge bg-success me-2">Ativo</span> Alunos ativos</div>
+                                            <div class="fw-bold">387 (91.5%)</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div><span class="badge bg-warning me-2">Em atraso</span> Alunos em atraso</div>
+                                            <div class="fw-bold">25 (5.9%)</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div><span class="badge bg-danger me-2">Inativo</span> Alunos inativos</div>
+                                            <div class="fw-bold">11 (2.6%)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <h5 class="mb-4">Alunos em Destaque</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="m-0">Melhor Desempenho</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/60/60" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <h6 class="mb-1">Carlos Mendes</h6>
+                                                    <p class="mb-1 text-muted">Inglês para Negócios</p>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-3">
+                                                            <i class="fas fa-star text-warning"></i>
+                                                            <i class="fas fa-star text-warning"></i>
+                                                            <i class="fas fa-star text-warning"></i>
+                                                            <i class="fas fa-star text-warning"></i>
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        </div>
+                                                        <span class="badge bg-success">92% concluído</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="m-0">Mais Engajado</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/60/60" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <h6 class="mb-1">Ana Oliveira</h6>
+                                                    <p class="mb-1 text-muted">UX/UI Design</p>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-3">
+                                                            <small class="text-muted">126 acessos este mês</small>
+                                                        </div>
+                                                        <span class="badge bg-info">Alta participação</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle com Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

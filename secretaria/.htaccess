@@ -1,0 +1,34 @@
+# Ativa o modo de exibição de erros para debug
+php_flag display_errors on
+php_value error_reporting E_ALL
+
+# Aumenta o limite de memória
+php_value memory_limit 256M
+
+# Aumenta o tempo máximo de execução
+php_value max_execution_time 300
+
+# Aumenta o tamanho máximo de upload
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+
+# Permite o uso de URLs amigáveis
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redireciona para HTTPS se não estiver usando HTTPS
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Exceções para arquivos específicos
+    RewriteCond %{REQUEST_URI} !^/alunos_documentos\.php
+    RewriteCond %{REQUEST_URI} !^/documentos_pessoais\.php
+    RewriteCond %{REQUEST_URI} !^/documentos_aluno\.php
+    RewriteCond %{REQUEST_URI} !^/teste_acesso\.php
+
+    # Mantém a URL original
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>

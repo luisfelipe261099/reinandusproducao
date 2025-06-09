@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário Acadêmico - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Calendário */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .month-selector h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .month-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--white);
+            border: 1px solid var(--very-light-purple);
+            color: var(--primary-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .month-btn:hover {
+            background-color: var(--primary-purple);
+            color: var(--white);
+        }
+
+        .view-selector .btn {
+            border-radius: 50px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            background-color: var(--very-light-purple);
+            border-radius: 8px;
+        }
+
+        .calendar-day {
+            min-height: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--white);
+            border: 1px solid var(--very-light-purple);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.current {
+            border: 2px solid var(--primary-purple);
+            background-color: var(--very-light-purple);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .calendar-event {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-event.event-aula {
+            background-color: var(--primary-purple);
+        }
+
+        .calendar-event.event-prova {
+            background-color: var(--danger-red);
+        }
+
+        .calendar-event.event-prazo {
+            background-color: var(--warning-yellow);
+            color: var(--text-dark);
+        }
+
+        .calendar-event.event-webinar {
+            background-color: var(--info-blue);
+        }
+
+        .more-events {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            text-align: center;
+            background-color: var(--very-light-purple);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        /* Próximos Eventos */
+        .events-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .event-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--very-light-purple);
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-date {
+            min-width: 60px;
+            text-align: center;
+            border-radius: 8px;
+            background-color: var(--very-light-purple);
+            padding: 8px;
+            margin-right: 15px;
+        }
+
+        .event-date-day {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+            line-height: 1;
+        }
+
+        .event-date-month {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .event-content {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-title i {
+            color: var(--primary-purple);
+        }
+
+        .event-details {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .event-time {
+            background-color: var(--very-light-purple);
+            color: var(--primary-purple);
+            border-radius: 50px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .event-badge {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .event-badge.badge-aula {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: var(--primary-purple);
+        }
+
+        .event-badge.badge-prova {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: var(--danger-red);
+        }
+
+        .event-badge.badge-prazo {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #d18700;
+        }
+
+        .event-badge.badge-webinar {
+            background-color: rgba(23, 162, 184, 0.15);
+            color: var(--info-blue);
+        }
+
+        /* Filtros e Pesquisa */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-checkbox input {
+            cursor: pointer;
+        }
+
+        .filter-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .filter-aula {
+            background-color: var(--primary-purple);
+        }
+
+        .filter-prova {
+            background-color: var(--danger-red);
+        }
+
+        .filter-prazo {
+            background-color: var(--warning-yellow);
+        }
+
+        .filter-webinar {
+            background-color: var(--info-blue);
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .calendar-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .view-selector {
+                width: 100%;
+            }
+
+            .view-selector .btn-group {
+                width: 100%;
+            }
+
+            .view-selector .btn {
+                flex: 1;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .calendar-day {
+                min-height: auto;
+                padding: 15px;
+            }
+
+            .calendar-header {
+                display: none;
+            }
+
+            .day-number {
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+            .day-name {
+                display: inline-block;
+                font-size: 0.9rem;
+                color: var(--text-muted);
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 992px) {
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+
+            .calendar-day {
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Moderna -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="aluno_dashboard.html">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li>
+                    <a href="meuscursos.html">
+                        <i class="fas fa-book"></i> Meus Cursos
+                    </a>
+                </li>
+                <li>
+                    <a href="calendario.html" class="active">
+                        <i class="fas fa-calendar-alt"></i> Calendário
+                    </a>
+                </li>
+                <li>
+                    <a href="desempenho.html">
+                        <i class="fas fa-chart-line"></i> Desempenho
+                    </a>
+                </li>
+                <li>
+                    <a href="certificado.html">
+                        <i class="fas fa-certificate"></i> Certificados
+                    </a>
+                </li>
+                <li>
+                    <a href="material.html">
+                        <i class="fas fa-file-alt"></i> Materiais
+                    </a>
+                </li>
+                <li>
+                    <a href="mensagens.html">
+                        <i class="fas fa-comment-alt"></i> Mensagens
+                    </a>
+                </li>
+                <li>
+                    <a href="perfil.html">
+                        <i class="fas fa-user-cog"></i> Perfil
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html" class="text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Calendário Acadêmico</h1>
+                <div class="user-info">
+                    <div class="student-info">
+                        <div class="student-name">Maria Silva</div>
+                        <div class="student-email">maria.silva@email.com</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Filtros para o Calendário -->
+            <div class="filters-bar">
+                <label class="filter-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="filter-color filter-aula"></span>
+                    <span>Aulas</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="filter-color filter-prova"></span>
+                    <span>Provas</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="filter-color filter-prazo"></span>
+                    <span>Prazos</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="filter-color filter-webinar"></span>
+                    <span>Webinars</span>
+                </label>
+                
+                <select class="form-select ms-auto" style="max-width: 200px;">
+                    <option selected>Todos os Cursos</option>
+                    <option>Marketing Digital Avançado</option>
+                    <option>Desenvolvimento Web Full Stack</option>
+                    <option>UX/UI Design</option>
+                </select>
+            </div>
+
+            <!-- Calendário -->
+            <section class="dashboard-card">
+                <div class="calendar-controls">
+                    <div class="month-selector">
+                        <button class="month-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3>Maio 2024</h3>
+                        <button class="month-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="view-selector">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary">Mês</button>
+                            <button type="button" class="btn btn-outline-primary">Semana</button>
+                            <button type="button" class="btn btn-outline-primary">Dia</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid">
+                    <!-- Cabeçalhos dos dias da semana -->
+                    <div class="calendar-header">Domingo</div>
+                    <div class="calendar-header">Segunda</div>
+                    <div class="calendar-header">Terça</div>
+                    <div class="calendar-header">Quarta</div>
+                    <div class="calendar-header">Quinta</div>
+                    <div class="calendar-header">Sexta</div>
+                    <div class="calendar-header">Sábado</div>
+                    
+                    <!-- Dias do mês anterior -->
+                    <div class="calendar-day other-month">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day other-month">
+                        <div class="day-number">29</div>
+                    </div>
+                    <div class="calendar-day other-month">
+                        <div class="day-number">30</div>
+                    </div>
+                    
+                    <!-- Dias do mês atual (Maio 2024) -->
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
+                        <div class="calendar-event event-webinar">Webinar: Marketing</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                        <div class="calendar-event event-aula">Aula de JavaScript</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">6</div>
+                        <div class="calendar-event event-aula">Aula de Marketing</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">8</div>
+                        <div class="calendar-event event-prazo">Prazo: Projeto</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">9</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">10</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">11</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">12</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">13</div>
+                        <div class="calendar-event event-aula">Aula de HTML</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">14</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">15</div>
+                        <div class="calendar-event event-aula">Aula de CSS</div>
+                    </div>
+                    <div class="calendar-day current">
+                        <div class="day-number">16</div>
+                        <div class="calendar-event event-aula">Aula de Marketing</div>
+                        <div class="calendar-event event-prazo">Prazo: Projeto</div>
+                        <div class="calendar-event event-webinar">Webinar: SEO</div>
+                        <div class="more-events">+1 mais</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">17</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">18</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">19</div>
+                        <div class="calendar-event event-aula">Aula de Marketing</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">20</div>
+                        <div class="calendar-event event-aula">Aula de JavaScript</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">21</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">22</div>
+                        <div class="calendar-event event-prova">Prova: Marketing</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">25</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">26</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">27</div>
+                        <div class="calendar-event event-aula">Aula de JavaScript</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                        <div class="calendar-event event-webinar">Webinar: UX/UI</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                        <div class="calendar-event event-prova">Prova: HTML/CSS</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    
+                    <!-- Dias do próximo mês -->
+                    <div class="calendar-day other-month">
+                        <div class="day-number">1</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="row">
+                <!-- Próximos Eventos -->
+                <div class="col-lg-7">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Próximos Eventos</h4>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-plus"></i> Adicionar Lembrete
+                            </a>
+                        </div>
+                        
+                        <ul class="events-list">
+                            <!-- Evento 1 -->
+                            <li class="event-item">
+                                <div class="event-date">
+                                    <div class="event-date-day">16</div>
+                                    <div class="event-date-month">Mai</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="event-title">
+                                                <i class="fas fa-graduation-cap"></i>
+                                                Aula de Marketing Digital
+                                            </div>
+                                            <div class="event-details">
+                                                Módulo: Marketing Estratégico
+                                            </div>
+                                            <span class="event-time">
+                                                <i class="far fa-clock"></i> 19:00 - 21:00
+                                            </span>
+                                            <span class="event-badge badge-aula">
+                                                Aula
+                                            </span>
+                                        </div>
+                                    </div>
+                            </li>
+
+                            <!-- Evento 2 -->
+                            <li class="event-item">
+                                <div class="event-date">
+                                    <div class="event-date-day">22</div>
+                                    <div class="event-date-month">Mai</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="event-title">
+                                                <i class="fas fa-file-alt"></i>
+                                                Prova de Marketing
+                                            </div>
+                                            <div class="event-details">
+                                                Avaliação Final do Módulo
+                                            </div>
+                                            <span class="event-time">
+                                                <i class="far fa-clock"></i> 20:00 - 22:00
+                                            </span>
+                                            <span class="event-badge badge-prova">
+                                                Prova
+                                            </span>
+                                        </div>
+                                    </div>
+                            </li>
+
+                            <!-- Evento 3 -->
+                            <li class="event-item">
+                                <div class="event-date">
+                                    <div class="event-date-day">28</div>
+                                    <div class="event-date-month">Mai</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="event-title">
+                                                <i class="fas fa-desktop"></i>
+                                                Webinar: UX/UI Design
+                                            </div>
+                                            <div class="event-details">
+                                                Tendências em Design de Interface
+                                            </div>
+                                            <span class="event-time">
+                                                <i class="far fa-clock"></i> 18:30 - 19:30
+                                            </span>
+                                            <span class="event-badge badge-webinar">
+                                                Webinar
+                                            </span>
+                                        </div>
+                                    </div>
+                            </li>
+
+                            <!-- Evento 4 -->
+                            <li class="event-item">
+                                <div class="event-date">
+                                    <div class="event-date-day">30</div>
+                                    <div class="event-date-month">Mai</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="event-title">
+                                                <i class="fas fa-laptop-code"></i>
+                                                Prova: HTML/CSS
+                                            </div>
+                                            <div class="event-details">
+                                                Avaliação de Desenvolvimento Web
+                                            </div>
+                                            <span class="event-time">
+                                                <i class="far fa-clock"></i> 19:30 - 21:30
+                                            </span>
+                                            <span class="event-badge badge-prova">
+                                                Prova
+                                            </span>
+                                        </div>
+                                    </div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+
+                <!-- Próximos Cursos -->
+                <div class="col-lg-5">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Próximos Cursos</h4>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-plus"></i> Matricular-se
+                            </a>
+                        </div>
+                        
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Marketing Digital Avançado</h6>
+                                    <small class="text-muted">Início: 05/06/2024</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">Em breve</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Desenvolvimento Web Full Stack</h6>
+                                    <small class="text-muted">Início: 15/07/2024</small>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">Planejando</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">UX/UI Design</h6>
+                                    <small class="text-muted">Início: 22/08/2024</small>
+                                </div>
+                                <span class="badge bg-warning rounded-pill">Inscrições Abertas</span>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS e dependências -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

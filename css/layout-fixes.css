@@ -1,0 +1,66 @@
+/**
+ * Correções específicas para problemas de layout
+ */
+
+/* Garante que o conteúdo principal não seja sobreposto pelo sidebar */
+.main-content,
+.flex-1.flex.flex-col.overflow-hidden,
+#content-wrapper,
+body > .flex.h-screen > div:not(#sidebar) {
+    position: relative;
+    z-index: 40;
+    margin-left: 250px !important;
+    width: calc(100% - 250px) !important;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* Ajusta o header para ficar por cima do sidebar */
+header {
+    position: relative;
+    z-index: 50;
+}
+
+/* Ajusta o footer para ficar por cima do sidebar */
+footer {
+    position: relative;
+    z-index: 50;
+}
+
+/* Garante que o conteúdo principal tenha altura adequada */
+.flex.h-screen {
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Ajusta o posicionamento quando o sidebar está recolhido */
+.sidebar-collapsed ~ .main-content,
+.sidebar-collapsed ~ .flex-1.flex.flex-col.overflow-hidden,
+.sidebar-collapsed ~ #content-wrapper {
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 768px) {
+    .main-content,
+    .flex-1.flex.flex-col.overflow-hidden,
+    #content-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    #sidebar {
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #sidebar.sidebar-expanded {
+        z-index: 100; /* No mobile, o sidebar expandido fica por cima de tudo */
+    }
+
+    .sidebar-collapsed ~ .main-content,
+    .sidebar-collapsed ~ .flex-1.flex.flex-col.overflow-hidden,
+    .sidebar-collapsed ~ #content-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}

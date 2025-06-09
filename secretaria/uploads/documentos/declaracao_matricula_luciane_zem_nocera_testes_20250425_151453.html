@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <title>Declaração de Matrícula</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+            
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            :root {
+                --roxo-principal: #6a1b9a;
+                --roxo-claro: #9c4dcc;
+                --roxo-escuro: #38006b;
+                --cinza-claro: #f8f9fa;
+                --cinza-medio: #e9ecef;
+                --texto-principal: #212529;
+                --texto-secundario: #495057;
+            }
+            
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            
+            body {
+                font-family: "Poppins", sans-serif;
+                color: var(--texto-principal);
+                line-height: 1.5;
+                background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .container {
+                width: 21cm;
+                min-height: 29.7cm;
+                margin: 0 auto;
+                padding: 1.5cm 2cm;
+                position: relative;
+                background-color: white;
+            }
+            
+            .header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 2em;
+                border-bottom: 2px solid var(--roxo-principal);
+                padding-bottom: 1em;
+            }
+            
+            .logo {
+                width: 180px;
+                height: auto;
+                margin-right: 2em;
+            }
+            
+            .title-container {
+                flex-grow: 1;
+            }
+            
+            .document-title {
+                font-size: 1.8em;
+                font-weight: 600;
+                color: var(--roxo-principal);
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                margin: 0;
+            }
+            
+            .document-subtitle {
+                font-size: 0.9em;
+                color: var(--texto-secundario);
+                margin-top: 0.3em;
+            }
+            
+            .content {
+                margin-bottom: 2em;
+                text-align: justify;
+                font-size: 0.95em;
+            }
+            
+            .content p {
+                margin-bottom: 1em;
+                line-height: 1.6;
+            }
+            
+            .highlight {
+                color: var(--roxo-principal);
+                font-weight: 600;
+            }
+            
+            .info-box {
+                background-color: var(--cinza-claro);
+                border-left: 4px solid var(--roxo-principal);
+                padding: 1em;
+                margin: 1.5em 0;
+                border-radius: 4px;
+            }
+            
+            .info-box p {
+                margin: 0.4em 0;
+            }
+            
+            .signature-container {
+                margin-top: 3em;
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .signature {
+                text-align: center;
+                width: 45%;
+            }
+            
+            .signature-line {
+                width: 100%;
+                height: 1px;
+                background-color: var(--roxo-principal);
+                margin: 0.5em 0;
+            }
+            
+            .signature p {
+                font-size: 0.8em;
+                margin: 0.3em 0;
+            }
+            
+            .signature .position {
+                font-weight: 600;
+                color: var(--roxo-principal);
+            }
+            
+            .verification {
+                margin-top: 2.5em;
+                text-align: center;
+                font-size: 0.75em;
+                padding: 0.8em;
+                background-color: var(--cinza-medio);
+                border-radius: 4px;
+                border-left: 4px solid var(--roxo-principal);
+            }
+            
+            .verification p {
+                margin: 0.3em 0;
+            }
+            
+            .verification-code {
+                font-weight: 700;
+                color: var(--roxo-principal);
+                font-size: 1.2em;
+                letter-spacing: 1px;
+            }
+            
+            .footer {
+                position: absolute;
+                bottom: 1.5cm;
+                left: 2cm;
+                right: 2cm;
+                text-align: center;
+                font-size: 0.7em;
+                color: var(--texto-secundario);
+                padding-top: 0.8em;
+                border-top: 1px solid var(--cinza-medio);
+            }
+            
+            .watermark {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 8em;
+                color: rgba(106, 27, 154, 0.05);
+                font-weight: 700;
+                white-space: nowrap;
+                pointer-events: none;
+                text-transform: uppercase;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="watermark">Faciência</div>
+            
+            <header class="header">
+                <img src="https://www.faciencia.edu.br/logo.png?v=1745601920310" alt="Faciência Logo" class="logo">
+                <div class="title-container">
+                    <h1 class="document-title">Declaração de Matrícula</h1>
+                    <p class="document-subtitle">Documento oficial para fins acadêmicos</p>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="info-box">
+                    <p><strong>Aluno:</strong> <span class="highlight">Luciane Zem Nocera TESTES</span></p>
+                    <p><strong>CPF:</strong> <span class="highlight">819.233.929-72</span></p>
+                    <p><strong>Curso:</strong> <span class="highlight">teste - extensao</span></p>
+                    <p><strong>Carga Horária:</strong> <span class="highlight">70 horas</span></p>
+                    <p><strong>Polo:</strong> <span class="highlight">Polo Temporário</span></p>
+                </div>
+
+                <p>Declaramos, para os devidos fins, que o(a) estudante acima identificado(a) está regularmente matriculado(a) em nossa instituição no curso mencionado, em conformidade com as normas acadêmicas vigentes e com a legislação educacional brasileira.</p>
+                
+                <p>O(A) aluno(a) encontra-se em situação regular perante a secretaria acadêmica e tesouraria da instituição.</p>
+                
+                <p>Esta declaração tem validade de <span class="highlight">90 (noventa) dias</span> a partir da data de emissão.</p>
+            </section>
+
+            <div class="signature-container">
+                <div class="signature">
+                    <p>25/04/2025</p>
+                    <img src="Captura de tela 2025-04-25 142745.png" alt="Assinatura Digital" style="max-height: 60px; margin: 10px 0;">
+                    <div class="signature-line"></div>
+                    <p class="position">Secretaria Acadêmica</p>
+                    <p>Faciência</p>
+                </div>
+                
+                <div class="signature">
+                    <p>25/04/2025</p>
+                      <img src="Captura de tela 2025-04-25 145252.png" alt="Assinatura Digital" style="max-height: 60px; margin: 10px 0;">
+                    <div class="signature-line"></div>
+                    <p class="position">Coordenação do Curso</p>
+                    <p>Faciência</p>
+                </div>
+            </div>
+
+            <div class="verification">
+                <p>Código de verificação: <span class="verification-code">914011</span></p>
+                <p>Para verificar a autenticidade deste documento, acesse <span class="highlight">www.faciencia.edu.br/verificar</span> e informe o código acima.</p>
+            </div>
+
+            <footer class="footer">
+                <p>Faciência - Faculdade de Ciências e Tecnologia</p>
+                <p>CNPJ: 09.038.742/0001-80 • Tel: (41) 9 9256-2500 • Email: secretaria@faciencia.edu.br</p>
+                <p>Rua Visconde de Nacar, 1510 – 10° Andar – Conj. 1003 – Centro – Curitiba/PR</p>
+            </footer>
+        </div>
+    </body>
+    </html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desempenho - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reutilizando o CSS do calendário com algumas pequenas modificações */
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna (mesmo do calendário) */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Estilos específicos para desempenho */
+        .performance-stat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: var(--very-light-purple);
+            margin-bottom: 15px;
+        }
+
+        .performance-stat-icon {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .performance-stat-content {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .performance-stat-title {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin-bottom: 5px;
+        }
+
+        .performance-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+
+        .progress-custom {
+            height: 10px;
+            background-color: rgba(106, 90, 205, 0.2);
+            border-radius: 50px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar-custom {
+            background-color: var(--primary-purple);
+            height: 100%;
+        }
+
+        .course-performance {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--very-light-purple);
+        }
+
+        .course-performance:last-child {
+            border-bottom: none;
+        }
+
+        .course-performance-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--very-light-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .course-performance-content {
+            flex-grow: 1;
+        }
+
+        .course-performance-title {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin-bottom: 5px;
+        }
+
+        .course-performance-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .performance-stat {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .performance-stat-icon {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Moderna -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="aluno_dashboard.html">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li>
+                    <a href="meuscursos.html">
+                        <i class="fas fa-book"></i> Meus Cursos
+                    </a>
+                </li>
+                <li>
+                    <a href="calendario.html">
+                        <i class="fas fa-calendar-alt"></i> Calendário
+                    </a>
+                </li>
+                <li>
+                    <a href="desempenho.html" class="active">
+                        <i class="fas fa-chart-line"></i> Desempenho
+                    </a>
+                </li>
+                <li>
+                    <a href="certificado.html">
+                        <i class="fas fa-certificate"></i> Certificados
+                    </a>
+                </li>
+                <li>
+                    <a href="material.html">
+                        <i class="fas fa-file-alt"></i> Materiais
+                    </a>
+                </li>
+                <li>
+                    <a href="mensagens.html">
+                        <i class="fas fa-comment-alt"></i> Mensagens
+                    </a>
+                </li>
+                <li>
+                    <a href="perfil.html">
+                        <i class="fas fa-user-cog"></i> Perfil
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html" class="text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Desempenho Acadêmico</h1>
+                <div class="user-info">
+                    <div class="student-info">
+                        <div class="student-name">Maria Silva</div>
+                        <div class="student-email">maria.silva@email.com</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="row">
+                <!-- Estatísticas Gerais -->
+                <div class="col-lg-4">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Estatísticas Gerais</h4>
+                        </div>
+
+                        <div class="performance-stat">
+                            <div class="performance-stat-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="performance-stat-content">
+                                <div class="performance-stat-title">Média Geral</div>
+                                <div class="performance-stat-value">8.7</div>
+                                <div class="progress-custom">
+                                    <div class="progress-bar-custom" style="width: 87%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="performance-stat">
+                            <div class="performance-stat-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="performance-stat-content">
+                                <div class="performance-stat-title">Progresso Total</div>
+                                <div class="performance-stat-value">65%</div>
+                                <div class="progress-custom">
+                                    <div class="progress-bar-custom" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="performance-stat">
+                            <div class="performance-stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="performance-stat-content">
+                                <div class="performance-stat-title">Horas de Estudo</div>
+                                <div class="performance-stat-value">124h</div>
+                                <div class="progress-custom">
+                                    <div class="progress-bar-custom" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Desempenho por Curso -->
+                <div class="col-lg-8">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Desempenho por Curso</h4>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-chart-pie"></i> Relatório Completo
+                            </a>
+                        </div>
+
+                        <div class="course-performance">
+                            <div class="course-performance-icon">
+                                <i class="fas fa-code text-primary"></i>
+                            </div>
+                            <div class="course-performance-content">
+                                <div class="course-performance-title">Desenvolvimento Web Full Stack</div>
+                                <div class="course-performance-details">
+                                    <span>Média: 9.2</span>
+                                    <span>Progresso: 72%</span>
+                                </div>
+                                <div class="progress-custom mt-2">
+                                    <div class="progress-bar-custom" style="width: 72%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="course-performance">
+                            <div class="course-performance-icon">
+                                <i class="fas fa-project-diagram text-success"></i>
+                            </div>
+                            <div class="course-performance-content">
+                                <div class="course-performance-title">Marketing Digital Avançado</div>
+                                <div class="course-performance-details">
+                                    <span>Média: 8.5</span>
+                                    <span>Progresso: 65%</span>
+                                </div>
+                                <div class="progress-custom mt-2">
+                                    <div class="progress-bar-custom" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="course-performance">
+                            <div class="course-performance-icon">
+                                <i class="fas fa-paint-brush text-info"></i>
+                            </div>
+                            <div class="course-performance-content">
+                                <div class="course-performance-title">UX/UI Design</div>
+                                <div class="course-performance-details">
+                                    <span>Média: 8.9</span>
+                                    <span>Progresso: 58%</span>
+                                </div>
+                                <div class="progress-custom mt-2">
+                                    <div class="progress-bar-custom" style="width: 58%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Últimas Atividades -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Últimas Atividades</h4>
+                </div>
+
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Projeto Final de Desenvolvimento Web</h6>
+                            <small class="text-muted">Enviado em 15/05/2024</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Aprovado</span>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Prova de Marketing Digital</h6>
+                            <small class="text-muted">Realizada em 22/04/2024</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">8.7</span>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Webinar de UX/UI</h6>
+                            <small class="text-muted">Assistido em 10/04/2024</small>
+                        </div>
+                        <span class="badge bg-info rounded-pill">Concluído</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS e dependências -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

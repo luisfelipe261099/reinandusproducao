@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Cursos - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Course Cards */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .course-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 90, 205, 0.15);
+        }
+
+        .course-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .course-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+        }
+
+        .course-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-purple);
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .course-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .progress-custom {
+            height: 10px;
+            background-color: rgba(106, 90, 205, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .progress-custom .progress-bar {
+            background-color: var(--primary-purple);
+            border-radius: 5px;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .course-progress {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .course-badge {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: var(--primary-purple);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .btn-continue {
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-continue:hover {
+            background: linear-gradient(to right, var(--secondary-purple), var(--primary-purple));
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+        }
+
+        .course-instructor {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .instructor-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--very-light-purple);
+        }
+
+        .instructor-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .instructor-name {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .instructor-role {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .course-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .course-meta-item i {
+            color: var(--primary-purple);
+            font-size: 0.9rem;
+        }
+
+        /* Filtros e Pesquisa */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 50px;
+            border: 1px solid #eee;
+            background-color: var(--white);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--light-purple);
+            border-color: var(--light-purple);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filters-dropdown {
+            min-width: 160px;
+        }
+
+        /* Course Categories */
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .category-pill {
+            padding: 8px 20px;
+            border-radius: 50px;
+            background-color: var(--white);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            border: 1px solid rgba(106, 90, 205, 0.2);
+        }
+
+        .category-pill:hover {
+            background-color: rgba(106, 90, 205, 0.1);
+            border-color: var(--primary-purple);
+        }
+
+        .category-pill.active {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border-color: var(--primary-purple);
+        }
+
+        /* Course Status Badge */
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 1;
+        }
+
+        .status-badge.in-progress {
+            background-color: rgba(40, 167, 69, 0.85);
+            color: white;
+        }
+
+        .status-badge.completed {
+            background-color: rgba(23, 162, 184, 0.85);
+            color: white;
+        }
+
+        .status-badge.not-started {
+            background-color: rgba(108, 117, 125, 0.85);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--light-purple);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            margin-bottom: 30px;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Moderna -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="aluno_dashboard.html">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li>
+                    <a href="meuscursos.html" class="active">
+                        <i class="fas fa-book"></i> Meus Cursos
+                    </a>
+                </li>
+                <li>
+                    <a href="calendario.html">
+                        <i class="fas fa-calendar-alt"></i> Calendário
+                    </a>
+                </li>
+                <li>
+                    <a href="desempenho.html">
+                        <i class="fas fa-chart-line"></i> Desempenho
+                    </a>
+                </li>
+                <li>
+                    <a href="certificado.html">
+                        <i class="fas fa-certificate"></i> Certificados
+                    </a>
+                </li>
+                <li>
+                    <a href="material.html">
+                        <i class="fas fa-file-alt"></i> Materiais
+                    </a>
+                </li>
+                <li>
+                    <a href="mensagens.html">
+                        <i class="fas fa-comment-alt"></i> Mensagens
+                    </a>
+                </li>
+                <li>
+                    <a href="perfil.html">
+                        <i class="fas fa-user-cog"></i> Perfil
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html" class="text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Meus Cursos</h1>
+                <div class="user-info">
+                    <div class="student-info">
+                        <div class="student-name">Maria Silva</div>
+                        <div class="student-email">maria.silva@email.com</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Filtros e Barra de Pesquisa -->
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Buscar nos meus cursos...">
+                </div>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Todos os Status</option>
+                    <option>Em Andamento</option>
+                    <option>Concluídos</option>
+                    <option>Não Iniciados</option>
+                </select>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Ordenar por</option>
+                    <option>Progresso</option>
+                    <option>Data de Matrícula</option>
+                    <option>Nome do Curso</option>
+                </select>
+            </div>
+
+            <!-- Filtro por Categorias -->
+            <div class="category-pills">
+                <div class="category-pill active">Todos</div>
+                <div class="category-pill">Marketing</div>
+                <div class="category-pill">Tecnologia</div>
+                <div class="category-pill">Negócios</div>
+                <div class="category-pill">Design</div>
+                <div class="category-pill">Idiomas</div>
+            </div>
+
+            <!-- Cursos em Andamento -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Cursos em Andamento</h4>
+                    <div>
+                        <span class="badge rounded-pill bg-primary">2 Cursos</span>
+                    </div>
+                </div>
+                
+                <div class="courses-grid">
+                    <!-- Curso 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="status-badge in-progress">Em Andamento</span>
+                            <span class="course-tag">Intermediário</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Marketing Digital Avançado</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Prof. Roberto Andrade</div>
+                                    <div class="instructor-role">Especialista em Marketing Digital</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>40 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Até 15/08/2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress progress-custom">
+                                <div class="progress-bar" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-progress">65% Concluído</span>
+                                <span class="course-badge">12 aulas restantes</span>
+                            </div>
+                            
+                            <a href="curso_marketing.html" class="btn btn-continue">
+                                <i class="fas fa-play-circle"></i> Continuar Curso
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Curso 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="status-badge in-progress">Em Andamento</span>
+                            <span class="course-tag">Iniciante</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Desenvolvimento Web Full Stack</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Prof. Carlos Mendes</div>
+                                    <div class="instructor-role">Desenvolvedor Web Sênior</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>60 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Até 30/09/2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress progress-custom">
+                                <div class="progress-bar" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-progress">35% Concluído</span>
+                                <span class="course-badge">24 aulas restantes</span>
+                            </div>
+                            
+                            <a href="curso_web.html" class="btn btn-continue">
+                                <i class="fas fa-play-circle"></i> Continuar Curso
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cursos Concluídos -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Cursos Concluídos</h4>
+                    <div>
+                        <span class="badge rounded-pill bg-info">2 Cursos</span>
+                    </div>
+                </div>
+                
+                <div class="courses-grid">
+                    <!-- Curso Concluído 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="status-badge completed">Concluído</span>
+                            <span class="course-tag">Básico</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Marketing Digital Básico</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Profa. Juliana Martins</div>
+                                    <div class="instructor-role">Consultora de Marketing</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>30 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Concluído em 10/02/2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress progress-custom">
+                                <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-progress">100% Concluído</span>
+                                <span class="course-badge">Nota Final: 9.5</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="#" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-redo-alt"></i> Revisar
+                                </a>
+                                <a href="#" class="btn btn-outline-success flex-grow-1">
+                                    <i class="fas fa-certificate"></i> Certificado
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Curso Concluído 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="status-badge completed">Concluído</span>
+                            <span class="course-tag">Básico</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Introdução à Programação</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Prof. André Santos</div>
+                                    <div class="instructor-role">Engenheiro de Software</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fasfa-clock"></i>
+                                    <span>25 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Concluído em 15/01/2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress progress-custom">
+                                <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-progress">100% Concluído</span>
+                                <span class="course-badge">Nota Final: 9.0</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="#" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-redo-alt"></i> Revisar
+                                </a>
+                                <a href="#" class="btn btn-outline-success flex-grow-1">
+                                    <i class="fas fa-certificate"></i> Certificado
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cursos Disponíveis (Não Iniciados) -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Cursos Disponíveis</h4>
+                    <div>
+                        <span class="badge rounded-pill bg-secondary">1 Curso</span>
+                    </div>
+                </div>
+                
+                <div class="courses-grid">
+                    <!-- Curso Não Iniciado -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="status-badge not-started">Não Iniciado</span>
+                            <span class="course-tag">Básico</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">UX/UI Design</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Profa. Mariana Fernandes</div>
+                                    <div class="instructor-role">UX/UI Designer Sênior</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>45 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Disponível até 31/12/2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress progress-custom">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-progress">0% Concluído</span>
+                                <span class="course-badge">38 aulas disponíveis</span>
+                            </div>
+                            
+                            <a href="curso_uxui.html" class="btn btn-continue">
+                                <i class="fas fa-play-circle"></i> Começar Curso
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recomendações de Cursos -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Recomendados para Você</h4>
+                    <a href="catalogo_cursos.html" class="btn btn-outline-primary btn-sm">
+                        Ver Catálogo Completo
+                    </a>
+                </div>
+                
+                <div class="courses-grid">
+                    <!-- Curso Recomendado 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="course-tag">Intermediário</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Análise de Dados com Python</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Prof. Lucas Ferreira</div>
+                                    <div class="instructor-role">Data Scientist</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>50 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9 (128 avaliações)</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-muted small mb-3">Aprenda a analisar e visualizar dados utilizando Python e suas principais bibliotecas: Pandas, NumPy, Matplotlib e Seaborn.</p>
+                            
+                            <div class="d-flex mt-2">
+                                <a href="curso_detalhes.html" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-info-circle"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Curso Recomendado 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="course-tag">Intermediário</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Desenvolvimento Mobile com React Native</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Prof. Henrique Gomes</div>
+                                    <div class="instructor-role">Mobile Developer</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>45 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8 (96 avaliações)</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-muted small mb-3">Desenvolva aplicativos móveis para iOS e Android com um único código-fonte usando React Native e JavaScript.</p>
+                            
+                            <div class="d-flex mt-2">
+                                <a href="curso_detalhes.html" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-info-circle"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Curso Recomendado 3 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('/api/placeholder/350/200')">
+                            <span class="course-tag">Avançado</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">SEO Avançado e Marketing de Conteúdo</h3>
+                            
+                            <div class="course-instructor">
+                                <div class="instructor-avatar">
+                                    <img src="/api/placeholder/40/40" alt="Instrutor">
+                                </div>
+                                <div>
+                                    <div class="instructor-name">Profa. Camila Rocha</div>
+                                    <div class="instructor-role">Especialista em SEO</div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <div class="course-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>35 horas</span>
+                                </div>
+                                <div class="course-meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.7 (112 avaliações)</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-muted small mb-3">Aprenda técnicas avançadas de SEO e estratégias de marketing de conteúdo para aumentar o tráfego orgânico.</p>
+                            
+                            <div class="d-flex mt-2">
+                                <a href="curso_detalhes.html" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-info-circle"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estado vazio (caso não tenha cursos) - normalmente ficaria escondido com JS -->
+            <section class="dashboard-card" style="display: none;">
+                <div class="empty-state">
+                    <i class="fas fa-book-open empty-state-icon"></i>
+                    <h4>Você ainda não tem cursos</h4>
+                    <p class="empty-state-text">Explore nosso catálogo e comece sua jornada de aprendizado!</p>
+                    <a href="catalogo_cursos.html" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Explorar Cursos
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle com Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

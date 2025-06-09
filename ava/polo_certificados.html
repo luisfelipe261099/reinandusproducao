@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Certificados - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --very-light-purple: #E6E6FA;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+            --border-radius: 10px;
+            --card-shadow: 0 6px 15px rgba(106, 90, 205, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 10px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--white);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--very-light-purple);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .polo-info {
+            text-align: right;
+        }
+
+        .polo-info .polo-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--secondary-purple);
+        }
+
+        .polo-info .polo-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--white);
+        }
+
+        /* Cards e Elementos de UI */
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-purple), var(--light-purple));
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.15);
+        }
+
+        .stat-card.total-certificados {
+            background: linear-gradient(135deg, rgba(106, 90, 205, 0.08), rgba(106, 90, 205, 0.01));
+        }
+
+        .stat-card.certificados-mes {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), rgba(40, 167, 69, 0.01));
+        }
+
+        .stat-card.declaracoes {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.08), rgba(23, 162, 184, 0.01));
+        }
+
+        .stat-card.em-analise {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 193, 7, 0.01));
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.total-certificados .stat-icon {
+            background: linear-gradient(135deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .stat-card.certificados-mes .stat-icon {
+            background: linear-gradient(135deg, #28a745, #5dd879);
+        }
+
+        .stat-card.declaracoes .stat-icon {
+            background: linear-gradient(135deg, #17a2b8, #4dc0d1);
+        }
+
+        .stat-card.em-analise .stat-icon {
+            background: linear-gradient(135deg, #ffc107, #ffe066);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        /* Tabelas Estilizadas */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .custom-table thead th {
+            background-color: var(--very-light-purple);
+            color: var(--secondary-purple);
+            font-weight: 600;
+            padding: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .custom-table thead th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        .custom-table thead th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+            transform: scale(1.01);
+        }
+
+        .custom-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .badge.bg-success {
+            background-color: rgba(40, 167, 69, 0.15) !important;
+            color: var(--success-green);
+        }
+
+        .badge.bg-warning {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+            color: #d18700;
+        }
+
+        .badge.bg-danger {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            color: var(--danger-red);
+        }
+
+        .badge.bg-info {
+            background-color: rgba(23, 162, 184, 0.15) !important;
+            color: var(--info-blue);
+        }
+
+        .badge.bg-secondary {
+            background-color: rgba(108, 117, 125, 0.15) !important;
+            color: var(--text-muted);
+        }
+
+        /* Filtros e Pesquisa */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 50px;
+            border: 1px solid #eee;
+            background-color: var(--white);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--light-purple);
+            border-color: var(--light-purple);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filters-dropdown {
+            min-width: 160px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Cards Headers */
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Plano e Limites */
+        .plan-card {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .plan-card::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .plan-header {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 20px;
+        }
+
+        .plan-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .plan-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .plan-limits {
+            position: relative;
+            z-index: 2;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .limit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .limit-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .limit-label i {
+            font-size: 1.1rem;
+        }
+
+        .limit-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .limit-progress {
+            margin-top: 5px;
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .limit-progress-bar {
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+        }
+
+        .upgrade-btn {
+            position: relative;
+            z-index: 2;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+            text-decoration: none;
+            display: block;
+            font-weight: 500;
+        }
+
+        .upgrade-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: var(--white);
+            transform: translateY(-3px);
+        }
+
+        /* Botões e Ações */
+        .btn-primary {
+            background-color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-purple);
+            border-color: var(--secondary-purple);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-red);
+            border-color: var(--danger-red);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-red);
+            color: white;
+        }
+
+        /* Certificate Preview */
+        .certificate-preview {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--very-light-purple);
+            position: relative;
+        }
+
+        .certificate-preview-img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .certificate-preview-actions {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left var(--transition-speed) ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                align-self: flex-end;
+            }
+
+            .filters-bar {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar Aprimorada -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_aluno.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gestão</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_matriculas.html">
+                            <i class="fas fa-user-plus"></i> Matrículas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_certificados.html" class="active">
+                            <i class="fas fa-certificate"></i> Certificados
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_relatorio.html">
+                            <i class="fas fa-chart-bar"></i> Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="polo_config.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="polo_suporte.html">
+                            <i class="fas fa-headset"></i> Suporte
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Faciencia EAD © 2024</p>
+                <small>Versão 2.5.3</small>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1>Gerenciamento de Certificados</h1>
+                <div class="user-info">
+                    <div class="polo-info">
+                        <div class="polo-name">Polo São Paulo</div>
+                        <div class="polo-role">Administrador</div>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/api/placeholder/50/50" alt="Foto de Perfil">
+                        <span class="notification-badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Plano e Limites -->
+            <section class="plan-card">
+                <div class="plan-header">
+                    <div class="plan-name">Plano Premium</div>
+                    <div class="plan-description">Seu plano permite emissão de certificados e declarações com recursos avançados</div>
+                </div>
+                
+                <div class="plan-limits">
+                    <div class="limit-item">
+                        <div class="limit-label">
+                            <i class="fas fa-certificate"></i>
+                            <span>Certificados</span>
+                        </div>
+                        <div class="limit-value">89/150</div>
+                    </div>
+                    <div class="limit-progress">
+                        <div class="limit-progress-bar" style="width: 59%"></div>
+                    </div>
+                    
+                    <div class="limit-item">
+                        <div class="limit-label">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Declarações</span>
+                        </div>
+                        <div class="limit-value">42/100</div>
+                    </div>
+                    <div class="limit-progress">
+                        <div class="limit-progress-bar" style="width: 42%"></div>
+                    </div>
+                    
+                    <div class="limit-item">
+                        <div class="limit-label">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Matrículas</span>
+                        </div>
+                        <div class="limit-value">423/500</div>
+                    </div>
+                    <div class="limit-progress">
+                        <div class="limit-progress-bar" style="width: 85%"></div>
+                    </div>
+                    
+                    <div class="limit-item">
+                        <div class="limit-label">
+                            <i class="fas fa-palette"></i>
+                            <span>Modelos personalizados</span>
+                        </div>
+                        <div class="limit-value">3/5</div>
+                    </div>
+                    <div class="limit-progress">
+                        <div class="limit-progress-bar" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <a href="polo_planos.html" class="upgrade-btn">
+                    <i class="fas fa-arrow-circle-up me-2"></i> Ampliar Limites
+                </a>
+            </section>
+
+            <!-- Estatísticas de Certificados -->
+            <section class="stats-grid">
+                <div class="stat-card total-certificados">
+                    <div class="stat-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">89</div>
+                        <div class="stat-label">Total de Certificados Emitidos</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            12.4% desde o último trimestre
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card certificados-mes">
+                    <div class="stat-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">14</div>
+                        <div class="stat-label">Certificados este Mês</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            3 mais que no mês anterior
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card declaracoes">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">42</div>
+                        <div class="stat-label">Declarações Emitidas</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            8 mais que no mês anterior
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card em-analise">
+                    <div class="stat-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Solicitações em Análise</div>
+                        <div class="stat-trend trend-down">
+                            <i class="fas fa-arrow-down me-1"></i>
+                            2 menos que no mês anterior
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtros e Barra de Ações -->
+            <section class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Buscar certificados...">
+                </div>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Todos os Cursos</option>
+                    <option>Marketing Digital</option>
+                    <option>Desenvolvimento Web</option>
+                    <option>UX/UI Design</option>
+                    <option>Gestão de Negócios</option>
+                    <option>Inglês para Negócios</option>
+                </select>
+                
+                <select class="form-select filters-dropdown">
+                    <option selected>Todos os Tipos</option>
+                    <option>Certificado de Conclusão</option>
+                    <option>Declaração de Matrícula</option>
+                    <option>Declaração de Frequência</option>
+                    <option>Certificado de Participação</option>
+                </select>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#novoCertificadoModal">
+                        <i class="fas fa-plus"></i> Novo Certificado
+                    </button>
+                    <button class="btn btn-outline-primary btn-icon">
+                        <i class="fas fa-file-export"></i> Exportar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Certificados Recentes -->
+            <section class="dashboard-card">
+                <div class="card-header-custom">
+                    <h4>Certificados Recentes</h4>
+                    <div>
+                        <span class="badge bg-primary">14 emitidos este mês</span>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Aluno</th>
+                                <th>Curso</th>
+                                <th>Tipo</th>
+                                <th>Data de Emissão</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#CERT-4578</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                        <div>
+                                            <div class="fw-bold">Roberto Alves</div>
+                                            <div class="small text-muted">roberto.alves@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Desenvolvimento Web Full Stack</td>
+                                <td>Certificado de Conclusão</td>
+                                <td>15/05/2024</td>
+                                <td><span class="badge bg-success">Emitido</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Enviar por E-mail">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#CERT-4577</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                        <div>
+                                            <div class="fw-bold">Ana Oliveira</div>
+                                            <div class="small text-muted">ana.oliveira@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Marketing Digital Avançado</td>
+                                <td>Certificado de Conclusão</td>
+                                <td>12/05/2024</td>
+                                <td><span class="badge bg-success">Emitido</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Enviar por E-mail">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#CERT-4576</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                        <div>
+                                            <div class="fw-bold">Juliana Ferreira</div>
+                                            <div class="small text-muted">juliana.ferreira@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Gestão de Negócios Digitais</td>
+                                <td>Declaração de Matrícula</td>
+                                <td>10/05/2024</td>
+                                <td><span class="badge bg-success">Emitido</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Enviar por E-mail">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#CERT-4575</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                        <div>
+                                            <div class="fw-bold">Carlos Mendes</div>
+                                            <div class="small text-muted">carlos.mendes@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>UX/UI Design</td>
+                                <td>Certificado de Conclusão</td>
+                                <td>08/05/2024</td>
+                                <td><span class="badge bg-success">Emitido</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Enviar por E-mail">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#CERT-4574</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                        <div>
+                                            <div class="fw-bold">Pedro Santos</div>
+                                            <div class="small text-muted">pedro.santos@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Inglês para Negócios</td>
+                                <td>Declaração de Frequência</td>
+                                <td>05/05/2024</td>
+                                <td><span class="badge bg-success">Emitido</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Enviar por E-mail">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>Mostrando 5 de 89 certificados</div>
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Próximo</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </section>
+
+            <div class="row">
+                <!-- Solicitações Pendentes -->
+                <div class="col-lg-6">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Solicitações Pendentes</h4>
+                            <div>
+                                <span class="badge bg-warning">5 solicitações</span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Aluno</th>
+                                        <th>Tipo</th>
+                                        <th>Data</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">João Silva</div>
+                                                    <div class="small text-muted">Marketing Digital</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Certificado de Conclusão</td>
+                                        <td>16/05/2024</td>
+                                        <td><span class="badge bg-warning">Pendente</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-success" title="Aprovar">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-danger" title="Recusar">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Maria Souza</div>
+                                                    <div class="small text-muted">Desenvolvimento Web</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Declaração de Matrícula</td>
+                                        <td>15/05/2024</td>
+                                        <td><span class="badge bg-warning">Pendente</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-success" title="Aprovar">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-danger" title="Recusar">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/40/40" class="rounded-circle me-3" alt="Avatar">
+                                                <div>
+                                                    <div class="fw-bold">Fernanda Lima</div>
+                                                    <div class="small text-muted">UX/UI Design</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Declaração de Frequência</td>
+                                        <td>14/05/2024</td>
+                                        <td><span class="badge bg-info">Em Análise</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-success" title="Aprovar">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-danger" title="Recusar">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- Modelos de Certificados -->
+                <div class="col-lg-6">
+                    <section class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h4>Modelos de Certificados</h4>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#novoModeloModal">
+                                <i class="fas fa-plus"></i> Novo Modelo
+                            </button>
+                        </div>
+                        
+                        <div class="certificate-preview">
+                            <img src="/api/placeholder/400/250" alt="Modelo de Certificado" class="certificate-preview-img">
+                            <div class="mt-3 text-center">
+                                <h6 class="mb-1">Modelo Padrão - Conclusão de Curso</h6>
+                                <p class="text-muted small">Utilizado para certificados de conclusão</p>
+                            </div>
+                            <div class="certificate-preview-actions">
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Modelo Prestige</h6>
+                                        <p class="card-text small text-muted">Para cursos de nível avançado</p>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">Visualizar</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Modelo Declarações</h6>
+                                        <p class="card-text small text-muted">Para declarações de matrícula e frequência</p>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">Visualizar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Novo Certificado -->
+    <div class="modal fade" id="novoCertificadoModal" tabindex="-1" aria-labelledby="novoCertificadoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="novoCertificadoModalLabel">Emitir Novo Certificado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <!-- Seção de Informações do Aluno -->
+                        <h6 class="text-primary mb-3">Informações do Aluno</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="alunoSelect">
+                                        <option selected disabled>Selecione um aluno</option>
+                                        <option>João Silva</option>
+                                        <option>Maria Souza</option>
+                                        <option>Pedro Santos</option>
+                                        <option>Ana Oliveira</option>
+                                        <option>Carlos Mendes</option>
+                                    </select>
+                                    <label for="alunoSelect">Aluno</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Seção de Informações do Certificado -->
+                        <h6 class="text-primary mb-3">Informações do Certificado</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="cursoSelect">
+                                        <option selected disabled>Selecione um curso</option>
+                                        <option>Marketing Digital Avançado</option>
+                                        <option>Desenvolvimento Web Full Stack</option>
+                                        <option>UX/UI Design</option>
+                                        <option>Gestão de Negócios Digitais</option>
+                                        <option>Inglês para Negócios</option>
+                                    </select>
+                                    <label for="cursoSelect">Curso</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="tipoSelect">
+                                        <option selected disabled>Selecione o tipo</option>
+                                        <option>Certificado de Conclusão</option>
+                                        <option>Declaração de Matrícula</option>
+                                        <option>Declaração de Frequência</option>
+                                        <option>Certificado de Participação</option>
+                                    </select>
+                                    <label for="tipoSelect">Tipo de Documento</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="dataEmissao" placeholder="Data de Emissão">
+                                    <label for="dataEmissao">Data de Emissão</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="modeloSelect">
+                                        <option selected disabled>Selecione</option>
+                                        <option>Modelo Padrão</option>
+                                        <option>Modelo Prestige</option>
+                                        <option>Modelo Declarações</option>
+                                    </select>
+                                    <label for="modeloSelect">Modelo de Certificado</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="observacoes" placeholder="Observações" style="height: 100px"></textarea>
+                                    <label for="observacoes">Observações (opcional)</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Opções de Entrega -->
+                        <h6 class="text-primary mb-3">Opções de Entrega</h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enviarEmail" checked>
+                                    <label class="form-check-label" for="enviarEmail">
+                                        Enviar automaticamente por e-mail para o aluno
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="disponibilizarDownload" checked>
+                                    <label class="form-check-label" for="disponibilizarDownload">
+                                        Disponibilizar para download na área do aluno
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Emitir Certificado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Novo Modelo de Certificado -->
+    <div class="modal fade" id="novoModeloModal" tabindex="-1" aria-labelledby="novoModeloModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="novoModeloModalLabel">Novo Modelo de Certificado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="nomeModelo" placeholder="Nome do Modelo">
+                                    <label for="nomeModelo">Nome do Modelo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="tipoModelo">
+                                        <option selected disabled>Selecione</option>
+                                        <option>Certificado de Conclusão</option>
+                                        <option>Declaração de Matrícula</option>
+                                        <option>Declaração de Frequência</option>
+                                        <option>Certificado de Participação</option>
+                                    </select>
+                                    <label for="tipoModelo">Tipo de Documento</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="uploadTemplate" class="form-label">Upload de Template</label>
+                                    <input class="form-control" type="file" id="uploadTemplate">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="descricaoModelo" placeholder="Descrição" style="height: 100px"></textarea>
+                                    <label for="descricaoModelo">Descrição</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div>
+                                De acordo com seu plano atual (Premium), você pode criar até 5 modelos personalizados. Atualmente você está utilizando 3 de 5 modelos.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Modelo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle com Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

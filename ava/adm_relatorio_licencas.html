@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Licenças - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .bg-purple {
+            background-color: var(--primary-purple);
+        }
+
+        .bg-blue {
+            background-color: var(--info-blue);
+        }
+
+        .bg-green {
+            background-color: var(--success-green);
+        }
+
+        .bg-yellow {
+            background-color: var(--warning-yellow);
+        }
+
+        .bg-red {
+            background-color: var(--danger-red);
+        }
+
+        .summary-text h4 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-text p {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        /* Estilos específicos para o relatório de licenças */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+            background-color: var(--light-bg);
+            margin-bottom: 30px;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .license-table th {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            font-weight: 600;
+            border: none;
+        }
+
+        .license-table td {
+            vertical-align: middle;
+        }
+
+        .license-table tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        .export-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 20px;
+        }
+
+        .license-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .license-stat-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .license-stat-title {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .license-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .license-stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        .polo-select {
+            min-width: 200px;
+        }
+
+        .license-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .license-detail-item {
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .license-detail-label {
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 8px;
+        }
+
+        .license-detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .license-progress {
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .expiry-soon {
+            color: var(--warning-yellow);
+        }
+
+        .expiry-danger {
+            color: var(--danger-red);
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .filter-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .date-filter {
+                flex-wrap: wrap;
+            }
+
+            .license-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html" class="active">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Relatório de Licenças</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Resumo de Licenças -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>523</h4>
+                        <p>Total de Licenças Ativas</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-blue">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>42</h4>
+                        <p>Novas Licenças (Abr)</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-yellow">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>35</h4>
+                        <p>Licenças a Expirar (30d)</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-red">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>18</h4>
+                        <p>Licenças Expiradas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="admin-card">
+                <div class="report-header">
+                    <h4 class="m-0">Análise de Licenças</h4>
+                    <button class="btn btn-primary export-button">
+                        <i class="fas fa-file-export"></i>
+                        Exportar Relatório
+                    </button>
+                </div>
+
+                <div class="filter-box">
+                    <select class="form-select polo-select">
+                        <option selected>Todos os Polos</option>
+                        <option>Polo São Paulo</option>
+                        <option>Polo Rio de Janeiro</option>
+                        <option>Polo Belo Horizonte</option>
+                        <option>Polo Curitiba</option>
+                    </select>
+                    
+                    <select class="form-select">
+                        <option selected>Todos os Tipos</option>
+                        <option>Premium</option>
+                        <option>Standard</option>
+                        <option>Basic</option>
+                    </select>
+                    
+                    <select class="form-select">
+                        <option selected>Todos os Status</option>
+                        <option>Ativo</option>
+                        <option>Pendente</option>
+                        <option>Suspenso</option>
+                        <option>Expirado</option>
+                    </select>
+                    
+                    <div class="date-filter">
+                        <div>Período:</div>
+                        <input type="date" class="form-control" value="2024-01-01">
+                        <div>até</div>
+                        <input type="date" class="form-control" value="2024-04-30">
+                        <button class="btn btn-outline-primary">Aplicar</button>
+                    </div>
+                </div>
+
+                <!-- Estatísticas de Licenças -->
+                <div class="license-stats">
+                    <div class="license-stat-card">
+                        <div class="license-stat-title">Taxa de Renovação</div>
+                        <div class="license-stat-value">87.6%</div>
+                        <div class="license-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            2.3% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="license-stat-card">
+                        <div class="license-stat-title">Distribuição Premium</div>
+                        <div class="license-stat-value">42.5%</div>
+                        <div class="license-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            3.7% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="license-stat-card">
+                        <div class="license-stat-title">Média de Utilização</div>
+                        <div class="license-stat-value">78.3%</div>
+                        <div class="license-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            5.2% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                    <div class="license-stat-card">
+                        <div class="license-stat-title">Satisfação</div>
+                        <div class="license-stat-value">92.1%</div>
+                        <div class="license-stat-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            1.8% em relação ao trimestre anterior
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos de Licenças -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Distribuição por Tipo de Licença</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Pizza - Distribuição de Licenças</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Ativações vs. Expirações</h5>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #28a745;"></span>
+                                        <span>Ativações</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #dc3545;"></span>
+                                        <span>Expirações</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras - Ativações vs. Expirações</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Evolução de Licenças por Tipo (2024)</h5>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #6A5ACD;"></span>
+                                        <span>Premium</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #4682B4;"></span>
+                                        <span>Standard</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background-color: #2E8B57;"></span>
+                                        <span>Basic</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha - Evolução de Licenças</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Licenças por Polo</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras Horizontais</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Licenças a Expirar -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Licenças a Expirar (Próximos 30 Dias)</h5>
+                    <div class="table-responsive">
+                        <table class="table license-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Polo</th>
+                                    <th>Tipo</th>
+                                    <th>Data de Expiração</th>
+                                    <th>Usuários</th>
+                                    <th>Utilização</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>#LIC-8754</strong></td>
+                                    <td>São Paulo</td>
+                                    <td>Premium</td>
+                                    <td class="expiry-danger">08/05/2024 (5 dias)</td>
+                                    <td>120/150</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#LIC-8729</strong></td>
+                                    <td>Rio de Janeiro</td>
+                                    <td>Standard</td>
+                                    <td class="expiry-danger">10/05/2024 (7 dias)</td>
+                                    <td>85/100</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#LIC-8712</strong></td>
+                                    <td>Belo Horizonte</td>
+                                    <td>Premium</td>
+                                    <td class="expiry-soon">15/05/2024 (12 dias)</td>
+                                    <td>132/150</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 88%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#LIC-8698</strong></td>
+                                    <td>Curitiba</td>
+                                    <td>Basic</td>
+                                    <td class="expiry-soon">18/05/2024 (15 dias)</td>
+                                    <td>43/50</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 86%" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#LIC-8687</strong></td>
+                                    <td>São Paulo</td>
+                                    <td>Standard</td>
+                                    <td class="expiry-soon">23/05/2024 (20 dias)</td>
+                                    <td>88/100</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 88%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>#LIC-8675</strong></td>
+                                    <td>São Paulo</td>
+                                    <td>Basic</td>
+                                    <td class="expiry-soon">25/05/2024 (22 dias)</td>
+                                    <td>46/50</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge bg-success">Ativo</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Renovar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Relatório de Licenças Ativas -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Licenças Ativas por Polo</h5>
+                    <div class="table-responsive">
+                        <table class="table license-table">
+                            <thead>
+                                <tr>
+                                    <th>Polo</th>
+                                    <th>Premium</th>
+                                    <th>Standard</th>
+                                    <th>Basic</th>
+                                    <th>Total</th>
+                                    <th>Utilizadas</th>
+                                    <th>Taxa de Utilização</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>São Paulo</strong></td>
+                                    <td>12</td>
+                                    <td>18</td>
+                                    <td>25</td>
+                                    <td>55</td>
+                                    <td>2,645/3,250</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 81%" aria-valuenow="81" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>81%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rio de Janeiro</strong></td>
+                                    <td>10</td>
+                                    <td>14</td>
+                                    <td>18</td>
+                                    <td>42</td>
+                                    <td>1,980/2,400</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 82.5%" aria-valuenow="82.5" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>82.5%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Belo Horizonte</strong></td>
+                                    <td>8</td>
+                                    <td>12</td>
+                                    <td>15</td>
+                                    <td>35</td>
+                                    <td>1,540/1,900</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 81%" aria-valuenow="81" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>81%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Curitiba</strong></td>
+                                    <td>5</td>
+                                    <td>10</td>
+                                    <td>12</td>
+                                    <td>27</td>
+                                    <td>1,250/1,500</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 83%" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>83%</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Porto Alegre</strong></td>
+                                    <td>4</td>
+                                    <td>9</td>
+                                    <td>15</td>
+                                    <td>28</td>
+                                    <td>1,310/1,650</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 79%" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>79%</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detalhes de Licença e Estatísticas de Uso -->
+            <section class="admin-card">
+                <h4 class="mb-4">Análise de Utilização de Licenças</h4>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Utilização por Tipo de Licença</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Barras - Utilização</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Crescimento de Licenças</h5>
+                            </div>
+                            <div class="chart-container">
+                                <p class="text-muted m-0">Gráfico de Linha - Crescimento</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estatísticas de Usuários por Licença -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Estatísticas de Usuários por Tipo de Licença</h5>
+                    <div class="table-responsive">
+                        <table class="table license-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Licença</th>
+                                    <th>Total Ativo</th>
+                                    <th>Limite de Usuários</th>
+                                    <th>Usuários Ativos</th>
+                                    <th>Utilização</th>
+                                    <th>Preço Médio</th>
+                                    <th>Custo por Usuário</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Premium</strong></td>
+                                    <td>39</td>
+                                    <td>5,850</td>
+                                    <td>4,915</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 84%" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>84%</small>
+                                    </td>
+                                    <td>R$ 12.500,00</td>
+                                    <td>R$ 99,08</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Standard</strong></td>
+                                    <td>63</td>
+                                    <td>6,300</td>
+                                    <td>5,200</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 82.5%" aria-valuenow="82.5" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>82.5%</small>
+                                    </td>
+                                    <td>R$ 7.990,00</td>
+                                    <td>R$ 96,85</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Basic</strong></td>
+                                    <td>85</td>
+                                    <td>4,250</td>
+                                    <td>3,260</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 76.7%" aria-valuenow="76.7" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>76.7%</small>
+                                    </td>
+                                    <td>R$ 3.990,00</td>
+                                    <td>R$ 103,90</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Histórico de Renovações -->
+                <div>
+                    <h5 class="mb-3">Histórico de Renovações (2024)</h5>
+                    <div class="table-responsive">
+                        <table class="table license-table">
+                            <thead>
+                                <tr>
+                                    <th>Mês</th>
+                                    <th>Licenças Expiradas</th>
+                                    <th>Renovações</th>
+                                    <th>Taxa de Renovação</th>
+                                    <th>Novas Licenças</th>
+                                    <th>Crescimento Líquido</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Janeiro</strong></td>
+                                    <td>24</td>
+                                    <td>21</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 87.5%" aria-valuenow="87.5" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>87.5%</small>
+                                    </td>
+                                    <td>15</td>
+                                    <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>12</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fevereiro</strong></td>
+                                    <td>18</td>
+                                    <td>15</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 83.3%" aria-valuenow="83.3" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>83.3%</small>
+                                    </td>
+                                    <td>22</td>
+                                    <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>19</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Março</strong></td>
+                                    <td>31</td>
+                                    <td>27</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 87.1%" aria-valuenow="87.1" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>87.1%</small>
+                                    </td>
+                                    <td>19</td>
+                                    <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>15</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Abril</strong></td>
+                                    <td>29</td>
+                                    <td>26</td>
+                                    <td>
+                                        <div class="progress license-progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 89.7%" aria-valuenow="89.7" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small>89.7%</small>
+                                    </td>
+                                    <td>16</td>
+                                    <td><span class="trend-up"><i class="fas fa-arrow-up me-1"></i>13</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Observações e Recomendações -->
+            <section class="admin-card">
+                <h4 class="mb-3">Observações e Recomendações</h4>
+                
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="fas fa-info-circle me-2"></i>Análise do Período</h5>
+                    <p>O relatório de licenças apresenta um crescimento contínuo na base de licenças ativas, com uma taxa de renovação média de 87.6%. A utilização das licenças está em níveis saudáveis, com média geral de 78.3%.</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Pontos de Atenção</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Licenças a Expirar</strong>
+                                <p class="mb-0">Existem 35 licenças que expirarão nos próximos 30 dias, representando um volume financeiro de aproximadamente R$ 225.000,00 em renovações potenciais.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <div>
+                                <strong>Utilização da Licença Basic</strong>
+                                <p class="mb-0">A taxa de utilização das licenças Basic está abaixo da média em 76.7%, o que pode indicar um dimensionamento inadequado ou subutilização.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5>Recomendações</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Campanha de Renovação Antecipada</strong>
+                                <p class="mb-0">Implementar uma campanha de renovação antecipada oferecendo descontos de até 15% para licenças que expiram nos próximos 30 dias.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Otimização de Licenças Basic</strong>
+                                <p class="mb-0">Revisar o dimensionamento das licenças Basic e considerar consolidar algumas licenças para melhorar a taxa de utilização e reduzir custos.</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-lightbulb text-primary me-2"></i>
+                            <div>
+                                <strong>Estratégia de Upgrade</strong>
+                                <p class="mb-0">Desenvolver uma campanha de upgrade para converter licenças Standard em Premium, destacando os benefícios adicionais e o melhor custo-benefício a longo prazo.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    
+    <!-- Script para Mobile Sidebar Toggle -->
+    <script>
+        // Toggle para sidebar mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão para mobile
+            const mobileToggle = document.createElement('button');
+            mobileToggle.classList.add('btn', 'btn-primary', 'd-md-none', 'position-fixed');
+            mobileToggle.style.top = '10px';
+            mobileToggle.style.left = '10px';
+            mobileToggle.style.zIndex = '1001';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggle);
+            
+            // Adicionar funcionalidade de toggle
+            mobileToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+            });
+            
+            // Fechar sidebar ao clicar fora dela (em mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const mobileToggle = document.querySelector('.btn-primary.d-md-none');
+                
+                if (!sidebar.contains(event.target) && event.target !== mobileToggle) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        });
+        
+        // Código para inicialização dos gráficos (simulação)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aqui seria implementado o código real para os gráficos usando Chart.js
+            // com dados vindos do backend
+        });
+    </script>
+</body>
+</html>

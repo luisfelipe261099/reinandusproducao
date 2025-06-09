@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Documento</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+                line-height: 1.5;
+                margin: 2cm;
+                color: #333;
+                background-color: #fff;
+                position: relative;
+            }
+
+            /* Marca dagua */
+            .watermark {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                text-align: center;
+                opacity: 0.1;
+                z-index: -1;
+                pointer-events: none;
+                transform: rotate(-45deg);
+                font-size: 60px;
+                color: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+
+            th, td {
+                padding: 12px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #0056b3;
+                color: white;
+                font-weight: 500;
+            }
+
+            /* Cabeçalho do documento */
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+                border-bottom: 2px solid #0056b3;
+                padding-bottom: 20px;
+                position: relative;
+            }
+
+            .header img {
+                max-height: 80px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                color: #0056b3;
+                font-size: 22pt;
+                font-weight: 700;
+                margin: 0 0 5px 0;
+                text-transform: uppercase;
+            }
+
+            .header p {
+                color: #555;
+                font-size: 10pt;
+                margin: 5px 0;
+            }
+
+            .header h2 {
+                font-size: 18pt;
+                font-weight: 700;
+                margin: 25px 0 0 0;
+                color: #333;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                border-top: 1px solid #ddd;
+                padding-top: 15px;
+            }
+
+            /* Conteúdo do documento */
+            .content {
+                text-align: justify;
+                margin: 30px 0;
+                line-height: 1.8;
+                font-size: 12pt;
+            }
+
+            .content p {
+                margin: 15px 0;
+            }
+
+            .content strong {
+                font-weight: 700;
+                color: #0056b3;
+            }
+
+            /* Rodapé do documento */
+            .footer {
+                text-align: center;
+                margin-top: 50px;
+                font-size: 10pt;
+                color: #555;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+            }
+
+            .signature {
+                margin-top: 60px;
+                text-align: center;
+            }
+
+            .signature img {
+                max-height: 60px;
+                margin-bottom: 10px;
+            }
+
+            .signature p {
+                margin: 5px 0;
+            }
+
+            .signature .line {
+                width: 250px;
+                border-bottom: 1px solid #333;
+                margin: 10px auto;
+            }
+
+            /* QR Code */
+            .qrcode {
+                text-align: center;
+                margin-top: 30px;
+            }
+
+            .qrcode img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .qrcode p {
+                font-size: 8pt;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            /* Informações de contato */
+            .contact-info {
+                position: fixed;
+                bottom: 1cm;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 8pt;
+                color: #666;
+                border-top: 1px solid #eee;
+                padding-top: 10px;
+            }
+
+            /* Configurações de impressão */
+            .page-break {
+                page-break-after: always;
+            }
+
+            @media print {
+                body {
+                    margin: 0;
+                    padding: 2cm;
+                }
+                @page {
+                    size: A4 portrait;
+                    margin: 2cm;
+                }
+            }
+
+            /* Botão de impressão */
+            .print-button {
+                display: block;
+                margin: 20px auto;
+                padding: 12px 24px;
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: background-color 0.3s ease;
+            }
+
+            .print-button:hover {
+                background-color: #003d82;
+            }
+
+            @media print {
+                .print-button {
+                    display: none;
+                }
+            }
+        </style>
+        <script>
+            function printDocument() {
+                window.print();
+            }
+        </script>
+    </head>
+    <body>
+        <button class="print-button" onclick="printDocument()">Imprimir Documento</button>
+        
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #0056b3; padding-bottom: 20px;">
+        <h1 style="color: #0056b3; font-size: 22pt; font-weight: bold; margin: 0 0 5px 0; text-transform: uppercase;">Faculdade FaCiência</h1>
+        <p style="color: #555; font-size: 10pt; margin: 5px 0;">Credenciada pelo MEC - Portaria nº 147 de 08/03/2022</p>
+        <p style="color: #555; font-size: 10pt; margin: 5px 0;">Departamento de Pós-Graduação</p>
+        <p style="color: #555; font-size: 10pt; margin: 5px 0;">CNPJ: XX.XXX.XXX/0001-XX</p>
+        <h2 style="font-size: 18pt; font-weight: bold; margin: 25px 0 0 0; color: #333; text-transform: uppercase; letter-spacing: 2px; border-top: 1px solid #ddd; padding-top: 15px;">DECLARAÇÃO DE MATRÍCULA</h2>
+    </div>
+
+    <div style="text-align: justify; margin: 30px 0; line-height: 1.8; font-size: 12pt;">
+        <p>Declaramos para os devidos fins que <strong style="color: #0056b3;">Aluno Teste</strong>, 
+        inscrito(a) no CPF <strong style="color: #0056b3;">123.456.789-00</strong>, 
+        com número de matrícula <strong style="color: #0056b3;">12345</strong>, 
+        é aluno(a) regularmente matriculado(a) no Curso de <strong style="color: #0056b3;">Curso de Teste</strong> 
+        desta instituição de ensino, no polo <strong style="color: #0056b3;">Polo de Teste</strong>.</p>
+
+        <p>O(A) aluno(a) iniciou o curso em <strong style="color: #0056b3;">01/01/2023</strong> 
+        com previsão de término em <strong style="color: #0056b3;">31/12/2023</strong>.</p><p><strong style="color: #0056b3;">Observações:</strong> Este é um documento de teste.</p><p>Por ser expressão da verdade, firmamos a presente.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 50px; font-size: 10pt; color: #555; border-top: 1px solid #ddd; padding-top: 20px;">
+        <p style="margin: 5px 0;">Curitiba/PR, 17 de abril de 2025.</p>
+
+        <div style="margin-top: 60px; text-align: center;">
+            <div style="width: 250px; border-bottom: 1px solid #333; margin: 10px auto;"></div>
+            <p style="margin: 5px 0;"><strong>Secretaria Acadêmica</strong></p>
+            <p style="margin: 5px 0;">Faculdade FaCiência</p>
+            <p style="margin: 5px 0;">Departamento de Pós-Graduação</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <p style="font-size: 8pt; color: #666; margin-top: 5px;">Código de Verificação: ABC12345</p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; font-size: 8pt; color: #666;">
+        Rua Visconde de Nácar, 1510 - 10º andar - Centro, Curitiba/PR - CEP 80410-201 - (41) 99256-2500<br>
+        faciencia.edu.br - contato@faciencia.edu.br
+    </div>
+    </body>
+    </html>

@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração de Cursos - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .bg-purple {
+            background-color: var(--primary-purple);
+        }
+
+        .bg-blue {
+            background-color: var(--info-blue);
+        }
+
+        .bg-green {
+            background-color: var(--success-green);
+        }
+
+        .bg-yellow {
+            background-color: var(--warning-yellow);
+        }
+
+        .bg-red {
+            background-color: var(--danger-red);
+        }
+
+        .summary-text h4 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-text p {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        .curso-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .filter-dropdown .btn {
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Estilos específicos para cards de curso */
+        .curso-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .curso-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .curso-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .curso-card-img {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .curso-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            color: white;
+        }
+
+        .curso-categoria {
+            background-color: var(--primary-purple);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+        }
+
+        .curso-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .curso-card-body {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .curso-card-title {
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .curso-info {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .curso-info-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .curso-info-item i {
+            margin-right: 5px;
+            width: 16px;
+            text-align: center;
+            color: var(--primary-purple);
+        }
+
+        .curso-progress {
+            margin-top: auto;
+        }
+
+        .curso-card-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .curso-professor {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .curso-professor img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .curso-actions .btn {
+            border-radius: 20px;
+            font-size: 0.85rem;
+            padding: 5px 15px;
+        }
+
+        .progress-thin {
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badges-container {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .modal-header {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .modal-subheader {
+            background-color: var(--light-bg);
+            padding: 10px 20px;
+            margin: -16px -16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-content-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .nav-tabs-custom {
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 10px 15px;
+            margin-right: 5px;
+            border-radius: 0;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            color: var(--primary-purple);
+            border-bottom: 2px solid var(--primary-purple);
+            background-color: transparent;
+        }
+
+        /* Estilos para o modo de visualização em tabela */
+        .table-view-header {
+            background-color: var(--light-bg);
+            font-weight: 600;
+            border: none;
+        }
+
+        .curso-table tr:hover {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .curso-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: var(--primary-purple);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .curso-name-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-view-btn {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .toggle-view-btn button {
+            border: none;
+            background-color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .toggle-view-btn button.active {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .toggle-view-btn button:first-child {
+            border-right: 1px solid #ddd;
+        }
+
+        .category-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .category-tech {
+            background-color: #6A5ACD;
+        }
+
+        .category-business {
+            background-color: #4682B4;
+        }
+
+        .category-marketing {
+            background-color: #2E8B57;
+        }
+
+        .category-design {
+            background-color: #CD5C5C;
+        }
+
+        .category-languages {
+            background-color: #DAA520;
+        }
+
+        /* Conteúdo do Modal */
+        .course-header-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            margin: -16px -16px 20px;
+            position: relative;
+        }
+        
+        .course-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            color: white;
+        }
+
+        .course-detail-card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        .course-detail-card .card-header {
+            background-color: var(--light-bg);
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .course-detail-card .card-body {
+            padding: 20px;
+        }
+
+        .module-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .module-item:last-child {
+            border-bottom: none;
+        }
+
+        .module-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary-purple);
+        }
+
+        .module-content {
+            flex-grow: 1;
+        }
+
+        .module-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .module-meta {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .student-info {
+            flex-grow: 1;
+        }
+
+        .student-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .student-meta {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .student-progress {
+            width: 100px;
+            text-align: right;
+        }
+
+        .student-actions {
+            margin-left: 10px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .search-filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .curso-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Estilo para seletor de cores de categoria */
+        .color-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .color-option.selected {
+            border-color: var(--primary-purple);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html" class="active">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Gerenciamento de Cursos</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Resumo dos Cursos -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>87</h4>
+                        <p>Total de Cursos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-green">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>2.345</h4>
+                        <p>Alunos Matriculados</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-blue">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>42</h4>
+                        <p>Professores Ativos</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-yellow">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="summary-text">
+                        <h4>512</h4>
+                        <p>Certificados Emitidos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="admin-card">
+                <div class="curso-header">
+                    <h4 class="m-0">Cursos Disponíveis</h4>
+                    <div class="d-flex gap-3">
+                        <div class="toggle-view-btn">
+                            <button class="active" id="cardViewBtn">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button id="tableViewBtn">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCursoModal">
+                            <i class="fas fa-plus me-2"></i>Novo Curso
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Buscar curso...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter"></i> Status
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Todos</a></li>
+                            <li><a class="dropdown-item" href="#">Ativos</a></li>
+                            <li><a class="dropdown-item" href="#">Inativos</a></li>
+                            <li><a class="dropdown-item" href="#">Em desenvolvimento</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tag"></i> Categoria
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Todas</a></li>
+                            <li><a class="dropdown-item" href="#">Tecnologia</a></li>
+                            <li><a class="dropdown-item" href="#">Negócios</a></li>
+                            <li><a class="dropdown-item" href="#">Marketing</a></li>
+                            <li><a class="dropdown-item" href="#">Design</a></li>
+                            <li><a class="dropdown-item" href="#">Idiomas</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe"></i> Polo
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Todos</a></li>
+                            <li><a class="dropdown-item" href="#">Polo São Paulo</a></li>
+                            <li><a class="dropdown-item" href="#">Polo Rio de Janeiro</a></li>
+                            <li><a class="dropdown-item" href="#">Polo Belo Horizonte</a></li>
+                            <li><a class="dropdown-item" href="#">Polo Curitiba</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort"></i> Ordenar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Nome (A-Z)</a></li>
+                            <li><a class="dropdown-item" href="#">Nome (Z-A)</a></li>
+                            <li><a class="dropdown-item" href="#">Alunos (Mais)</a></li>
+                            <li><a class="dropdown-item" href="#">Alunos (Menos)</a></li>
+                            <li><a class="dropdown-item" href="#">Data de criação</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Visualização em Cards -->
+                <div id="cardView" class="curso-grid">
+                    <!-- Card Curso 1 -->
+                    <div class="curso-card">
+                         <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Tecnologia</span>
+                            <span class="curso-status bg-success">Ativo</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">Desenvolvimento Web Full Stack</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>120 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>65 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>6 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo São Paulo</span>
+                                <span class="category-badge category-tech">Tecnologia</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Progresso médio dos alunos</span>
+                                    <span>72%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-success" style="width: 72%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>Lucas Mendes</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Curso 2 -->
+                    <div class="curso-card">
+                        <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Marketing</span>
+                            <span class="curso-status bg-success">Ativo</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">Marketing Digital Avançado</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>80 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>82 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>5 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo São Paulo</span>
+                                <span class="category-badge category-marketing">Marketing</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Progresso médio dos alunos</span>
+                                    <span>68%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-info" style="width: 68%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>Fernanda Lima</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Curso 3 -->
+                    <div class="curso-card">
+                        <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Negócios</span>
+                            <span class="curso-status bg-success">Ativo</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">Gestão de Negócios Digitais</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>60 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>47 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>4 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo Belo Horizonte</span>
+                                <span class="category-badge category-business">Negócios</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Progresso médio dos alunos</span>
+                                    <span>55%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" style="width: 55%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>André Silva</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Curso 4 -->
+                    <div class="curso-card">
+                        <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Idiomas</span>
+                            <span class="curso-status bg-success">Ativo</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">Inglês para Negócios</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>90 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>39 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>8 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo Rio de Janeiro</span>
+                                <span class="category-badge category-languages">Idiomas</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Progresso médio dos alunos</span>
+                                    <span>42%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" style="width: 42%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>Camila Soares</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Curso 5 -->
+                    <div class="curso-card">
+                        <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Design</span>
+                            <span class="curso-status bg-warning text-dark">Em Desenvolvimento</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">UX/UI Design Avançado</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>75 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>0 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>5 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo São Paulo</span>
+                                <span class="category-badge category-design">Design</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Desenvolvimento do conteúdo</span>
+                                    <span>65%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>Patrícia Rocha</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Curso 6 -->
+                    <div class="curso-card">
+                        <div class="curso-card-img" style="background-image: url('/api/placeholder/400/250');">
+                            <span class="curso-categoria">Tecnologia</span>
+                            <span class="curso-status bg-secondary">Inativo</span>
+                            <div class="curso-card-overlay">
+                                <h5 class="m-0">Data Science Fundamentals</h5>
+                            </div>
+                        </div>
+                        <div class="curso-card-body">
+                            <div class="curso-info">
+                                <div class="curso-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>100 horas</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>28 alunos</span>
+                                </div>
+                                <div class="curso-info-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>8 módulos</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Polo Curitiba</span>
+                                <span class="category-badge category-tech">Tecnologia</span>
+                            </div>
+                            <div class="curso-progress">
+                                <div class="progress-label">
+                                    <span>Progresso médio dos alunos</span>
+                                    <span>85%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-secondary" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="curso-card-footer">
+                            <div class="curso-professor">
+                                <img src="/api/placeholder/30/30" alt="Professor">
+                                <span>Roberto Santos</span>
+                            </div>
+                            <div class="curso-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                    <i class="fas fa-eye me-1"></i>Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualização em Tabela (inicialmente oculta) -->
+                <div id="tableView" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table curso-table">
+                            <thead>
+                                <tr class="table-view-header">
+                                    <th>Curso</th>
+                                    <th>Categoria</th>
+                                    <th>Polo</th>
+                                    <th>Professor</th>
+                                    <th>Duração</th>
+                                    <th>Alunos</th>
+                                    <th>Progresso</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon bg-tech">
+                                                <i class="fas fa-laptop-code"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Desenvolvimento Web Full Stack</div>
+                                                <small class="text-muted">Publicado em: 10/01/2024</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-tech">Tecnologia</span></td>
+                                    <td>São Paulo</td>
+                                    <td>Lucas Mendes</td>
+                                    <td>120 horas</td>
+                                    <td>65</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-success" style="width: 72%"></div>
+                                        </div>
+                                        <small>72%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon" style="background-color: #2E8B57;">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Marketing Digital Avançado</div>
+                                                <small class="text-muted">Publicado em: 15/02/2024</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-marketing">Marketing</span></td>
+                                    <td>São Paulo</td>
+                                    <td>Fernanda Lima</td>
+                                    <td>80 horas</td>
+                                    <td>82</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-info" style="width: 68%"></div>
+                                        </div>
+                                        <small>68%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon" style="background-color: #4682B4;">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Gestão de Negócios Digitais</div>
+                                                <small class="text-muted">Publicado em: 05/03/2024</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-business">Negócios</span></td>
+                                    <td>Belo Horizonte</td>
+                                    <td>André Silva</td>
+                                    <td>60 horas</td>
+                                    <td>47</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-warning" style="width: 55%"></div>
+                                        </div>
+                                        <small>55%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon" style="background-color: #DAA520;">
+                                                <i class="fas fa-language"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Inglês para Negócios</div>
+                                                <small class="text-muted">Publicado em: 20/03/2024</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-languages">Idiomas</span></td>
+                                    <td>Rio de Janeiro</td>
+                                    <td>Camila Soares</td>
+                                    <td>90 horas</td>
+                                    <td>39</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-warning" style="width: 42%"></div>
+                                        </div>
+                                        <small>42%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon" style="background-color: #CD5C5C;">
+                                                <i class="fas fa-palette"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">UX/UI Design Avançado</div>
+                                                <small class="text-muted">Em desenvolvimento</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-design">Design</span></td>
+                                    <td>São Paulo</td>
+                                    <td>Patrícia Rocha</td>
+                                    <td>75 horas</td>
+                                    <td>0</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-warning" style="width: 65%"></div>
+                                        </div>
+                                        <small>65%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-warning text-dark">Em Desenvolvimento</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="curso-name-info">
+                                            <div class="curso-icon bg-tech">
+                                                <i class="fas fa-database"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Data Science Fundamentals</div>
+                                                <small class="text-muted">Inativo desde: 15/04/2024</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="category-badge category-tech">Tecnologia</span></td>
+                                    <td>Curitiba</td>
+                                    <td>Roberto Santos</td>
+                                    <td>100 horas</td>
+                                    <td>28</td>
+                                    <td>
+                                        <div class="progress progress-thin mt-1" style="width: 100px;">
+                                            <div class="progress-bar bg-secondary" style="width: 85%"></div>
+                                        </div>
+                                        <small>85%</small>
+                                    </td>
+                                    <td><span class="status-pill bg-secondary">Inativo</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cursoDetailModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div>Mostrando 6 de 87 cursos</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Próximo</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de Detalhes do Curso -->
+    <div class="modal fade" id="cursoDetailModal" tabindex="-1" aria-labelledby="cursoDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cursoDetailModalLabel">Detalhes do Curso</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="course-header-img" style="background-image: url('/api/placeholder/800/400');">
+                        <div class="course-header-overlay">
+                            <span class="category-badge category-tech mb-2">Tecnologia</span>
+                            <h3>Desenvolvimento Web Full Stack</h3>
+                            <div class="d-flex align-items-center">
+                                <span class="status-pill bg-success me-3">Ativo</span>
+                                <span class="me-3"><i class="fas fa-users me-1"></i> 65 alunos</span>
+                                <span><i class="fas fa-clock me-1"></i> 120 horas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Abas para diferentes informações -->
+                    <ul class="nav nav-tabs nav-tabs-custom" id="cursoDetailTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Informações</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="modules-tab" data-bs-toggle="tab" data-bs-target="#modules" type="button" role="tab">Módulos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">Alunos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Estatísticas</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="cursoDetailTabsContent">
+                        <!-- Aba de Informações Gerais -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="course-detail-card">
+                                        <div class="card-header">Informações Básicas</div>
+                                        <div class="card-body">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th style="width: 35%">Nome do Curso:</th>
+                                                    <td>Desenvolvimento Web Full Stack</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Categoria:</th>
+                                                    <td>Tecnologia</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Duração Total:</th>
+                                                    <td>120 horas</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Data de Criação:</th>
+                                                    <td>10/01/2024</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Status:</th>
+                                                    <td><span class="status-pill bg-success">Ativo</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Polo:</th>
+                                                    <td>São Paulo</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="course-detail-card mt-4">
+                                        <div class="card-header">Requisitos</div>
+                                        <div class="card-body">
+                                            <ul class="mb-0">
+                                                <li>Conhecimento básico de lógica de programação</li>
+                                                <li>Familiaridade com HTML e CSS</li>
+                                                <li>Computador com acesso à internet</li>
+                                                <li>Disponibilidade de 10 horas semanais para estudos</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="course-detail-card">
+                                        <div class="card-header">Professor</div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <img src="/api/placeholder/80/80" class="rounded-circle me-4" alt="Professor">
+                                                <div>
+                                                    <h5 class="mb-1">Lucas Mendes</h5>
+                                                    <p class="mb-2">Professor de Tecnologia</p>
+                                                    <p class="mb-2"><i class="fas fa-envelope me-2"></i>lucas.mendes@faciencia.com.br</p>
+                                                    <p class="mb-0"><i class="fas fa-phone me-2"></i>(11) 98765-4321</p>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <p class="mb-0">Desenvolvedor Full Stack com mais de 10 anos de experiência. Especialista em React, Node.js e arquitetura de sistemas distribuídos. Mestre em Ciência da Computação.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="course-detail-card mt-4">
+                                        <div class="card-header">Descrição do Curso</div>
+                                        <div class="card-body">
+                                            <p>Neste curso completo de Desenvolvimento Web Full Stack, os alunos aprenderão todas as etapas necessárias para se tornarem desenvolvedores completos. Desde o front-end com HTML, CSS, JavaScript e React, até o back-end com Node.js, Express e bancos de dados relacionais e não-relacionais.</p>
+                                            <p>Os alunos serão capacitados a construir aplicações web completas, responsivas e seguindo as melhores práticas de mercado. Ao final do curso, cada aluno terá um portfólio com pelo menos 3 projetos completos.</p>
+                                            <p class="mb-0">O curso inclui mentorias individuais e em grupo, além de acesso à comunidade exclusiva para networking e oportunidades de carreira.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba de Módulos do Curso -->
+                        <div class="tab-pane fade" id="modules" role="tabpanel">
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Módulos do Curso</h5>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Adicionar Módulo
+                                    </button>
+                                </div>
+                                
+                                <div class="course-detail-card mb-3">
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 1: Fundamentos de HTML5 e CSS3</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>20 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>10 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>5 atividades</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 2: JavaScript Essencial</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>25 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>12 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>8 atividades</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fab fa-react"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 3: Front-end com React</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>30 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>15 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>6 atividades</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fab fa-node-js"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 4: Back-end com Node.js</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>25 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>12 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>5 atividades</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 5: Bancos de Dados</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>15 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>8 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>4 atividades</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="module-item">
+                                        <div class="module-icon">
+                                            <i class="fas fa-project-diagram"></i>
+                                        </div>
+                                        <div class="module-content">
+                                            <h6 class="module-title">Módulo 6: Projeto Final</h6>
+                                            <div class="module-meta">
+                                                <span class="me-3"><i class="fas fa-clock me-1"></i>5 horas</span>
+                                                <span class="me-3"><i class="fas fa-file-alt me-1"></i>3 aulas</span>
+                                                <span><i class="fas fa-tasks me-1"></i>1 projeto</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-actions">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba de Alunos Matriculados -->
+                        <div class="tab-pane fade" id="students" role="tabpanel">
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Alunos Matriculados (65)</h5>
+                                    <div class="d-flex">
+                                        <div class="search-box me-2" style="width: 250px;">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Buscar aluno...">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary">
+                                            <i class="fas fa-user-plus me-1"></i>Adicionar Aluno
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="course-detail-card mb-3">
+                                    <div class="card-body p-0">
+                                        <div class="tab-content-scroll" style="max-height: 400px;">
+                                            <div class="student-item p-3">
+                                                <img src="/api/placeholder/40/40" class="student-avatar" alt="Aluno">
+                                                <div class="student-info">
+                                                    <h6 class="student-name">João Silva</h6>
+                                                    <div class="student-meta">
+                                                        <span class="me-3">joao.silva@email.com</span>
+                                                        <span>Matrícula: 15/01/2024</span>
+                                                    </div>
+                                                </div>
+                                                <div class="student-progress">
+                                                    <div class="progress progress-thin">
+                                                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                                                    </div>
+                                                    <small class="d-block text-end mt-1">85%</small>
+                                                </div>
+                                                <div class="student-actions">
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="student-item p-3">
+                                                <img src="/api/placeholder/40/40" class="student-avatar" alt="Aluna">
+                                                <div class="student-info">
+                                                    <h6 class="student-name">Maria Souza</h6>
+                                                    <div class="student-meta">
+                                                        <span class="me-3">maria.souza@email.com</span>
+                                                        <span>Matrícula: 18/01/2024</span>
+                                                    </div>
+                                                </div>
+                                                <div class="student-progress">
+                                                    <div class="progress progress-thin">
+                                                        <div class="progress-bar bg-success" style="width: 92%"></div>
+                                                    </div>
+                                                    <small class="d-block text-end mt-1">92%</small>
+                                                </div>
+                                                <div class="student-actions">
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="student-item p-3">
+                                                <img src="/api/placeholder/40/40" class="student-avatar" alt="Aluno">
+                                                <div class="student-info">
+                                                    <h6 class="student-name">Pedro Santos</h6>
+                                                    <div class="student-meta">
+                                                        <span class="me-3">pedro.santos@email.com</span>
+                                                        <span>Matrícula: 20/01/2024</span>
+                                                    </div>
+                                                </div>
+                                                <div class="student-progress">
+                                                    <div class="progress progress-thin">
+                                                        <div class="progress-bar bg-warning" style="width: 45%"></div>
+                                                    </div>
+                                                    <small class="d-block text-end mt-1">45%</small>
+                                                </div>
+                                                <div class="student-actions">
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="student-item p-3">
+                                                <img src="/api/placeholder/40/40" class="student-avatar" alt="Aluna">
+                                                <div class="student-info">
+                                                    <h6 class="student-name">Ana Oliveira</h6>
+                                                    <div class="student-meta">
+                                                        <span class="me-3">ana.oliveira@email.com</span>
+                                                        <span>Matrícula: 05/02/2024</span>
+                                                    </div>
+                                                </div>
+                                                <div class="student-progress">
+                                                    <div class="progress progress-thin">
+                                                        <div class="progress-bar bg-warning" style="width: 65%"></div>
+                                                    </div>
+                                                    <small class="d-block text-end mt-1">65%</small>
+                                                </div>
+                                                <div class="student-actions">
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="student-item p-3">
+                                                <img src="/api/placeholder/40/40" class="student-avatar" alt="Aluno">
+                                                <div class="student-info">
+                                                    <h6 class="student-name">Bruno Costa</h6>
+                                                    <div class="student-meta">
+                                                        <span class="me-3">bruno.costa@email.com</span>
+                                                        <span>Matrícula: 10/02/2024</span>
+                                                    </div>
+                                                </div>
+                                                <div class="student-progress">
+                                                    <div class="progress progress-thin">
+                                                        <div class="progress-bar bg-danger" style="width: 20%"></div>
+                                                    </div>
+                                                    <small class="d-block text-end mt-1">20%</small>
+                                                </div>
+                                                <div class="student-actions">
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>Mostrando 5 de 65 alunos</div>
+                                    <nav>
+                                        <ul class="pagination pagination-sm">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#">Próximo</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba de Estatísticas -->
+                        <div class="tab-pane fade" id="stats" role="tabpanel">
+                            <div class="mt-4">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="course-detail-card">
+                                            <div class="card-header">Progresso dos Alunos</div>
+                                            <div class="card-body">
+                                                <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                                    <p class="text-muted m-0">Gráfico de Progresso</p>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Progresso médio:</span>
+                                                        <span class="fw-bold">72%</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Alunos com 100% de progresso:</span>
+                                                        <span class="fw-bold">15 (23%)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Alunos com menos de 50% de progresso:</span>
+                                                        <span class="fw-bold">12 (18%)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="course-detail-card">
+                                            <div class="card-header">Engajamento por Módulo</div>
+                                            <div class="card-body">
+                                                <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                                    <p class="text-muted m-0">Gráfico de Engajamento</p>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Módulo mais visualizado:</span>
+                                                        <span class="fw-bold">Módulo 1 (98%)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Módulo menos visualizado:</span>
+                                                        <span class="fw-bold">Módulo 6 (45%)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Tempo médio por aula:</span>
+                                                        <span class="fw-bold">32 minutos</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="course-detail-card">
+                                            <div class="card-header">Desempenho nas Atividades</div>
+                                            <div class="card-body">
+                                                <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                                    <p class="text-muted m-0">Gráfico de Desempenho</p>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Nota média:</span>
+                                                        <span class="fw-bold">8.3/10</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Atividade com melhor desempenho:</span>
+                                                        <span class="fw-bold">HTML Básico (9.2/10)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Atividade com pior desempenho:</span>
+                                                        <span class="fw-bold">Banco de Dados NoSQL (6.8/10)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="course-detail-card">
+                                            <div class="card-header">Matrículas ao Longo do Tempo</div>
+                                            <div class="card-body">
+                                                <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                                    <p class="text-muted m-0">Gráfico de Matrículas</p>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Total de matrículas:</span>
+                                                        <span class="fw-bold">65</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Matrículas este mês:</span>
+                                                        <span class="fw-bold">12</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Taxa de evasão:</span>
+                                                        <span class="fw-bold">5%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary">Editar Curso</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Curso -->
+    <div class="modal fade" id="addCursoModal" tabindex="-1" aria-labelledby="addCursoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCursoModalLabel">Adicionar Novo Curso</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <!-- Informações Básicas -->
+                        <h5 class="border-bottom pb-2 mb-3">Informações Básicas</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="courseName" class="form-label">Nome do Curso</label>
+                                    <input type="text" class="form-control" id="courseName" placeholder="Ex: Desenvolvimento Web Full Stack">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="courseCategory" class="form-label">Categoria</label>
+                                    <select class="form-select" id="courseCategory">
+                                        <option selected disabled>Selecione uma categoria...</option>
+                                        <option value="tecnologia">Tecnologia</option>
+                                        <option value="negocios">Negócios</option>
+                                        <option value="marketing">Marketing</option>
+                                        <option value="design">Design</option>
+                                        <option value="idiomas">Idiomas</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cor da Categoria</label>
+                                    <div class="color-select">
+                                        <div class="color-option selected" style="background-color: #6A5ACD;"></div>
+                                       <div class="color-option" style="background-color: #4682B4;"></div>
+                                        <div class="color-option" style="background-color: #2E8B57;"></div>
+                                        <div class="color-option" style="background-color: #CD5C5C;"></div>
+                                        <div class="color-option" style="background-color: #DAA520;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="courseDuration" class="form-label">Duração (horas)</label>
+                                    <input type="number" class="form-control" id="courseDuration" min="1" placeholder="Ex: 120">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="courseStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="courseStatus">
+                                        <option value="active">Ativo</option>
+                                        <option value="development" selected>Em Desenvolvimento</option>
+                                        <option value="inactive">Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="courseImage" class="form-label">Imagem do Curso</label>
+                                    <input type="file" class="form-control" id="courseImage">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vinculação -->
+                        <h5 class="border-bottom pb-2 mb-3">Vinculação</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="coursePolo" class="form-label">Polo</label>
+                                    <select class="form-select" id="coursePolo">
+                                        <option selected disabled>Selecione um polo...</option>
+                                        <option value="sao-paulo">Polo São Paulo</option>
+                                        <option value="rio-de-janeiro">Polo Rio de Janeiro</option>
+                                        <option value="belo-horizonte">Polo Belo Horizonte</option>
+                                        <option value="curitiba">Polo Curitiba</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="courseTeacher" class="form-label">Professor</label>
+                                    <select class="form-select" id="courseTeacher">
+                                        <option selected disabled>Selecione um professor...</option>
+                                        <option value="lucas-mendes">Lucas Mendes</option>
+                                        <option value="fernanda-lima">Fernanda Lima</option>
+                                        <option value="andre-silva">André Silva</option>
+                                        <option value="camila-soares">Camila Soares</option>
+                                        <option value="patricia-rocha">Patrícia Rocha</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Conteúdo do Curso -->
+                        <h5 class="border-bottom pb-2 mb-3">Conteúdo do Curso</h5>
+                        <div class="mb-3">
+                            <label for="courseDescription" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="courseDescription" rows="4" placeholder="Descreva o curso..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="courseRequirements" class="form-label">Requisitos</label>
+                            <textarea class="form-control" id="courseRequirements" rows="3" placeholder="Liste os requisitos..."></textarea>
+                            <small class="text-muted">Separados por linha quebrada (Enter)</small>
+                        </div>
+                        
+                        <!-- Módulos Iniciais -->
+                        <h5 class="border-bottom pb-2 mb-3">Módulos Iniciais</h5>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label m-0">Módulos do Curso</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addModuleBtn">
+                                    <i class="fas fa-plus me-1"></i>Adicionar Módulo
+                                </button>
+                            </div>
+                            
+                            <div id="modulesList">
+                                <div class="card mb-2 module-card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Nome do Módulo</label>
+                                                    <input type="text" class="form-control" placeholder="Ex: Introdução ao HTML">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Duração (horas)</label>
+                                                    <input type="number" class="form-control" placeholder="Ex: 20">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-module-btn">
+                                                <i class="fas fa-trash me-1"></i>Remover
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Curso</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS e Dependências -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Alternar entre visualização de cards e tabela
+        document.getElementById('cardViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').style.display = 'grid';
+            document.getElementById('tableView').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('tableViewBtn').classList.remove('active');
+        });
+        
+        document.getElementById('tableViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').style.display = 'none';
+            document.getElementById('tableView').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('cardViewBtn').classList.remove('active');
+        });
+
+        // Selecionar cor da categoria
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(o => {
+                    o.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+
+        // Adicionar e remover módulos
+        document.getElementById('addModuleBtn').addEventListener('click', function() {
+            const modulesList = document.getElementById('modulesList');
+            const newModule = document.createElement('div');
+            newModule.className = 'card mb-2 module-card';
+            newModule.innerHTML = `
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label">Nome do Módulo</label>
+                                <input type="text" class="form-control" placeholder="Ex: Introdução ao HTML">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label">Duração (horas)</label>
+                                <input type="number" class="form-control" placeholder="Ex: 20">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-module-btn">
+                            <i class="fas fa-trash me-1"></i>Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+            modulesList.appendChild(newModule);
+            
+            // Adicionar evento de remoção ao novo botão
+            newModule.querySelector('.remove-module-btn').addEventListener('click', function() {
+                this.closest('.module-card').remove();
+            });
+        });
+        
+        // Adicionar evento de remoção aos botões existentes
+        document.querySelectorAll('.remove-module-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.module-card').remove();
+            });
+        });
+
+        // Mobile Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar botão de hambúrguer para mobile quando o viewport for pequeno
+            if (window.innerWidth < 992) {
+                const mainContent = document.querySelector('.main-content');
+                const hamburgerBtn = document.createElement('button');
+                hamburgerBtn.classList.add('btn', 'btn-primary', 'position-fixed', 'd-md-none');
+                hamburgerBtn.style.top = '10px';
+                hamburgerBtn.style.left = '10px';
+                hamburgerBtn.style.zIndex = '1001';
+                hamburgerBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                
+                document.body.appendChild(hamburgerBtn);
+                
+                hamburgerBtn.addEventListener('click', function() {
+                    const sidebar = document.querySelector('.sidebar');
+                    sidebar.classList.toggle('show');
+                });
+                
+                // Fechar sidebar ao clicar fora
+                document.addEventListener('click', function(event) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const hamburgerBtn = document.querySelector('.d-md-none');
+                    
+                    if (!sidebar.contains(event.target) && event.target !== hamburgerBtn && sidebar.classList.contains('show')) {
+                        sidebar.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

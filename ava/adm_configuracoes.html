@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Sistema - Faciencia EAD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6A5ACD;
+            --secondary-purple: #483D8B;
+            --light-purple: #9370DB;
+            --white: #FFFFFF;
+            --light-bg: #F4F4F9;
+            --text-dark: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            background-color: var(--light-bg);
+        }
+
+        /* Sidebar Moderna */
+        .sidebar {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            background-color: var(--white);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-purple);
+        }
+
+        .admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(106, 90, 205, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-custom h4 {
+            font-weight: 600;
+            color: var(--secondary-purple);
+            margin: 0;
+        }
+
+        .config-tabs .nav-link {
+            color: var(--text-dark);
+            border-radius: 0;
+            padding: 12px 20px;
+            font-weight: 500;
+            border: none;
+            position: relative;
+        }
+
+        .config-tabs .nav-link.active {
+            color: var(--primary-purple);
+            background-color: transparent;
+            border-bottom: 3px solid var(--primary-purple);
+        }
+
+        .config-tabs .nav-link:hover:not(.active) {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+
+        .config-tabs .nav-link i {
+            margin-right: 8px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--secondary-purple);
+        }
+
+        .license-card {
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        .license-card.active {
+            border-left-color: var(--success-green);
+        }
+
+        .license-card.warning {
+            border-left-color: var(--warning-yellow);
+        }
+
+        .license-card.expired {
+            border-left-color: var(--danger-red);
+            opacity: 0.7;
+        }
+
+        .license-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .license-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .license-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .plan-card {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 90, 205, 0.1);
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin-bottom: 5px;
+        }
+
+        .plan-price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--secondary-purple);
+            margin-bottom: 10px;
+        }
+
+        .plan-price small {
+            font-size: 1rem;
+            font-weight: normal;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .plan-features li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .plan-features i {
+            color: var(--success-green);
+            margin-right: 10px;
+        }
+
+        .plan-features i.text-muted {
+            color: #aaa;
+        }
+
+        .btn-plan {
+            width: 100%;
+            padding: 12px;
+            font-weight: 500;
+            border-radius: 50px;
+        }
+
+        .btn-plan.btn-primary {
+            background-color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-plan.btn-outline-primary {
+            color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-plan.btn-outline-primary:hover {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-text {
+            margin-right: 15px;
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .notification-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .notification-switch {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Toggle switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success-green);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--success-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .access-item {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .access-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .access-icon {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(106, 90, 205, 0.1);
+            color: var(--primary-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .access-details h5 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .access-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .access-status {
+            display: flex;
+            align-items: center;
+        }
+
+        .access-badge {
+            margin-right: 15px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .access-badge.active {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-green);
+        }
+
+        .access-badge.blocked {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-red);
+        }
+
+        .access-badge.warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning-yellow);
+        }
+
+        .system-item {
+            padding: 20px;
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .system-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .system-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .system-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .notification-icon {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-info {
+                margin-top: 15px;
+                align-self: flex-end;
+            }
+
+            .config-tabs .nav-link {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .config-tabs .nav-link i {
+                margin-right: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <!-- Sidebar de Administração Geral -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2 class="ms-2">Faciencia</h2>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Principal</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> Painel Geral
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_license.html">
+                            <i class="fas fa-id-card"></i> Licenciamento
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Gerenciamento</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_polo.html">
+                            <i class="fas fa-globe"></i> Polos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_cursos.html">
+                            <i class="fas fa-book-open"></i> Cursos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_alunos.html">
+                            <i class="fas fa-users"></i> Alunos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_professores.html">
+                            <i class="fas fa-chalkboard-teacher"></i> Professores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Relatórios</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_relatorio_financeiro.html">
+                            <i class="fas fa-dollar-sign"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_desempenho.html">
+                            <i class="fas fa-chart-line"></i> Desempenho
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adm_relatorio_licencas.html">
+                            <i class="fas fa-id-badge"></i> Licenças
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">Sistema</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="adm_configuracoes.html" class="active">
+                            <i class="fas fa-cogs"></i> Configurações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho do Painel -->
+            <header class="dashboard-header">
+                <h1 class="m-0">Configurações do Sistema</h1>
+                <div class="d-flex align-items-center">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="/api/placeholder/45/45" alt="Foto de Perfil">
+                        <div>
+                            <h6 class="m-0">Admin Master</h6>
+                            <small class="text-muted">Administrador</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs de Configuração -->
+            <div class="admin-card">
+                <ul class="nav nav-tabs config-tabs mb-4" id="configTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="geral-tab" data-bs-toggle="tab" data-bs-target="#geral" type="button" role="tab" aria-controls="geral" aria-selected="true">
+                            <i class="fas fa-sliders-h"></i> Geral
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="planos-tab" data-bs-toggle="tab" data-bs-target="#planos" type="button" role="tab" aria-controls="planos" aria-selected="false">
+                            <i class="fas fa-cubes"></i> Planos e Limites
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="acessos-tab" data-bs-toggle="tab" data-bs-target="#acessos" type="button" role="tab" aria-controls="acessos" aria-selected="false">
+                            <i class="fas fa-user-lock"></i> Controle de Acessos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notificacoes-tab" data-bs-toggle="tab" data-bs-target="#notificacoes" type="button" role="tab" aria-controls="notificacoes" aria-selected="false">
+                            <i class="fas fa-bell"></i> Notificações
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sistema-tab" data-bs-toggle="tab" data-bs-target="#sistema" type="button" role="tab" aria-controls="sistema" aria-selected="false">
+                            <i class="fas fa-server"></i> Sistema
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="configTabsContent">
+                    <!-- Configurações Gerais -->
+                    <div class="tab-pane fade show active" id="geral" role="tabpanel" aria-labelledby="geral-tab">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Configurações da Plataforma</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="plataformaNome" class="form-label">Nome da Plataforma</label>
+                                        <input type="text" class="form-control" id="plataformaNome" value="Faciencia EAD">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="plataformaEmail" class="form-label">E-mail de Contato</label>
+                                        <input type="email" class="form-control" id="plataformaEmail" value="contato@faciencia.edu.br">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="plataformaURL" class="form-label">URL do Site</label>
+                                        <input type="url" class="form-control" id="plataformaURL" value="https://faciencia.edu.br">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="plataformaLogo" class="form-label">Logo da Plataforma</label>
+                                        <input type="file" class="form-control" id="plataformaLogo">
+                                        <small class="form-text text-muted">Tamanho recomendado: 200x60px</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="plataformaFavicon" class="form-label">Favicon</label>
+                                        <input type="file" class="form-control" id="plataformaFavicon">
+                                        <small class="form-text text-muted">Tamanho recomendado: 32x32px</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Cores Principais</label>
+                                        <div class="d-flex gap-2">
+                                            <input type="color" class="form-control form-control-color" value="#6A5ACD" title="Cor primária">
+                                            <input type="color" class="form-control form-control-color" value="#483D8B" title="Cor secundária">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="plataformaDescricao" class="form-label">Descrição da Plataforma</label>
+                                <textarea class="form-control" id="plataformaDescricao" rows="3">Faciencia EAD - Plataforma de ensino à distância com cursos de qualidade em diversas áreas do conhecimento.</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Configurações Padrão</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaFusoHorario" class="form-label">Fuso Horário</label>
+                                        <select class="form-select" id="sistemaFusoHorario">
+                                            <option>UTC -5 (EST)</option>
+                                            <option>UTC -4 (EDT)</option>
+                                            <option selected>UTC -3 (Brasília)</option>
+                                            <option>UTC -2</option>
+                                            <option>UTC -1</option>
+                                            <option>UTC 0 (GMT)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sistemaIdioma" class="form-label">Idioma Padrão</label>
+                                        <select class="form-select" id="sistemaIdioma">
+                                            <option>English</option>
+                                            <option selected>Português (Brasil)</option>
+                                            <option>Español</option>
+                                            <option>Français</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaFormatoData" class="form-label">Formato de Data</label>
+                                        <select class="form-select" id="sistemaFormatoData">
+                                            <option>MM/DD/YYYY</option>
+                                            <option selected>DD/MM/YYYY</option>
+                                            <option>YYYY-MM-DD</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sistemaMoeda" class="form-label">Moeda</label>
+                                        <select class="form-select" id="sistemaMoeda">
+                                            <option>USD ($)</option>
+                                            <option selected>BRL (R$)</option>
+                                            <option>EUR (€)</option>
+                                            <option>GBP (£)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Configurações de Segurança</h4>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="sistemaAutenticacaoDupla" checked>
+                                    <label class="form-check-label" for="sistemaAutenticacaoDupla">Autenticação em Dois Fatores (2FA) para Administradores</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="sistemaSSL" checked>
+                                    <label class="form-check-label" for="sistemaSSL">Forçar Conexão SSL (HTTPS)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sistemaTempoSessao" class="form-label">Tempo de Sessão (Minutos)</label>
+                                <input type="number" class="form-control" id="sistemaTempoSessao" value="60">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sistemaForcaSenha" class="form-label">Política de Senhas</label>
+                                <select class="form-select" id="sistemaForcaSenha">
+                                    <option>Básica (mín. 6 caracteres)</option>
+                                    <option>Média (letras e números, mín. 8 caracteres)</option>
+                                    <option selected>Forte (letras, números e símbolos, mín. 8 caracteres)</option>
+                                    <option>Muito Forte (letras maiúsculas e minúsculas, números e símbolos, mín. 10 caracteres)</option>
+                                </select>
+                            </div>
+                        </div>
+                                                    <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary me-2">Restaurar Padrões</button>
+                            <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurações de Planos e Limites -->
+                    <div class="tab-pane fade" id="planos" role="tabpanel" aria-labelledby="planos-tab">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Planos Disponíveis</h4>
+                            
+                            <div class="row">
+                                <!-- Plano Básico -->
+                                <div class="col-md-4">
+                                    <div class="plan-card">
+                                        <div class="plan-header">
+                                            <div class="plan-title">Básico</div>
+                                            <div class="plan-price">R$ 199<small>/mês</small></div>
+                                        </div>
+                                        
+                                        <ul class="plan-features">
+                                            <li><i class="fas fa-check"></i> Até 200 alunos</li>
+                                            <li><i class="fas fa-check"></i> Até 10 cursos</li>
+                                            <li><i class="fas fa-check"></i> Até 5 professores</li>
+                                            <li><i class="fas fa-check"></i> Suporte por e-mail</li>
+                                            <li><i class="fas fa-times text-muted"></i> Certificados personalizados</li>
+                                            <li><i class="fas fa-times text-muted"></i> API avançada</li>
+                                        </ul>
+                                        
+                                        <button type="button" class="btn btn-outline-primary btn-plan" data-bs-toggle="modal" data-bs-target="#editPlanoModal" data-plano="basico">Editar Plano</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Plano Standard -->
+                                <div class="col-md-4">
+                                    <div class="plan-card">
+                                        <div class="plan-header">
+                                            <div class="plan-title">Standard</div>
+                                            <div class="plan-price">R$ 399<small>/mês</small></div>
+                                        </div>
+                                        
+                                        <ul class="plan-features">
+                                            <li><i class="fas fa-check"></i> Até 400 alunos</li>
+                                            <li><i class="fas fa-check"></i> Até 15 cursos</li>
+                                            <li><i class="fas fa-check"></i> Até 10 professores</li>
+                                            <li><i class="fas fa-check"></i> Suporte prioritário</li>
+                                            <li><i class="fas fa-check"></i> Certificados personalizados</li>
+                                            <li><i class="fas fa-times text-muted"></i> API avançada</li>
+                                        </ul>
+                                        
+                                        <button type="button" class="btn btn-outline-primary btn-plan" data-bs-toggle="modal" data-bs-target="#editPlanoModal" data-plano="standard">Editar Plano</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Plano Premium -->
+                                <div class="col-md-4">
+                                    <div class="plan-card">
+                                        <div class="plan-header">
+                                            <div class="plan-title">Premium</div>
+                                            <div class="plan-price">R$ 699<small>/mês</small></div>
+                                        </div>
+                                        
+                                        <ul class="plan-features">
+                                            <li><i class="fas fa-check"></i> Até 500 alunos</li>
+                                            <li><i class="fas fa-check"></i> Até 25 cursos</li>
+                                            <li><i class="fas fa-check"></i> Até 15 professores</li>
+                                            <li><i class="fas fa-check"></i> Suporte 24/7</li>
+                                            <li><i class="fas fa-check"></i> Certificados personalizados</li>
+                                            <li><i class="fas fa-check"></i> API avançada</li>
+                                        </ul>
+                                        
+                                        <button type="button" class="btn btn-outline-primary btn-plan" data-bs-toggle="modal" data-bs-target="#editPlanoModal" data-plano="premium">Editar Plano</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlanoModal">
+                                    <i class="fas fa-plus me-2"></i>Adicionar Novo Plano
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Limites do Sistema</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="limiteMaxAlunos" class="form-label">Máximo de Alunos por Polo</label>
+                                        <input type="number" class="form-control" id="limiteMaxAlunos" value="500">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="limiteMaxCursos" class="form-label">Máximo de Cursos por Polo</label>
+                                        <input type="number" class="form-control" id="limiteMaxCursos" value="25">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="limiteMaxProfessores" class="form-label">Máximo de Professores por Polo</label>
+                                        <input type="number" class="form-control" id="limiteMaxProfessores" value="15">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="limiteArquivo" class="form-label">Tamanho Máximo de Arquivo (MB)</label>
+                                        <input type="number" class="form-control" id="limiteArquivo" value="50">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="limiteArmazenamento" class="form-label">Armazenamento Total (GB)</label>
+                                        <input type="number" class="form-control" id="limiteArmazenamento" value="200">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="limiteBandwidth" class="form-label">Largura de Banda Mensal (GB)</label>
+                                        <input type="number" class="form-control" id="limiteBandwidth" value="500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="limiteNotificacao" checked>
+                                    <label class="form-check-label" for="limiteNotificacao">Notificar administradores quando os limites atingirem 80%</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="limiteBloquearExcesso" checked>
+                                    <label class="form-check-label" for="limiteBloquearExcesso">Bloquear automaticamente novas adições quando o limite for atingido</label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2">Restaurar Padrões</button>
+                                <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Controle de Acessos -->
+                    <div class="tab-pane fade" id="acessos" role="tabpanel" aria-labelledby="acessos-tab">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Controle de Acesso dos Polos</h4>
+                            
+                            <div class="mb-4">
+                                <!-- Polo São Paulo -->
+                                <div class="access-item">
+                                    <div class="access-info">
+                                        <div class="access-icon">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="access-details">
+                                            <h5>Polo São Paulo</h5>
+                                            <p>Último acesso: 04/04/2025, 10:23</p>
+                                        </div>
+                                    </div>
+                                    <div class="access-status">
+                                        <span class="access-badge active">Ativo</span>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#blockAccessModal" data-polo="São Paulo">
+                                            <i class="fas fa-ban me-1"></i>Bloquear
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Polo Rio de Janeiro -->
+                                <div class="access-item">
+                                    <div class="access-info">
+                                        <div class="access-icon">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="access-details">
+                                            <h5>Polo Rio de Janeiro</h5>
+                                            <p>Último acesso: 03/04/2025, 16:45</p>
+                                        </div>
+                                    </div>
+                                    <div class="access-status">
+                                        <span class="access-badge warning">Pagamento Pendente</span>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#blockAccessModal" data-polo="Rio de Janeiro">
+                                            <i class="fas fa-ban me-1"></i>Bloquear
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Polo Belo Horizonte -->
+                                <div class="access-item">
+                                    <div class="access-info">
+                                        <div class="access-icon">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="access-details">
+                                            <h5>Polo Belo Horizonte</h5>
+                                            <p>Último acesso: 04/04/2025, 09:12</p>
+                                        </div>
+                                    </div>
+                                    <div class="access-status">
+                                        <span class="access-badge active">Ativo</span>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#blockAccessModal" data-polo="Belo Horizonte">
+                                            <i class="fas fa-ban me-1"></i>Bloquear
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Polo Salvador - Bloqueado -->
+                                <div class="access-item">
+                                    <div class="access-info">
+                                        <div class="access-icon">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="access-details">
+                                            <h5>Polo Salvador</h5>
+                                            <p>Último acesso: 28/03/2025, 14:30</p>
+                                        </div>
+                                    </div>
+                                    <div class="access-status">
+                                        <span class="access-badge blocked">Bloqueado</span>
+                                        <button class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-unlock me-1"></i>Desbloquear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Configurações de Acesso</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="acessoTentativasLogin" class="form-label">Máximo de Tentativas de Login</label>
+                                        <input type="number" class="form-control" id="acessoTentativasLogin" value="5">
+                                        <small class="form-text text-muted">Após essa quantidade, a conta será bloqueada por tempo determinado</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="acessoTempoBloqueio" class="form-label">Tempo de Bloqueio (minutos)</label>
+                                        <input type="number" class="form-control" id="acessoTempoBloqueio" value="30">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="acessoTempoInatividade" class="form-label">Tempo para Bloqueio por Inatividade (dias)</label>
+                                        <input type="number" class="form-control" id="acessoTempoInatividade" value="30">
+                                        <small class="form-text text-muted">Bloqueio automático após período sem acesso</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="acessoIPsPermitidos" class="form-label">IPs Permitidos para Administração</label>
+                                        <textarea class="form-control" id="acessoIPsPermitidos" rows="3" placeholder="Deixe em branco para permitir todos. Um IP por linha."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="acessoNotificarBloqueio" checked>
+                                    <label class="form-check-label" for="acessoNotificarBloqueio">Notificar administradores sobre bloqueios de acesso</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="acessoRegistrarLogs" checked>
+                                    <label class="form-check-label" for="acessoRegistrarLogs">Registrar logs detalhados de acesso ao sistema</label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2">Restaurar Padrões</button>
+                                <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurações de Notificações -->
+                    <div class="tab-pane fade" id="notificacoes" role="tabpanel" aria-labelledby="notificacoes-tab">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Notificações do Sistema</h4>
+                            
+                            <div class="notification-item">
+                                <div class="notification-text">
+                                    <div class="notification-title">Novas Matrículas</div>
+                                    <div class="notification-desc">Notificar administradores quando novas matrículas forem realizadas</div>
+                                </div>
+                                <div class="notification-switch">
+                                    <label class="switch me-2">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-text">
+                                    <div class="notification-title">Licenças Expirando</div>
+                                    <div class="notification-desc">Notificar quando licenças estiverem próximas ao vencimento (15 dias)</div>
+                                </div>
+                                <div class="notification-switch">
+                                    <label class="switch me-2">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-text">
+                                    <div class="notification-title">Limites de Uso</div>
+                                    <div class="notification-desc">Notificar quando planos atingirem 80% dos limites de uso</div>
+                                </div>
+                                <div class="notification-switch">
+                                    <label class="switch me-2">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-text">
+                                    <div class="notification-title">Atividades Suspeitas</div>
+                                    <div class="notification-desc">Notificar sobre tentativas de login malsucedidas repetidas</div>
+                                </div>
+                                <div class="notification-switch">
+                                    <label class="switch me-2">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-text">
+                                    <div class="notification-title">Relatórios Semanais</div>
+                                    <div class="notification-desc">Enviar um resumo semanal das atividades do sistema</div>
+                                </div>
+                                <div class="notification-switch">
+                                    <label class="switch me-2">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Canais de Notificação</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="notificacaoEmail" class="form-label">E-mails para Notificações</label>
+                                        <input type="text" class="form-control" id="notificacaoEmail" value="admin@faciencia.edu.br, suporte@faciencia.edu.br">
+                                        <small class="form-text text-muted">Separe múltiplos e-mails com vírgula</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="notificacaoSMSFone" class="form-label">Telefones para SMS (Opcional)</label>
+                                        <input type="text" class="form-control" id="notificacaoSMSFone" placeholder="Ex: +5511999998888">
+                                        <small class="form-text text-muted">Separe múltiplos números com vírgula</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="notificacaoPushBrowser" checked>
+                                    <label class="form-check-label" for="notificacaoPushBrowser">Ativar notificações push no navegador</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="notificacaoWebhook">
+                                    <label class="form-check-label" for="notificacaoWebhook">Usar Webhook para integrações</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3" id="webhookUrlContainer" style="display: none;">
+                                <label for="notificacaoWebhookUrl" class="form-label">URL do Webhook</label>
+                                <input type="url" class="form-control" id="notificacaoWebhookUrl" placeholder="https://example.com/webhook">
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2">Restaurar Padrões</button>
+                                <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurações do Sistema -->
+                    <div class="tab-pane fade" id="sistema" role="tabpanel" aria-labelledby="sistema-tab">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Manutenção do Sistema</h4>
+                            
+                            <div class="system-item">
+                                <div class="system-header">
+                                    <h5 class="system-title">Modo de Manutenção</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sistemaModoManutencao">
+                                        <label class="form-check-label" for="sistemaModoManutencao"></label>
+                                    </div>
+                                </div>
+                                <p class="system-desc">Ativar o modo de manutenção tornará o sistema inacessível para todos os usuários, exceto administradores. Útil durante atualizações ou manutenções programadas.</p>
+                                
+                                <div class="mb-3" id="manutencaoMsgContainer" style="display: none;">
+                                    <label for="sistemaManutencaoMsg" class="form-label">Mensagem de Manutenção</label>
+                                    <textarea class="form-control" id="sistemaManutencaoMsg" rows="3">Estamos realizando uma manutenção programada. O sistema estará disponível novamente em breve. Agradecemos sua compreensão.</textarea>
+                                </div>
+                                
+                                <div class="row" id="manutencaoTimeContainer" style="display: none;">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="sistemaManutencaoInicio" class="form-label">Data/Hora de Início</label>
+                                            <input type="datetime-local" class="form-control" id="sistemaManutencaoInicio">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="sistemaManutencaoFim" class="form-label">Data/Hora de Término (Estimada)</label>
+                                            <input type="datetime-local" class="form-control" id="sistemaManutencaoFim">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Backup e Armazenamento</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaBackupFrequencia" class="form-label">Frequência de Backup</label>
+                                        <select class="form-select" id="sistemaBackupFrequencia">
+                                            <option>A cada 6 horas</option>
+                                            <option>A cada 12 horas</option>
+                                            <option selected>Diário</option>
+                                            <option>Semanal</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sistemaBackupRetencao" class="form-label">Período de Retenção (dias)</label>
+                                        <input type="number" class="form-control" id="sistemaBackupRetencao" value="30">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaBackupTipo" class="form-label">Tipo de Backup</label>
+                                        <select class="form-select" id="sistemaBackupTipo">
+                                            <option>Apenas Banco de Dados</option>
+                                            <option selected>Banco de Dados e Arquivos</option>
+                                            <option>Completo (Sistema + Dados)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sistemaBackupLocal" class="form-label">Local do Backup</label>
+                                        <select class="form-select" id="sistemaBackupLocal">
+                                            <option>Local (Servidor)</option>
+                                            <option selected>Nuvem (Amazon S3)</option>
+                                            <option>Ambos (Local e Nuvem)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-primary mb-4">
+                                <i class="fas fa-download me-2"></i>Fazer Backup Manual Agora
+                            </button>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Último backup: <strong>04/04/2025, 00:00</strong> | Tamanho: <strong>4.2 GB</strong> | Status: <strong>Completo</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4 class="form-section-title">Registros e Logs</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaLogNivel" class="form-label">Nível de Log</label>
+                                        <select class="form-select" id="sistemaLogNivel">
+                                            <option>Básico (Erros apenas)</option>
+                                            <option>Médio (Erros e Avisos)</option>
+                                            <option selected>Completo (Todos os eventos)</option>
+                                            <option>Debug (Detalhado)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sistemaLogRetencao" class="form-label">Período de Retenção de Logs (dias)</label>
+                                        <input type="number" class="form-control" id="sistemaLogRetencao" value="90">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="sistemaLogAcesso" checked>
+                                    <label class="form-check-label" for="sistemaLogAcesso">Registrar logs de acesso ao sistema</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="sistemaLogAlteracoes" checked>
+                                    <label class="form-check-label" for="sistemaLogAlteracoes">Registrar logs de alterações de dados</label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2">Restaurar Padrões</button>
+                                <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Edição de Plano -->
+    <div class="modal fade" id="editPlanoModal" tabindex="-1" aria-labelledby="editPlanoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                   <h5 class="modal-title" id="editPlanoModalLabel">Editar Plano</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPlanoForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="planoNome" class="form-label">Nome do Plano</label>
+                                    <input type="text" class="form-control" id="planoNome" value="Premium">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="planoPreco" class="form-label">Preço (R$)</label>
+                                    <input type="number" class="form-control" id="planoPreco" value="699">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="planoPeriodo" class="form-label">Período de Cobrança</label>
+                                    <select class="form-select" id="planoPeriodo">
+                                        <option>Mensal</option>
+                                        <option>Trimestral</option>
+                                        <option>Semestral</option>
+                                        <option>Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="planoLimiteAlunos" class="form-label">Limite de Alunos</label>
+                                    <input type="number" class="form-control" id="planoLimiteAlunos" value="500">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="planoLimiteCursos" class="form-label">Limite de Cursos</label>
+                                    <input type="number" class="form-control" id="planoLimiteCursos" value="25">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="planoLimiteProfessores" class="form-label">Limite de Professores</label>
+                                    <input type="number" class="form-control" id="planoLimiteProfessores" value="15">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Recursos Incluídos</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoSuporte" checked>
+                                        <label class="form-check-label" for="planoRecursoSuporte">Suporte 24/7</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoCertificados" checked>
+                                        <label class="form-check-label" for="planoRecursoCertificados">Certificados Personalizados</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoAPI" checked>
+                                        <label class="form-check-label" for="planoRecursoAPI">API Avançada</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoAnalytics" checked>
+                                        <label class="form-check-label" for="planoRecursoAnalytics">Analytics Avançado</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoIntegracoes" checked>
+                                        <label class="form-check-label" for="planoRecursoIntegracoes">Integrações com Sistemas Externos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="planoRecursoWhiteLabel">
+                                        <label class="form-check-label" for="planoRecursoWhiteLabel">White Label</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="planoDescricao" class="form-label">Descrição do Plano</label>
+                            <textarea class="form-control" id="planoDescricao" rows="3">Plano Premium ideal para polos de médio porte, com recursos avançados, suporte 24/7 e capacidade para atender até 500 alunos.</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="planoStatus" checked>
+                                <label class="form-check-label" for="planoStatus">Plano Ativo</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger me-auto" data-bs-toggle="modal" data-bs-target="#confirmDeletePlanoModal">Excluir Plano</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Novo Plano -->
+    <div class="modal fade" id="addPlanoModal" tabindex="-1" aria-labelledby="addPlanoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPlanoModalLabel">Adicionar Novo Plano</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPlanoForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="novoPlanoNome" class="form-label">Nome do Plano</label>
+                                    <input type="text" class="form-control" id="novoPlanoNome" placeholder="Ex: Empresarial">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="novoPlanoPreco" class="form-label">Preço (R$)</label>
+                                    <input type="number" class="form-control" id="novoPlanoPreco" placeholder="Ex: 999">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="novoPlanoPeriodo" class="form-label">Período de Cobrança</label>
+                                    <select class="form-select" id="novoPlanoPeriodo">
+                                        <option selected>Mensal</option>
+                                        <option>Trimestral</option>
+                                        <option>Semestral</option>
+                                        <option>Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="novoPlanoLimiteAlunos" class="form-label">Limite de Alunos</label>
+                                    <input type="number" class="form-control" id="novoPlanoLimiteAlunos" placeholder="Ex: 1000">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="novoPlanoLimiteCursos" class="form-label">Limite de Cursos</label>
+                                    <input type="number" class="form-control" id="novoPlanoLimiteCursos" placeholder="Ex: 50">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="novoPlanoLimiteProfessores" class="form-label">Limite de Professores</label>
+                                    <input type="number" class="form-control" id="novoPlanoLimiteProfessores" placeholder="Ex: 30">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Recursos Incluídos</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoSuporte" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoSuporte">Suporte 24/7</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoCertificados" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoCertificados">Certificados Personalizados</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoAPI" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoAPI">API Avançada</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoAnalytics" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoAnalytics">Analytics Avançado</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoIntegracoes" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoIntegracoes">Integrações com Sistemas Externos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="novoPlanoRecursoWhiteLabel" checked>
+                                        <label class="form-check-label" for="novoPlanoRecursoWhiteLabel">White Label</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="novoPlanoDescricao" class="form-label">Descrição do Plano</label>
+                            <textarea class="form-control" id="novoPlanoDescricao" rows="3" placeholder="Descreva os benefícios e características deste plano..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="novoPlanoStatus" checked>
+                                <label class="form-check-label" for="novoPlanoStatus">Plano Ativo</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Adicionar Plano</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação para Excluir Plano -->
+    <div class="modal fade" id="confirmDeletePlanoModal" tabindex="-1" aria-labelledby="confirmDeletePlanoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeletePlanoModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Você está prestes a excluir o plano <strong id="deletePlanoName">Premium</strong>. Esta ação não pode ser desfeita.
+                    </p>
+                    <p>Os polos atualmente utilizando este plano terão que ser migrados para outro plano. Deseja continuar?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger">Excluir Plano</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Bloquear Acesso de Polo -->
+    <div class="modal fade" id="blockAccessModal" tabindex="-1" aria-labelledby="blockAccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="blockAccessModalLabel">Bloquear Acesso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Você está prestes a bloquear o acesso ao polo <strong id="blockPoloName">São Paulo</strong>. Esta ação impedirá que todos os usuários deste polo acessem o sistema.</p>
+                    
+                    <div class="mb-3">
+                        <label for="blockMotivo" class="form-label">Motivo do Bloqueio</label>
+                        <select class="form-select" id="blockMotivo">
+                            <option>Pagamento pendente</option>
+                            <option>Licença expirada</option>
+                            <option>Violação de termos de uso</option>
+                            <option>Solicitação do cliente</option>
+                            <option>Manutenção programada</option>
+                            <option>Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="blockDescricao" class="form-label">Descrição Detalhada (opcional)</label>
+                        <textarea class="form-control" id="blockDescricao" rows="3" placeholder="Descreva o motivo do bloqueio em detalhes..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="blockNotificar" checked>
+                            <label class="form-check-label" for="blockNotificar">Notificar administradores do polo</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="blockTimeContainer">
+                        <label for="blockDuracao" class="form-label">Duração do Bloqueio</label>
+                        <select class="form-select" id="blockDuracao">
+                            <option>24 horas</option>
+                            <option>7 dias</option>
+                            <option>30 dias</option>
+                            <option selected>Até ser manualmente desbloqueado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger">Bloquear Acesso</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para controle de interface -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para mostrar/ocultar sidebar em dispositivos móveis
+            function toggleSidebar() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('show');
+                
+                // Toggle overlay
+                if (sidebar.classList.contains('show')) {
+                    overlay.style.display = 'block';
+                } else {
+                    overlay.style.display = 'none';
+                }
+            }
+            
+            // Adicionar botão para mobile (menu hamburguer)
+            const mainContent = document.querySelector('.main-content');
+            const mobileMenuBtn = document.createElement('button');
+            mobileMenuBtn.classList.add('mobile-menu-btn');
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            mobileMenuBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background-color: var(--primary-purple);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                width: 40px;
+                height: 40px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                font-size: 1.2rem;
+            `;
+            
+            document.body.appendChild(mobileMenuBtn);
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+            
+            // Overlay para fechar o menu quando clicar fora
+            const overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 999;
+                display: none;
+            `;
+            
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Mostrar/ocultar elementos baseado no tamanho da tela
+            function handleScreenResize() {
+                if (window.innerWidth <= 992) {
+                    mobileMenuBtn.style.display = 'flex';
+                } else {
+                    mobileMenuBtn.style.display = 'none';
+                    overlay.style.display = 'none';
+                    
+                    // Reset sidebar state on larger screens
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar.classList.contains('show')) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            }
+            
+            // Adicionar event listener para redimensionamento
+            window.addEventListener('resize', handleScreenResize);
+            
+            // Chamar a função uma vez para configurar o estado inicial
+            handleScreenResize();
+            
+            // Controle para webhook URL
+            const webhookSwitch = document.getElementById('notificacaoWebhook');
+            const webhookUrlContainer = document.getElementById('webhookUrlContainer');
+            
+            if (webhookSwitch && webhookUrlContainer) {
+                webhookSwitch.addEventListener('change', function() {
+                    webhookUrlContainer.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+            
+            // Controle para modo de manutenção
+            const manutencaoSwitch = document.getElementById('sistemaModoManutencao');
+            const manutencaoMsgContainer = document.getElementById('manutencaoMsgContainer');
+            const manutencaoTimeContainer = document.getElementById('manutencaoTimeContainer');
+            
+            if (manutencaoSwitch && manutencaoMsgContainer && manutencaoTimeContainer) {
+                manutencaoSwitch.addEventListener('change', function() {
+                    const showElements = this.checked;
+                    manutencaoMsgContainer.style.display = showElements ? 'block' : 'none';
+                    manutencaoTimeContainer.style.display = showElements ? 'flex' : 'none';
+                });
+            }
+            
+            // Atualizar informações do modal de edição de plano
+            const editPlanoModal = document.getElementById('editPlanoModal');
+            if (editPlanoModal) {
+                editPlanoModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const planoTipo = button.getAttribute('data-plano');
+                    
+                    // Ajustar título e valores baseado no plano
+                    let planoNome, planoPreco, planoAlunos, planoCursos, planoProfessores;
+                    
+                    switch(planoTipo) {
+                        case 'basico':
+                            planoNome = 'Básico';
+                            planoPreco = 199;
+                            planoAlunos = 200;
+                            planoCursos = 10;
+                            planoProfessores = 5;
+                            break;
+                        case 'standard':
+                            planoNome = 'Standard';
+                            planoPreco = 399;
+                            planoAlunos = 400;
+                            planoCursos = 15;
+                            planoProfessores = 10;
+                            break;
+                        case 'premium':
+                        default:
+                            planoNome = 'Premium';
+                            planoPreco = 699;
+                            planoAlunos = 500;
+                            planoCursos = 25;
+                            planoProfessores = 15;
+                            break;
+                    }
+                    
+                    // Atualizar os campos do formulário
+                    document.getElementById('planoNome').value = planoNome;
+                    document.getElementById('planoPreco').value = planoPreco;
+                    document.getElementById('planoLimiteAlunos').value = planoAlunos;
+                    document.getElementById('planoLimiteCursos').value = planoCursos;
+                    document.getElementById('planoLimiteProfessores').value = planoProfessores;
+                    
+                    // Atualizar também no modal de confirmação de exclusão
+                    document.getElementById('deletePlanoName').textContent = planoNome;
+                });
+            }
+            
+            // Atualizar informações do modal de bloqueio de acesso
+            const blockAccessModal = document.getElementById('blockAccessModal');
+            if (blockAccessModal) {
+                blockAccessModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const poloNome = button.getAttribute('data-polo');
+                    
+                    // Atualizar o nome do polo no modal
+                    document.getElementById('blockPoloName').textContent = poloNome;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
