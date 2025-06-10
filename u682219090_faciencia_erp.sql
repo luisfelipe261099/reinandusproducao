@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Tempo de geração: 09/06/2025 às 12:01
--- Versão do servidor: 10.11.10-MariaDB
+-- Tempo de geração: 10/06/2025 às 18:46
+-- Versão do servidor: 10.11.10-MariaDB-log
 -- Versão do PHP: 7.2.34
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -1569,10 +1569,10 @@ CREATE TABLE `solicitacoes_documentos` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `solicitacoes_site`
+-- Estrutura para tabela `solicitacoes_s`
 --
 
-CREATE TABLE `solicitacoes_site` (
+CREATE TABLE `solicitacoes_s` (
   `id` int(11) NOT NULL,
   `protocolo` varchar(30) NOT NULL,
   `nome_empresa` varchar(255) NOT NULL,
@@ -2349,9 +2349,9 @@ ALTER TABLE `solicitacoes_documentos`
   ADD KEY `idx_id_legado` (`id_legado`);
 
 --
--- Índices de tabela `solicitacoes_site`
+-- Índices de tabela `solicitacoes_s`
 --
-ALTER TABLE `solicitacoes_site`
+ALTER TABLE `solicitacoes_s`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `protocolo` (`protocolo`);
 
@@ -2826,9 +2826,9 @@ ALTER TABLE `solicitacoes_documentos`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `solicitacoes_site`
+-- AUTO_INCREMENT de tabela `solicitacoes_s`
 --
-ALTER TABLE `solicitacoes_site`
+ALTER TABLE `solicitacoes_s`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

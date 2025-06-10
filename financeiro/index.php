@@ -20,6 +20,24 @@ if (!in_array($userType, ['financeiro', 'admin_master'])) {
     exit;
 }
 
+// Registra log de acesso ao módulo financeiro
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'financeiro',
+        'acesso_dashboard',
+        'Usuário acessou o dashboard do módulo financeiro',
+        null,
+        null,
+        null,
+        [
+            'user_id' => Auth::getUserId(),
+            'user_type' => $userType,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 // Conecta ao banco de dados
 $db = Database::getInstance();
 

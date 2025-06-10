@@ -30,6 +30,24 @@ if (!$polo_id) {
     exit;
 }
 
+// Registra log de acesso ao dashboard do AVA
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'ava',
+        'acesso_dashboard',
+        'Usuário acessou o dashboard do AVA',
+        $polo_id,
+        'polo',
+        null,
+        [
+            'user_id' => getUsuarioId(),
+            'polo_id' => $polo_id,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 // Verifica se o polo existe
 $sql = "SELECT * FROM polos WHERE id = ?";
 $polo = $db->fetchOne($sql, [$polo_id]);

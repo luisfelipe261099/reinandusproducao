@@ -149,11 +149,12 @@ if (isPost()) {
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido',
                 'data_hora' => date('Y-m-d H:i:s')
-            ];
-            registrarLog('usuarios', 'login', 'Login realizado com sucesso', $usuario['id'], 'usuario', null, $dadosLog);
+            ];            registrarLog('usuarios', 'login', 'Login realizado com sucesso', $usuario['id'], 'usuario', null, $dadosLog);
 
             // Redireciona com base no tipo de usuário
-            if ($usuario['tipo'] === 'polo') {
+            if ($usuario['tipo'] === 'admin_master') {
+                redirect('administrador/index.php');
+            } else if ($usuario['tipo'] === 'polo') {
                 redirect('polo/index.php');
             } else {
                 redirect('secretaria/index.php');
@@ -197,11 +198,12 @@ if (isPost()) {
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido',
                 'data_hora' => date('Y-m-d H:i:s'),
                 'metodo' => 'cookie'
-            ];
-            registrarLog('usuarios', 'login_automatico', 'Login automático realizado com sucesso', $usuario['id'], 'usuario', null, $dadosLog);
+            ];            registrarLog('usuarios', 'login_automatico', 'Login automático realizado com sucesso', $usuario['id'], 'usuario', null, $dadosLog);
 
             // Redireciona com base no tipo de usuário
-            if ($usuario['tipo'] === 'polo') {
+            if ($usuario['tipo'] === 'admin_master') {
+                redirect('administrador/index.php');
+            } else if ($usuario['tipo'] === 'polo') {
                 redirect('polo/index.php');
             } else {
                 redirect('secretaria/index.php');

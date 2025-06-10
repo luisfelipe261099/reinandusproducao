@@ -164,7 +164,7 @@ if ($view_type == 'chamados') {
     $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
     // Conta o total de solicitações do site
-    $sql_count = "SELECT COUNT(*) as total FROM solicitacoes_site $where_clause";
+    $sql_count = "SELECT COUNT(*) as total FROM solicitacoes_s $where_clause";
     $count_result = $db->fetchOne($sql_count, $params);
     $total_registros = $count_result['total'];
 
@@ -175,12 +175,12 @@ if ($view_type == 'chamados') {
     $offset = ($pagina - 1) * $itens_por_pagina;
 
     // Busca as solicitações do site
-    $sql = "SELECT * FROM solicitacoes_site
+    $sql = "SELECT * FROM solicitacoes_s
             $where_clause
             ORDER BY data_solicitacao DESC
             LIMIT $offset, $itens_por_pagina";
 
-    $solicitacoes_site = $db->fetchAll($sql, $params);
+    $solicitacoes_s = $db->fetchAll($sql, $params);
 }
 
 // Busca os polos para o filtro (apenas para usuários que não são do tipo polo)

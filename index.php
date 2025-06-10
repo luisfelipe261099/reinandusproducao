@@ -67,9 +67,9 @@ try {
     $stats['chamados_abertos'] = $resultado['total'] ?? 0;
 
     // Total de solicitações do site (externas)
-    $sql = "SELECT COUNT(*) as total FROM solicitacoes_site WHERE status IN ('Pendente', 'Em Andamento')";
+    $sql = "SELECT COUNT(*) as total FROM solicitacoes_s WHERE status IN ('Pendente', 'Em Andamento')";
     $resultado = executarConsulta($db, $sql);
-    $stats['solicitacoes_site'] = $resultado['total'] ?? 0;
+    $stats['solicitacoes_s'] = $resultado['total'] ?? 0;
 
     // Total de turmas ativas
     $sql = "SELECT COUNT(*) as total FROM turmas WHERE status IN ('planejada', 'em_andamento')";
@@ -325,7 +325,7 @@ $titulo_pagina = 'Dashboard da Secretaria';
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Solicitações Site</p>
-                                    <p class="text-3xl font-bold text-gray-800 mt-1" id="solicitacoes-site"><?php echo number_format($stats['solicitacoes_site'], 0, ',', '.'); ?></p>
+                                    <p class="text-3xl font-bold text-gray-800 mt-1" id="solicitacoes-site"><?php echo number_format($stats['solicitacoes_s'], 0, ',', '.'); ?></p>
                                 </div>
                                 <div class="bg-purple-100 p-3 rounded-full">
                                     <i class="fas fa-globe text-purple-500"></i>

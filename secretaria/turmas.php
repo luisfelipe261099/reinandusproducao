@@ -51,6 +51,24 @@ exigirLogin();
 // Verifica se o usuário tem permissão para acessar o módulo de turmas
 exigirPermissao('turmas');
 
+// Registra log de acesso ao módulo de turmas
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'secretaria',
+        'acesso_turmas',
+        'Usuário acessou o módulo de gestão de turmas',
+        null,
+        null,
+        null,
+        [
+            'user_id' => getUsuarioId(),
+            'user_type' => getUsuarioTipo(),
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 // ================================================================
 // INICIALIZAÇÃO DE COMPONENTES
 // ================================================================

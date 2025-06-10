@@ -16,6 +16,24 @@ if (!in_array($userType, ['financeiro', 'admin_master'])) {
     exit;
 }
 
+// Registra log de acesso ao módulo de mensalidades
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'financeiro',
+        'acesso_mensalidades',
+        'Usuário acessou o módulo de gestão de mensalidades',
+        null,
+        null,
+        null,
+        [
+            'user_id' => Auth::getUserId(),
+            'user_type' => $userType,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 $db = Database::getInstance();
 $action = $_GET['action'] ?? 'listar';
 $mensalidadeId = $_GET['id'] ?? null;

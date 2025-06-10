@@ -22,7 +22,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id = (int)$_GET['id'];
 
 // Busca a solicitação do site
-$sql = "SELECT * FROM solicitacoes_site WHERE id = ?";
+$sql = "SELECT * FROM solicitacoes_s WHERE id = ?";
 $solicitacao = $db->fetchOne($sql, [$id]);
 
 if (!$solicitacao) {

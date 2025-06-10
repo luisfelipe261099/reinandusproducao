@@ -746,11 +746,10 @@ $titulo_pagina = 'Dashboard da Secretaria';
                                     <span class="hidden sm:inline">Use os atalhos do teclado para navegar mais rapidamente.</span>
                                 </p>
                                 
-                                <!-- Atalhos rápidos apenas para desktop -->
-                                <div class="hidden lg:flex space-x-4 text-sm text-gray-500">
+                                <!-- Atalhos rápidos apenas para desktop -->                                <div class="hidden lg:flex space-x-4 text-sm text-gray-500">
                                     <span><kbd class="px-2 py-1 bg-gray-200 rounded">Ctrl+1</kbd> Novo Aluno</span>
                                     <span><kbd class="px-2 py-1 bg-gray-200 rounded">Ctrl+2</kbd> Nova Matrícula</span>
-                                    <span><kbd class="px-2 py-1 bg-gray-200 rounded">Ctrl+F</kbd> Buscar</span>
+                                    <span><kbd class="px-2 py-1 bg-gray-200 rounded">Ctrl+F</kbd> Cadastrar Polo</span>
                                 </div>
                             </div>
                             
@@ -1634,10 +1633,9 @@ $titulo_pagina = 'Dashboard da Secretaria';
                         case '3':
                             e.preventDefault();
                             window.location.href = 'declaracoes.php';
-                            break;
-                        case 'f':
+                            break;                        case 'f':
                             e.preventDefault();
-                            window.location.href = 'busca_avancada.php';
+                            window.location.href = 'polos.php?action=novo';
                             break;
                     }
                 }

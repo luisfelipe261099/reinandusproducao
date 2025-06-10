@@ -76,7 +76,7 @@
 
     <!-- Listagem de Chamados do Site -->
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <?php if (empty($solicitacoes_site)): ?>
+        <?php if (empty($solicitacoes_s)): ?>
         <div class="p-6 text-center text-gray-500">
             <p>Nenhuma solicitação do site encontrada.</p>
         </div>
@@ -96,7 +96,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <?php foreach ($solicitacoes_site as $solicitacao): ?>
+                    <?php foreach ($solicitacoes_s as $solicitacao): ?>
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             <?php echo htmlspecialchars($solicitacao['protocolo']); ?>

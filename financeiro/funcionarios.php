@@ -16,6 +16,24 @@ if (!in_array($userType, ['financeiro', 'admin_master'])) {
     exit;
 }
 
+// Registra log de acesso ao módulo de funcionários
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'financeiro',
+        'acesso_funcionarios',
+        'Usuário acessou o módulo de gestão de funcionários',
+        null,
+        null,
+        null,
+        [
+            'user_id' => Auth::getUserId(),
+            'user_type' => $userType,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 $db = Database::getInstance();
 $action = $_GET['action'] ?? 'listar';
 $funcionarioId = $_GET['id'] ?? null;
@@ -47,14 +65,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'estado' => $_POST['estado'] ?? null,
                 'cep' => $_POST['cep'] ?? null,
                 'status' => $_POST['status'] ?? 'ativo'
-            ];
-            
+            ];            
             if ($funcionarioId) {
+                $funcionario_anterior = $db->fetchOne('SELECT * FROM funcionarios WHERE id = ?', [$funcionarioId]);
                 $dados['updated_at'] = date('Y-m-d H:i:s');
                 $db->update('funcionarios', $dados, 'id = ?', [$funcionarioId]);
+                
+                // Registra log de edição
+                if (function_exists('registrarLog')) {
+                    registrarLog(
+                        'financeiro',
+                        'editar_funcionario',
+                        "Funcionário editado: {$dados['nome']} (ID: {$funcionarioId})",
+                        $funcionarioId,
+                        'funcionario',
+                        $funcionario_anterior,
+                        $dados
+                    );
+                }
+                
                 $_SESSION['success'] = 'Funcionário atualizado com sucesso!';
             } else {
-                $db->insert('funcionarios', $dados);
+                $novoId = $db->insert('funcionarios', $dados);
+                
+                // Registra log de criação
+                if (function_exists('registrarLog')) {
+                    registrarLog(
+                        'financeiro',
+                        'criar_funcionario',
+                        "Novo funcionário criado: {$dados['nome']} (ID: {$novoId})",
+                        $novoId,
+                        'funcionario',
+                        null,
+                        $dados
+                    );
+                }
+                
                 $_SESSION['success'] = 'Funcionário cadastrado com sucesso!';
             }
             

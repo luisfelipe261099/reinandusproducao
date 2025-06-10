@@ -31,6 +31,24 @@ if (!$polo_id) {
     exit;
 }
 
+// Registra log de acesso ao dashboard do polo
+if (function_exists('registrarLog')) {
+    registrarLog(
+        'polo',
+        'acesso_dashboard',
+        'Usuário acessou o dashboard do polo',
+        $polo_id,
+        'polo',
+        null,
+        [
+            'user_id' => $usuario_id,
+            'polo_id' => $polo_id,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
+    );
+}
+
 // Função para executar consultas com tratamento de erro
 function executarConsulta($db, $sql, $params = [], $default = null) {
     try {

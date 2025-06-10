@@ -1,5 +1,43 @@
 # Documentação Completa - Sistema Faciência ERP
 
+**Versão**: 2.0  
+**Última Atualização**: 10 de junho de 2025  
+**Status**: Produção com Módulo Administrador Implementado
+
+---
+
+## 🆕 ATUALIZAÇÕES RECENTES (Dezembro 2024 - Junho 2025)
+
+### ✅ Módulo Administrador Completo Implementado
+- **Novo módulo `/administrador/`**: Gestão centralizada do sistema
+- **Dashboard administrativo**: Estatísticas em tempo real e KPIs
+- **Gestão de usuários**: CRUD completo com validação avançada
+- **Sistema de logs completo**: Auditoria de todas as ações do sistema
+- **Configurações centralizadas**: Interface para configurar todo o sistema
+- **Navegação entre módulos**: Interface unificada para acessar todos os módulos
+
+### ✅ Sistema de Logging e Auditoria Implementado
+- **Logs automáticos**: Registrados em todos os módulos (secretaria, financeiro, polo, ava)
+- **Auditoria completa**: Todas as operações CRUD são logadas com detalhes
+- **Monitoramento de acesso**: Logs de login, logout e navegação entre páginas
+- **Dashboard de logs**: Interface administrativa para visualização e filtros avançados
+- **Rastreamento de usuários**: Logs incluem IP, user agent e contexto completo
+
+### ✅ Correções de Bugs Críticos Implementadas
+- **Erro htmlspecialchars()**: Corrigido em todos os módulos com fallbacks seguros
+- **Campos de banco inconsistentes**: Padronizados (`tipo`, `status`, `created_at`, `updated_at`)
+- **Queries otimizadas**: Subqueries pesadas substituídas por consultas eficientes
+- **Compatibilidade MySQLi**: Função `obterConexao()` implementada para AJAX
+- **Fluxo de login atualizado**: Redirecionamento automático para admin_master
+
+### ✅ Melhorias de Segurança e Performance
+- **Validação de entrada**: Sanitização aprimorada em todos os formulários
+- **Headers de segurança**: Implementados em todas as páginas administrativas
+- **Consultas otimizadas**: Melhoria significativa na performance de listagens
+- **Layout responsivo**: Interface administrativa totalmente responsiva
+
+---
+
 ## Índice
 1. [Visão Geral do Sistema](#visão-geral-do-sistema)
 2. [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
@@ -546,21 +584,439 @@ find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
 
 ---
 
+## 17. Módulo Administrador (`/administrador/`)
+
+### 17.1 Visão Geral do Módulo
+
+O módulo administrador é o centro de controle do sistema Faciência ERP, fornecendo acesso completo a todas as funcionalidades de gestão, configuração e monitoramento do sistema. Este módulo foi implementado em Dezembro de 2024 e atualizado em Junho de 2025.
+
+#### Funcionalidades Principais
+- **Dashboard Executivo**: Visão geral com KPIs e estatísticas em tempo real
+- **Gestão de Usuários**: CRUD completo com controle de permissões
+- **Configurações Globais**: Parâmetros gerais do sistema
+- **Sistema de Logs**: Auditoria completa de ações
+- **Gestão de Módulos**: Controle e acesso a todos os módulos do sistema
+
+### 17.2 Estrutura de Arquivos
+
+```
+administrador/
+├── index.php               # Dashboard principal
+├── usuarios.php            # Gestão de usuários
+├── configuracoes.php       # Configurações do sistema
+├── logs.php               # Visualização de logs
+├── modulos.php            # Gestão de módulos
+├── criar_admin_master.sql # Script de criação do admin master
+├── INSTALACAO.md          # Instruções de instalação
+├── LOGS_IMPLEMENTADOS.md  # Documentação dos logs
+├── CORRECOES.md           # Histórico de correções
+├── README.md              # Documentação específica
+├── css/                   # Estilos específicos do módulo
+│   └── admin.css
+├── includes/              # Arquivos de apoio
+│   ├── header.php
+│   ├── footer.php
+│   ├── init.php
+│   └── functions.php
+├── js/                    # Scripts JavaScript
+│   └── admin.js
+└── views/                 # Templates específicos
+    ├── dashboard.php
+    ├── usuarios.php
+    └── configuracoes.php
+```
+
+### 17.3 Dashboard Administrativo
+
+#### Estatísticas Principais
+- **Total de Usuários Ativos**: Contagem em tempo real
+- **Módulos do Sistema**: Status de cada módulo
+- **Acessos Hoje**: Número de logins do dia
+- **Status do Sistema**: Indicadores de saúde
+
+#### Implementação das Estatísticas
+```php
+// administrador/includes/init.php
+function contarModulosAtivos() {
+    $modulos = [
+        'secretaria', 'polo', 'financeiro', 'ava', 
+        'aluno', 'chamados', 'administrador'
+    ];
+    return count($modulos);
+}
+
+function contarUsuariosOnline() {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT COUNT(DISTINCT usuario_id) 
+        FROM logs_sistema 
+        WHERE acao = 'login' 
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+    ");
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+function contarAcessosHoje() {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM logs_sistema 
+        WHERE acao = 'login' 
+        AND DATE(created_at) = CURDATE()
+    ");
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+function verificarStatusSistema() {
+    // Verifica conectividade do banco, espaço em disco, etc.
+    try {
+        global $pdo;
+        $pdo->query("SELECT 1");
+        return "Operacional";
+    } catch (Exception $e) {
+        return "Problema";
+    }
+}
+```
+
+### 17.4 Sistema de Logs
+
+#### Tipos de Logs Implementados
+- **Login/Logout**: Autenticação de usuários
+- **CRUD Operations**: Create, Read, Update, Delete
+- **Acesso a Módulos**: Rastreamento de navegação
+- **Erros de Sistema**: Falhas e exceções
+- **Configurações**: Alterações de configuração
+
+#### Estrutura da Tabela de Logs
+```sql
+CREATE TABLE logs_sistema (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    acao VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    tabela_afetada VARCHAR(100),
+    registro_id INT,
+    dados_anteriores JSON,
+    dados_novos JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_usuario_id (usuario_id),
+    INDEX idx_acao (acao),
+    INDEX idx_created_at (created_at),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+);
+```
+
+#### Função de Log Automático
+```php
+// includes/functions.php
+function registrarLog($acao, $descricao, $tabela = null, $registro_id = null, $dados_anteriores = null, $dados_novos = null) {
+    global $pdo;
+    
+    $usuario_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+    $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO logs_sistema 
+            (usuario_id, acao, descricao, tabela_afetada, registro_id, dados_anteriores, dados_novos, ip_address, user_agent) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $usuario_id,
+            $acao,
+            $descricao,
+            $tabela,
+            $registro_id,
+            $dados_anteriores ? json_encode($dados_anteriores, JSON_UNESCAPED_UNICODE) : null,
+            $dados_novos ? json_encode($dados_novos, JSON_UNESCAPED_UNICODE) : null,
+            $ip_address,
+            $user_agent
+        ]);
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Erro ao registrar log: " . $e->getMessage());
+        return false;
+    }
+}
+```
+
+### 17.5 Gestão de Usuários
+
+#### Tipos de Usuário Suportados
+- **admin_master**: Acesso total ao sistema
+- **diretoria**: Acesso a relatórios e gestão geral
+- **secretaria_academica**: Gestão acadêmica completa
+- **secretaria_documentos**: Foco em documentos
+- **financeiro**: Módulo financeiro
+- **polo**: Acesso restrito ao polo específico
+- **professor**: Portal do professor
+- **aluno**: Portal do aluno
+
+#### Controle de Permissões
+```php
+// includes/Auth.php
+class Auth {
+    public static function hasPermission($modulo, $acao = 'view') {
+        if (!self::isLoggedIn()) {
+            return false;
+        }
+        
+        $userType = $_SESSION['user_type'];
+        
+        // Admin master tem acesso total
+        if ($userType === 'admin_master') {
+            return true;
+        }
+        
+        // Mapeamento de permissões por tipo de usuário
+        $permissions = [
+            'diretoria' => ['secretaria', 'financeiro', 'relatorios', 'administrador'],
+            'secretaria_academica' => ['secretaria', 'aluno', 'ava'],
+            'secretaria_documentos' => ['secretaria', 'documentos'],
+            'financeiro' => ['financeiro', 'aluno'],
+            'polo' => ['polo', 'aluno', 'chamados'],
+            'professor' => ['ava', 'aluno'],
+            'aluno' => ['aluno', 'ava']
+        ];
+        
+        return in_array($modulo, $permissions[$userType] ?? []);
+    }
+}
+```
+
+### 17.6 Configurações do Sistema
+
+#### Tipos de Configurações
+- **Configurações Gerais**: Nome da instituição, endereço, contatos
+- **Configurações de Email**: SMTP, templates de email
+- **Configurações de Upload**: Limites, tipos permitidos
+- **Configurações de Documentos**: Templates, numeração
+- **Configurações de Backup**: Frequência, local de armazenamento
+
+#### Interface de Configuração
+```php
+// administrador/configuracoes.php
+// Interface para gerenciar configurações dinâmicas
+// Permite edição de valores sem alterar código
+
+$configuracoes = [
+    'instituicao_nome' => 'Nome da Instituição',
+    'instituicao_endereco' => 'Endereço',
+    'email_smtp_host' => 'Servidor SMTP',
+    'email_smtp_port' => 'Porta SMTP',
+    'upload_max_size' => 'Tamanho Máximo Upload (MB)',
+    'documento_prefixo' => 'Prefixo dos Documentos'
+];
+```
+
+### 17.7 Gestão de Módulos
+
+#### Módulos do Sistema
+1. **Secretaria**: Portal da secretaria acadêmica
+2. **Polo**: Portal dos polos de ensino
+3. **Financeiro**: Gestão financeira e mensalidades
+4. **AVA**: Ambiente Virtual de Aprendizagem
+5. **Aluno**: Portal do aluno
+6. **Chamados**: Sistema de suporte
+7. **Administrador**: Módulo de administração
+
+#### Interface de Módulos
+```php
+// administrador/modulos.php
+$modulos = [
+    'secretaria' => [
+        'nome' => 'Secretaria Acadêmica',
+        'descricao' => 'Gestão de alunos, cursos e matrículas',
+        'url' => '../secretaria/',
+        'icone' => 'fas fa-graduation-cap',
+        'status' => 'ativo'
+    ],
+    'financeiro' => [
+        'nome' => 'Financeiro',
+        'descricao' => 'Controle de mensalidades e boletos',
+        'url' => '../financeiro/',
+        'icone' => 'fas fa-dollar-sign',
+        'status' => 'ativo'
+    ],
+    // ... outros módulos
+];
+```
+
+### 17.8 Instalação do Módulo Administrador
+
+#### Script de Criação do Admin Master
+```sql
+-- criar_admin_master.sql
+INSERT INTO usuarios (
+    nome, 
+    email, 
+    senha, 
+    tipo_usuario, 
+    status, 
+    created_at
+) VALUES (
+    'Administrador Master',
+    'admin@faciencia.edu.br',
+    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- senha: password
+    'admin_master',
+    'ativo',
+    NOW()
+);
+```
+
+#### Passos de Instalação
+1. **Criar usuário admin master**: Executar script SQL
+2. **Configurar permissões**: Verificar estrutura de pastas
+3. **Testar acesso**: Login com credenciais padrão
+4. **Configurar sistema**: Definir configurações iniciais
+
+### 17.9 Monitoramento e Manutenção
+
+#### Indicadores de Performance
+- **Tempo de Resposta**: Monitoramento de páginas
+- **Uso de Recursos**: CPU, memória, disco
+- **Logs de Erro**: Falhas do sistema
+- **Backups**: Status e frequência
+
+#### Manutenção Preventiva
+- **Limpeza de Logs**: Remoção automática de logs antigos
+- **Otimização de Banco**: Rebuild de índices
+- **Backup Automático**: Agendamento de backups
+- **Monitoramento de Espaço**: Alertas de capacidade
+
+---
+
+## 18. Atualizações Recentes (Dezembro 2024 - Junho 2025)
+
+### 18.1 Principais Melhorias Implementadas
+
+#### Módulo Administrador (Dezembro 2024)
+- **Implementação Completa**: Criação do módulo administrador
+- **Dashboard Executivo**: KPIs e estatísticas em tempo real
+- **Sistema de Logs**: Auditoria completa de ações
+- **Gestão de Usuários**: CRUD com controle de permissões
+- **Configurações Globais**: Interface para parâmetros do sistema
+
+#### Correções de Bugs (Junho 2025)
+- **Fix do modulos.php**: Correção do erro "Failed to open stream"
+- **Estrutura de Header**: Padronização do layout administrativo
+- **Navigation**: Implementação de navegação responsiva
+- **Layout Moderno**: Atualização para TailwindCSS
+
+#### Sistema de Logging (Janeiro 2025)
+- **Logs Automáticos**: Registro automático de todas as ações
+- **Auditoria**: Rastreamento completo de alterações
+- **Performance**: Otimização de consultas de log
+- **Interface**: Visualização amigável dos logs
+
+### 18.2 Melhorias de Segurança
+
+#### Autenticação Aprimorada
+- **Controle de Sessão**: Timeout e renovação automática
+- **Verificação de Permissões**: Validação em cada ação
+- **Logs de Segurança**: Registro de tentativas de acesso
+- **Proteção CSRF**: Implementação de tokens (em desenvolvimento)
+
+#### Validação de Dados
+- **Sanitização**: Limpeza automática de inputs
+- **Validação**: Verificação de tipos e formatos
+- **Escape**: Proteção contra XSS
+- **Prepared Statements**: Proteção contra SQL Injection
+
+### 18.3 Otimizações de Performance
+
+#### Banco de Dados
+- **Índices Otimizados**: Criação de índices estratégicos
+- **Consultas Melhoradas**: Refatoração de queries lentas
+- **Cache de Dados**: Implementação de cache simples
+- **Pool de Conexões**: Otimização de conexões
+
+#### Frontend
+- **CSS Minificado**: Redução do tamanho dos arquivos
+- **JavaScript Otimizado**: Compressão e cache
+- **Imagens Comprimidas**: Otimização de recursos
+- **Lazy Loading**: Carregamento sob demanda
+
+### 18.4 Documentação Atualizada
+
+#### Documentação Técnica
+- **Versão 2.0**: Documentação completamente atualizada
+- **Exemplos de Código**: Mais exemplos práticos
+- **Troubleshooting**: Seção expandida de solução de problemas
+- **APIs**: Documentação das APIs internas
+
+#### Guias de Usuário
+- **Manual do Administrador**: Guia completo do módulo
+- **Manual da Secretaria**: Procedimentos atualizados
+- **Manual dos Polos**: Instruções específicas
+- **FAQ**: Perguntas frequentes e respostas
+
+---
+
+## 19. Roadmap Futuro
+
+### 19.1 Próximas Versões
+
+#### Versão 2.1 (Julho 2025)
+- **API REST Completa**: Endpoints para todos os módulos
+- **Mobile App**: Aplicativo móvel para alunos
+- **Notificações Push**: Sistema de notificações em tempo real
+- **Integração WhatsApp**: Envio de documentos via WhatsApp
+
+#### Versão 2.2 (Setembro 2025)
+- **Business Intelligence**: Dashboard analítico avançado
+- **Machine Learning**: Predição de inadimplência
+- **Blockchain**: Certificados digitais com blockchain
+- **Multi-tenancy**: Suporte a múltiplas instituições
+
+### 19.2 Melhorias Planejadas
+
+#### Segurança
+- **Two-Factor Authentication**: Autenticação em dois fatores
+- **Single Sign-On**: Integração com sistemas externos
+- **Auditoria Avançada**: Logs mais detalhados
+- **Compliance**: Adequação à LGPD
+
+#### Performance
+- **Microserviços**: Arquitetura distribuída
+- **CDN**: Content Delivery Network
+- **Cache Distribuído**: Redis/Memcached
+- **Load Balancing**: Balanceamento de carga
+
+---
+
 ## Contatos e Suporte
 
 ### Informações do Desenvolvedor
 - **Sistema**: Faciência ERP
-- **Versão**: 1.0
-- **Desenvolvido em**: 2025
-- **Linguagem Principal**: PHP
-- **Banco de Dados**: MySQL
+- **Versão Atual**: 2.0
+- **Última Atualização**: Junho 2025
+- **Linguagem Principal**: PHP 7.4+
+- **Banco de Dados**: MySQL 8.0+
+- **Framework CSS**: TailwindCSS 3.0
+
+### Histórico de Versões
+- **v1.0** (2024): Versão inicial
+- **v1.1** (Dezembro 2024): Módulo administrador
+- **v1.2** (Janeiro 2025): Sistema de logs
+- **v2.0** (Junho 2025): Correções e melhorias
 
 ### Para Manutenção Futura
-- Manter documentação atualizada
-- Realizar backups regulares
-- Monitorar logs de erro
-- Atualizar dependências regularmente
-- Implementar melhorias de segurança
+- Manter documentação atualizada com cada versão
+- Realizar backups regulares (diário/semanal)
+- Monitorar logs de erro e performance
+- Atualizar dependências e bibliotecas regularmente
+- Implementar melhorias de segurança continuamente
+- Realizar testes de penetração periodicamente
+- Manter compatibilidade com versões PHP/MySQL mais recentes
 
 ---
 

@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             
             // Insere a solicitação no banco de dados
-            $db->insert('solicitacoes_site', $dados);
+            $db->insert('solicitacoes_s', $dados);
             
             // Define a mensagem de sucesso
             $mensagem = 'Solicitação enviada com sucesso! Seu protocolo é: ' . $protocolo;

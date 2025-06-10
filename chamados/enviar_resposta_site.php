@@ -104,7 +104,7 @@ $db = Database::getInstance();
 
 try {
     // Verifica se a solicitação existe
-    $sql = "SELECT * FROM solicitacoes_site WHERE id = ?";
+    $sql = "SELECT * FROM solicitacoes_s WHERE id = ?";
     $solicitacao = $db->fetchOne($sql, [$id]);
 
     if (!$solicitacao) {
@@ -302,24 +302,24 @@ try {
             'observacao' => $observacao
         ];
 
-        $db->update('solicitacoes_site', $dados, 'id = ?', [$id]);
+        $db->update('solicitacoes_s', $dados, 'id = ?', [$id]);
 
         // Registra o log
         registrarLog(
-            'solicitacoes_site',
+            'solicitacoes_s',
             'editar',
             "Email enviado e status da solicitação ID: {$id} atualizado para Concluído",
             $id,
-            'solicitacoes_site'
+            'solicitacoes_s'
         );
     } else {
         // Registra o log sem atualizar o status
         registrarLog(
-            'solicitacoes_site',
+            'solicitacoes_s',
             'editar',
             "Email enviado para a solicitação ID: {$id}",
             $id,
-            'solicitacoes_site'
+            'solicitacoes_s'
         );
     }
 

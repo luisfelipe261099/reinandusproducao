@@ -62,9 +62,9 @@ try {
     $stats['chamados_abertos'] = $resultado['total'] ?? 0;
 
     // Total de solicitações do site (externas)
-    $sql = "SELECT COUNT(*) as total FROM solicitacoes_site WHERE status IN ('Pendente', 'Em Andamento')";
+    $sql = "SELECT COUNT(*) as total FROM solicitacoes_s WHERE status IN ('Pendente', 'Em Andamento')";
     $resultado = executarConsulta($db, $sql);
-    $stats['solicitacoes_site'] = $resultado['total'] ?? 0;
+    $stats['solicitacoes_s'] = $resultado['total'] ?? 0;
 
     // Total de turmas ativas
     $sql = "SELECT COUNT(*) as total FROM turmas WHERE status IN ('planejada', 'em_andamento')";
@@ -84,15 +84,15 @@ try {
     // Solicitações processadas hoje (sistema + site)
     $sql = "SELECT
                 (SELECT COUNT(*) FROM chamados WHERE status = 'resolvido' AND DATE(data_resolucao) = CURDATE()) +
-                (SELECT COUNT(*) FROM solicitacoes_site WHERE status = 'Processado' AND DATE(data_solicitacao) = CURDATE()) as total";
+                (SELECT COUNT(*) FROM solicitacoes_s WHERE status = 'Processado' AND DATE(data_solicitacao) = CURDATE()) as total";
     $resultado = executarConsulta($db, $sql);
     $stats['chamados_resolvidos_hoje'] = $resultado['total'] ?? 0;
 
     // Solicitações do site pendentes há mais de 3 dias
-    $sql = "SELECT COUNT(*) as total FROM solicitacoes_site
+    $sql = "SELECT COUNT(*) as total FROM solicitacoes_s
             WHERE status IN ('Pendente', 'Em Andamento') AND DATEDIFF(CURDATE(), data_solicitacao) > 3";
     $resultado = executarConsulta($db, $sql);
-    $stats['solicitacoes_site_atrasadas'] = $resultado['total'] ?? 0;
+    $stats['solicitacoes_s_atrasadas'] = $resultado['total'] ?? 0;
 
     // Polos próximos do limite de documentos
     $sql = "SELECT id, nome, limite_documentos, documentos_emitidos,
@@ -150,7 +150,7 @@ try {
                        WHEN DATEDIFF(CURDATE(), ss.data_solicitacao) > 3 THEN 'alta'
                        ELSE 'normal'
                    END as prioridade
-            FROM solicitacoes_site ss
+            FROM solicitacoes_s ss
             WHERE ss.status IN ('Pendente', 'Em Andamento')
             ORDER BY
                 CASE
@@ -160,8 +160,8 @@ try {
                 END,
                 ss.data_solicitacao ASC
             LIMIT 3";
-    $solicitacoes_site = executarConsultaAll($db, $sql);
-    $tarefas = array_merge($tarefas, $solicitacoes_site);
+    $solicitacoes_s = executarConsultaAll($db, $sql);
+    $tarefas = array_merge($tarefas, $solicitacoes_s);
 
     // Matrículas recentes que precisam de revisão
     $sql = "SELECT m.id, m.data_matricula, 'matricula' as tipo,
@@ -275,27 +275,27 @@ try {
     }
 
     // Alerta de solicitações do site atrasadas
-    if ($stats['solicitacoes_site_atrasadas'] > 0) {
+    if ($stats['solicitacoes_s_atrasadas'] > 0) {
         $alertas[] = [
             'tipo' => 'warning',
             'titulo' => 'Solicitações do Site Atrasadas',
-            'mensagem' => "{$stats['solicitacoes_site_atrasadas']} solicitação(ões) do site pendente(s) há mais de 3 dias",
+            'mensagem' => "{$stats['solicitacoes_s_atrasadas']} solicitação(ões) do site pendente(s) há mais de 3 dias",
             'link' => 'chamados/index.php?view=chamados_site&status=atrasadas'
         ];
     }
 
     // Alerta de solicitações do site urgentes
-    if ($stats['solicitacoes_site'] > 0) {
-        $sql = "SELECT COUNT(*) as total FROM solicitacoes_site
+    if ($stats['solicitacoes_s'] > 0) {
+        $sql = "SELECT COUNT(*) as total FROM solicitacoes_s
                 WHERE status IN ('Pendente', 'Em Andamento') AND DATEDIFF(CURDATE(), data_solicitacao) > 7";
         $resultado = executarConsulta($db, $sql);
-        $solicitacoes_site_urgentes = $resultado['total'] ?? 0;
+        $solicitacoes_s_urgentes = $resultado['total'] ?? 0;
 
-        if ($solicitacoes_site_urgentes > 0) {
+        if ($solicitacoes_s_urgentes > 0) {
             $alertas[] = [
                 'tipo' => 'danger',
                 'titulo' => 'Solicitações Urgentes do Site',
-                'mensagem' => "{$solicitacoes_site_urgentes} solicitação(ões) urgente(s) do site (mais de 7 dias)",
+                'mensagem' => "{$solicitacoes_s_urgentes} solicitação(ões) urgente(s) do site (mais de 7 dias)",
                 'link' => 'chamados/index.php?view=chamados_site&status=urgentes'
             ];
         }
@@ -500,7 +500,7 @@ $titulo_pagina = 'Dashboard da Secretaria';
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Solicitações Site</p>
-                                    <p class="text-3xl font-bold text-gray-800 mt-1" id="solicitacoes-site"><?php echo number_format($stats['solicitacoes_site'], 0, ',', '.'); ?></p>
+                                    <p class="text-3xl font-bold text-gray-800 mt-1" id="solicitacoes-site"><?php echo number_format($stats['solicitacoes_s'], 0, ',', '.'); ?></p>
                                 </div>
                                 <div class="bg-purple-100 p-3 rounded-full">
                                     <i class="fas fa-globe text-purple-500"></i>
@@ -508,9 +508,9 @@ $titulo_pagina = 'Dashboard da Secretaria';
                             </div>
                             <div class="mt-4 flex items-center justify-between">
                                 <div>
-                                    <?php if ($stats['solicitacoes_site_atrasadas'] > 0): ?>
+                                    <?php if ($stats['solicitacoes_s_atrasadas'] > 0): ?>
                                     <span class="text-red-500 text-sm font-medium flex items-center">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i> <?php echo $stats['solicitacoes_site_atrasadas']; ?> atrasadas
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> <?php echo $stats['solicitacoes_s_atrasadas']; ?> atrasadas
                                     </span>
                                     <span class="text-gray-500 text-xs">Mais de 3 dias</span>
                                     <?php else: ?>

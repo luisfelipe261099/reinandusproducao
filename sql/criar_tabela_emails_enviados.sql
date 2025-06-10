@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS `emails_enviados` (
   PRIMARY KEY (`id`),
   KEY `solicitacao_id` (`solicitacao_id`),
   KEY `usuario_id` (`usuario_id`),
-  CONSTRAINT `fk_emails_solicitacao` FOREIGN KEY (`solicitacao_id`) REFERENCES `solicitacoes_site` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_emails_solicitacao` FOREIGN KEY (`solicitacao_id`) REFERENCES `solicitacoes_s` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_emails_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
