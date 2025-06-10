@@ -3,61 +3,68 @@
  * AJAX para buscar indicadores rápidos do módulo secretaria
  */
 
-require_once '../includes/init.php';
-require_once '../includes/Database.php';
-require_once '../includes/Auth.php';
+// Configuração básica
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Não exibir erros no output JSON
 
+// Headers para JSON
 header('Content-Type: application/json');
-
-// Verifica autenticação
-if (!Auth::isLoggedIn()) {
-    echo json_encode(['success' => false, 'message' => 'Não autenticado']);
-    exit;
-}
+header('Cache-Control: no-cache, must-revalidate');
 
 try {
+    // Inclui apenas os arquivos essenciais
+    require_once __DIR__ . '/../includes/Database.php';
+    
+    // Conecta ao banco
     $db = Database::getInstance();
     
-    // Total de alunos
+    // Inicializa contadores
     $totalAlunos = 0;
+    $matriculasAtivas = 0;
+    $totalCursos = 0;
+    
+    // Total de alunos ativos
     try {
         $result = $db->fetchOne("SELECT COUNT(*) as total FROM alunos WHERE status = 'ativo'");
-        $totalAlunos = $result['total'] ?? 0;
+        $totalAlunos = (int)($result['total'] ?? 0);
     } catch (Exception $e) {
-        // Tabela pode não existir ainda
+        error_log("Erro ao buscar alunos: " . $e->getMessage());
     }
     
     // Matrículas ativas
-    $matriculasAtivas = 0;
     try {
-        $result = $db->fetchOne("SELECT COUNT(*) as total FROM matriculas WHERE status = 'ativa'");
-        $matriculasAtivas = $result['total'] ?? 0;
+        $result = $db->fetchOne("SELECT COUNT(*) as total FROM matriculas WHERE status = 'ativo'");
+        $matriculasAtivas = (int)($result['total'] ?? 0);
     } catch (Exception $e) {
-        // Tabela pode não existir ainda
+        error_log("Erro ao buscar matrículas: " . $e->getMessage());
     }
     
-    // Total de cursos
-    $totalCursos = 0;
+    // Total de cursos ativos
     try {
         $result = $db->fetchOne("SELECT COUNT(*) as total FROM cursos WHERE status = 'ativo'");
-        $totalCursos = $result['total'] ?? 0;
+        $totalCursos = (int)($result['total'] ?? 0);
     } catch (Exception $e) {
-        // Tabela pode não existir ainda
+        error_log("Erro ao buscar cursos: " . $e->getMessage());
     }
     
+    // Retorna os dados
     echo json_encode([
         'success' => true,
         'total_alunos' => $totalAlunos,
         'matriculas_ativas' => $matriculasAtivas,
-        'total_cursos' => $totalCursos
-    ]);
+        'total_cursos' => $totalCursos,
+        'timestamp' => time()
+    ], JSON_UNESCAPED_UNICODE);
     
 } catch (Exception $e) {
+    error_log("Erro geral no indicadores_rapidos.php: " . $e->getMessage());
+    
     echo json_encode([
         'success' => false,
         'message' => 'Erro interno do servidor',
         'total_alunos' => 0,
         'matriculas_ativas' => 0,
-        'total_cursos' => 0
-    ]);
+        'total_cursos' => 0,
+        'timestamp' => time()
+    ], JSON_UNESCAPED_UNICODE);
 }

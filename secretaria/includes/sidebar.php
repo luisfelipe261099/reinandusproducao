@@ -83,7 +83,7 @@
                 </a>
             </div>
 
-            <!-- Ambiente Virtual de Aprendizagem -->
+            <!-- Ambiente Virtual de Aprendizagem 
             <div class="mb-4">
                 <p class="text-xs text-blue-200 uppercase font-semibold mb-2">Ambiente Virtual</p>
                 <a href="ava_gerenciar_acesso.php" class="sidebar-item flex items-center py-3 px-4 text-white hover:bg-blue-700 rounded-md <?php echo basename($_SERVER['PHP_SELF']) == 'ava_gerenciar_acesso.php' ? 'active bg-blue-600' : ''; ?>">
@@ -106,7 +106,7 @@
                     <i class="fas fa-desktop w-6"></i>
                     <span class="sidebar-label">Ambiente do Aluno</span>
                 </a>
-            </div>
+            </div> -->
 
             <!-- Sistema de Chamados -->
             <div class="mb-4">

@@ -1,6 +1,62 @@
 <?php
+/**
+ * ================================================================
+ *                        FACIÊNCIA ERP
+ * ================================================================
+ * 
+ * Sistema de Gestão Educacional
+ * 
+ * ARQUIVO: relatorios.php
+ * VERSÃO: 2.4.0
+ * DATA: 2024-01-15
+ * DESENVOLVEDOR: Equipe Faciência
+ * 
+ * DESCRIÇÃO:
+ * Sistema centralizado de relatórios do ERP educacional.
+ * Permite visualização e análise de dados através de diferentes 
+ * tipos de relatórios: desempenho, estatísticas, documentos,
+ * chamados, alunos e polos.
+ * 
+ * FUNCIONALIDADES:
+ * - Relatórios de desempenho acadêmico
+ * - Estatísticas gerais do sistema
+ * - Relatórios de documentos emitidos e solicitações
+ * - Análise de chamados de suporte
+ * - Relatórios de alunos e matrículas
+ * - Relatórios por polo de ensino
+ * - Exportação em Excel e PDF
+ * - Filtros avançados e períodos personalizados
+ * - Gráficos interativos com Chart.js
+ * 
+ * DEPENDÊNCIAS:
+ * - Sistema de autenticação (Auth)
+ * - Classe Database para conexão com MySQL
+ * - Chart.js para visualização de dados
+ * - Sistema de permissões por módulo
+ * 
+ * TABELAS UTILIZADAS:
+ * - documentos_emitidos: Documentos já gerados
+ * - solicitacoes_documentos: Solicitações pendentes
+ * - alunos: Dados dos estudantes
+ * - cursos: Informações dos cursos
+ * - turmas: Dados das turmas
+ * - polos: Polos de ensino
+ * - chamados: Sistema de suporte
+ * - usuarios: Dados dos usuários
+ * 
+ * ================================================================
+ */
+
+// ================================================================
+//                    CONFIGURAÇÕES INICIAIS
+// ================================================================
+
 // Inicializa o sistema
 require_once __DIR__ . '/includes/init.php';
+
+// ================================================================
+//                  VERIFICAÇÃO DE AUTENTICAÇÃO
+// ================================================================
 
 // Verifica se o usuário está autenticado
 exigirLogin();
@@ -16,6 +72,10 @@ if (!Auth::hasPermission('relatorios', 'visualizar')) {
     exit;
 }
 
+// ================================================================
+//                   CONFIGURAÇÃO DE PERMISSÕES
+// ================================================================
+
 // Define o nível de acesso
 $permissoes = [
     'nivel_acesso' => Auth::getUserType() === 'admin_master' ? 'total' :
@@ -23,8 +83,17 @@ $permissoes = [
                      (Auth::hasPermission('relatorios', 'criar') ? 'criar' : 'visualizar'))
 ];
 
+// ================================================================
+//                  PROCESSAMENTO DE PARÂMETROS
+// ================================================================
+
 // Obtém o tipo de relatório a ser exibido
 $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'desempenho';
+
+// Parâmetros de paginação
+$pagina_atual = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
+$registros_por_pagina = isset($_GET['per_page']) ? max(10, min(100, (int)$_GET['per_page'])) : 25;
+$offset = ($pagina_atual - 1) * $registros_por_pagina;
 
 // Variável para armazenar mensagens de erro
 $mensagens_erro = [];
@@ -40,6 +109,10 @@ $titulo_pagina = 'Relatórios - ' . ucfirst($tipo);
 
 
 
+
+// ================================================================
+//                     INTERFACE GRÁFICA
+// ================================================================
 
 // Inicia a saída HTML
 ?><!DOCTYPE html>
@@ -98,18 +171,37 @@ $titulo_pagina = 'Relatórios - ' . ucfirst($tipo);
                                         <span>Polos</span>
                                     </a>
                                 </div>
-                            </div>
-
-                            <div class="dropdown relative">
+                            </div>                            <div class="dropdown relative">
                                 <button class="btn-success dropdown-toggle">
                                     <i class="fas fa-download mr-2"></i> Exportar <i class="fas fa-chevron-down ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                    <a href="exportar_relatorio.php?tipo=<?php echo $tipo; ?><?php echo isset($_GET['curso_id']) ? '&curso_id=' . $_GET['curso_id'] : ''; ?><?php echo isset($_GET['polo_id']) ? '&polo_id=' . $_GET['polo_id'] : ''; ?><?php echo isset($_GET['turma_id']) ? '&turma_id=' . $_GET['turma_id'] : ''; ?><?php echo isset($_GET['periodo']) ? '&periodo=' . $_GET['periodo'] : ''; ?><?php echo isset($_GET['data_inicio']) ? '&data_inicio=' . $_GET['data_inicio'] : ''; ?><?php echo isset($_GET['data_fim']) ? '&data_fim=' . $_GET['data_fim'] : ''; ?>&formato=excel" class="dropdown-item" target="_blank">
+                                    <?php
+                                    // Constrói os parâmetros de URL para exportação
+                                    $params_exportacao = ['tipo' => $tipo];
+                                    
+                                    // Adiciona parâmetros gerais
+                                    if (isset($_GET['curso_id'])) $params_exportacao['curso_id'] = $_GET['curso_id'];
+                                    if (isset($_GET['polo_id'])) $params_exportacao['polo_id'] = $_GET['polo_id'];
+                                    if (isset($_GET['turma_id'])) $params_exportacao['turma_id'] = $_GET['turma_id'];
+                                    if (isset($_GET['periodo'])) $params_exportacao['periodo'] = $_GET['periodo'];
+                                    if (isset($_GET['data_inicio'])) $params_exportacao['data_inicio'] = $_GET['data_inicio'];
+                                    if (isset($_GET['data_fim'])) $params_exportacao['data_fim'] = $_GET['data_fim'];
+                                    
+                                    // Adiciona parâmetros específicos para documentos
+                                    if ($tipo === 'documentos') {
+                                        if (isset($_GET['tab'])) $params_exportacao['tab'] = $_GET['tab'];
+                                        if (isset($_GET['tipo_documento_id'])) $params_exportacao['tipo_documento_id'] = $_GET['tipo_documento_id'];
+                                        if (isset($_GET['status'])) $params_exportacao['status'] = $_GET['status'];
+                                    }
+                                    
+                                    $url_base = 'exportar_relatorio.php?' . http_build_query($params_exportacao);
+                                    ?>
+                                    <a href="<?php echo $url_base; ?>&formato=excel" class="dropdown-item" target="_blank">
                                         <i class="fas fa-file-excel text-green-600"></i>
                                         <span>Excel</span>
                                     </a>
-                                    <a href="exportar_relatorio.php?tipo=<?php echo $tipo; ?><?php echo isset($_GET['curso_id']) ? '&curso_id=' . $_GET['curso_id'] : ''; ?><?php echo isset($_GET['polo_id']) ? '&polo_id=' . $_GET['polo_id'] : ''; ?><?php echo isset($_GET['turma_id']) ? '&turma_id=' . $_GET['turma_id'] : ''; ?><?php echo isset($_GET['periodo']) ? '&periodo=' . $_GET['periodo'] : ''; ?><?php echo isset($_GET['data_inicio']) ? '&data_inicio=' . $_GET['data_inicio'] : ''; ?><?php echo isset($_GET['data_fim']) ? '&data_fim=' . $_GET['data_fim'] : ''; ?>&formato=pdf" class="dropdown-item" target="_blank">
+                                    <a href="<?php echo $url_base; ?>&formato=pdf" class="dropdown-item" target="_blank">
                                         <i class="fas fa-file-pdf text-red-600"></i>
                                         <span>PDF</span>
                                     </a>

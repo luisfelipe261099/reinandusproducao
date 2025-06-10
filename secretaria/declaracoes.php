@@ -1,64 +1,103 @@
 <?php
 /**
- * Página de gerenciamento de declarações de matrícula
- *
- * Esta página permite selecionar alunos e emitir APENAS declarações de matrícula
- * no formato PDF.
+ * ================================================================
+ * FACIÊNCIA ERP - MÓDULO DE DECLARAÇÕES DE MATRÍCULA
+ * ================================================================
+ * 
+ * Sistema de gerenciamento de declarações acadêmicas
+ * Permite gerar, visualizar e gerenciar declarações de matrícula
+ * e históricos acadêmicos em formato PDF
+ * 
+ * @version 2.0.0
+ * @author Faciência ERP Development Team
+ * @created 2024
+ * @updated 2025-06-10
+ * 
+ * Funcionalidades:
+ * - Geração de declarações de matrícula em PDF
+ * - Geração de históricos acadêmicos em PDF
+ * - Processamento em lote para múltiplos alunos
+ * - Download individual e em ZIP
+ * - Visualização online de documentos
+ * - Controle de solicitações e status
+ * ================================================================
  */
 
-// Ativa a exibição de erros para diagnóstico (remover após correções)
+// ================================================================
+// CONFIGURAÇÕES INICIAIS DO SISTEMA
+// ================================================================
+
+// Configurações de depuração (remover em produção)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Aumenta os limites de memória e tempo de execução para processar muitos documentos
-ini_set('memory_limit', '256M');
-ini_set('max_execution_time', 60); // 1 minuto
-set_time_limit(60);
+// Configurações de performance para processamento de documentos
+ini_set('memory_limit', '256M');           // Limite de memória aumentado
+ini_set('max_execution_time', 60);         // Timeout de 1 minuto
+set_time_limit(60);                        // Define timeout do script
 
-// Define o tamanho do lote para processamento
-define('TAMANHO_LOTE', 3); // Processa 3 alunos por lote para evitar sobrecarga
+// Constantes do sistema
+define('TAMANHO_LOTE', 3);                 // Alunos processados por lote (evita sobrecarga)
 
-// Carrega as configurações
+// ================================================================
+// CARREGAMENTO DE DEPENDÊNCIAS
+// ================================================================
+
+// Carrega as configurações do sistema
 require_once 'config/config.php';
 
-// Carrega as classes necessárias
-require_once 'includes/Database.php';
-require_once 'includes/Auth.php';
-require_once 'includes/Utils.php';
+// Carrega as classes principais do sistema
+require_once 'includes/Database.php';      // Gerenciamento de banco de dados
+require_once 'includes/Auth.php';          // Sistema de autenticação
+require_once 'includes/Utils.php';         // Utilitários gerais
 
-// Carrega as funções
-require_once 'includes/functions.php';
-require_once 'includes/init.php';
+// Carrega as funções e inicializações
+require_once 'includes/functions.php';     // Funções auxiliares
+require_once 'includes/init.php';          // Inicialização do sistema
 
-// Verifica se o TCPDF está instalado, caso contrário inclui
+// ================================================================
+// CONFIGURAÇÃO DA BIBLIOTECA TCPDF (GERAÇÃO DE PDF)
+// ================================================================
+
+// Verifica e carrega a biblioteca TCPDF para geração de PDFs
 if (!class_exists('TCPDF')) {
-    // Tenta incluir a biblioteca TCPDF
+    // Tenta carregar do diretório vendor (Composer)
     $tcpdf_path = 'vendor/tecnickcom/tcpdf/tcpdf.php';
     if (file_exists($tcpdf_path)) {
         require_once $tcpdf_path;
     } else {
-        // Se não encontrar, tenta um caminho alternativo
+        // Fallback para diretório local
         require_once 'includes/tcpdf/tcpdf.php';
     }
 }
 
-// Inicia a sessão se ainda não estiver iniciada
+// ================================================================
+// INICIALIZAÇÃO DA SESSÃO E AUTENTICAÇÃO
+// ================================================================
+
+// Inicia a sessão se necessário
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Verifica se o usuário está logado
+// ================================================================
+// VERIFICAÇÃO DE AUTENTICAÇÃO E INICIALIZAÇÃO DE VARIÁVEIS
+// ================================================================
+
+// Verifica se o usuário está autenticado
 if (!isset($_SESSION['user_id'])) {
-    // Redireciona para a página de login
+    // Redireciona para a página de login se não estiver logado
     header('Location: login.php');
     exit;
 }
 
-// Inicializa variáveis
-$titulo_pagina = 'Declarações de Matrícula';
-$view = 'listar';
-$mensagem = $_SESSION['mensagem'] ?? null;
+// Inicialização de variáveis do sistema
+$titulo_pagina = 'Declarações de Matrícula';    // Título padrão da página
+$view = 'listar';                               // View padrão a ser exibida
+$mensagem = $_SESSION['mensagem'] ?? null;      // Mensagem de feedback do sistema
+
+// Limpa mensagens da sessão após uso
 if (isset($_SESSION['mensagem'])) {
     unset($_SESSION['mensagem']);
 }
@@ -66,19 +105,30 @@ if (isset($_SESSION['mensagem'])) {
 // Conecta ao banco de dados
 $db = Database::getInstance();
 
-// Funções para executar consultas com tratamento de erro
-function executarConsulta($db, $sql, $params = [], $default = null) {
-    try {
+// ================================================================
+// FUNÇÕES AUXILIARES PARA OPERAÇÕES DE BANCO DE DADOS
+// ================================================================
+
+/**
+ * Executa uma consulta SQL que retorna um único resultado
+ * 
+ * @param object $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query
+ * @param mixed $default Valor padrão se não encontrar resultado
+ * @return mixed Resultado da consulta ou valor padrão
+ */
+function executarConsulta($db, $sql, $params = [], $default = null) {    try {
         $result = $db->fetchOne($sql, $params);
 
-        // Log para depuração
+        // Log para depuração (remover em produção)
         error_log('executarConsulta - SQL: ' . $sql);
         error_log('executarConsulta - Params: ' . print_r($params, true));
         error_log('executarConsulta - Result: ' . ($result ? 'Dados encontrados' : 'Nenhum dado encontrado'));
 
         return $result ?: $default;
     } catch (Exception $e) {
-        // Registra o erro no log
+        // Registra o erro no log do sistema
         error_log('Erro na consulta SQL: ' . $e->getMessage());
         error_log('SQL com erro: ' . $sql);
         error_log('Parâmetros: ' . print_r($params, true));
@@ -86,9 +136,20 @@ function executarConsulta($db, $sql, $params = [], $default = null) {
     }
 }
 
-// Função melhorada para buscar dados do aluno incluindo o polo da matrícula
+/**
+ * Busca dados completos do aluno para geração de documentos
+ * Inclui informações do curso, turma, polo e matrícula
+ * 
+ * @param object $db Instância do banco de dados
+ * @param int $aluno_id ID do aluno
+ * @return array|null Dados completos do aluno ou null se não encontrado
+ */
 function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
-    // Verifica se a coluna mec existe na tabela polos
+    // ============================================================
+    // VERIFICAÇÃO E PREPARAÇÃO DA ESTRUTURA DO BANCO DE DADOS
+    // ============================================================
+    
+    // Verifica se a coluna 'mec' existe na tabela polos (para compatibilidade)
     $coluna_mec_existe = false;
     try {
         $colunas = $db->fetchAll("SHOW COLUMNS FROM polos LIKE 'mec'");
@@ -97,7 +158,7 @@ function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
         error_log("Erro ao verificar coluna mec: " . $e->getMessage());
     }
 
-    // Se a coluna não existir, tenta criá-la
+    // Cria a coluna 'mec' se não existir (para armazenar código MEC do polo)
     if (!$coluna_mec_existe) {
         try {
             $db->query("ALTER TABLE polos ADD COLUMN mec VARCHAR(255) NULL COMMENT 'Nome do polo registrado no MEC'");
@@ -286,22 +347,30 @@ function criarOuObterSolicitacaoDocumento($db, $aluno_id, $polo_id, $tipo_docume
     } catch (Exception $e) {
         error_log("Erro ao criar/obter solicitação: " . $e->getMessage());
         error_log("Rastreamento: " . $e->getTraceAsString());
-        throw $e;
-    }
+        throw $e;    }
 }
 
+/**
+ * Executa uma consulta SQL que retorna múltiplos resultados
+ * 
+ * @param object $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query
+ * @param array $default Valor padrão se não encontrar resultados
+ * @return array Resultados da consulta ou array vazio
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
     try {
         $result = $db->fetchAll($sql, $params);
 
-        // Log para depuração
+        // Log para depuração (remover em produção)
         error_log('executarConsultaAll - SQL: ' . $sql);
         error_log('executarConsultaAll - Params: ' . print_r($params, true));
         error_log('executarConsultaAll - Result count: ' . ($result ? count($result) : 0));
 
         return $result ?: $default;
     } catch (Exception $e) {
-        // Registra o erro no log
+        // Registra o erro no log do sistema
         error_log('Erro na consulta SQL (fetchAll): ' . $e->getMessage());
         error_log('SQL com erro: ' . $sql);
         error_log('Parâmetros: ' . print_r($params, true));
@@ -309,14 +378,23 @@ function executarConsultaAll($db, $sql, $params = [], $default = []) {
     }
 }
 
-// Processa a ação solicitada
-// Verifica se a ação está no GET ou no POST
+// ================================================================
+// CONTROLADOR PRINCIPAL - PROCESSAMENTO DE AÇÕES
+// ================================================================
+
+// Obtém a ação solicitada (GET ou POST)
 $action = $_GET['action'] ?? ($_POST['action'] ?? 'listar');
 error_log("Ação solicitada: " . $action);
 
+// Router principal - processa as diferentes ações do sistema
 switch ($action) {
+    
+    // ============================================================
+    // FUNCIONALIDADES DE DOWNLOAD EM LOTE
+    // ============================================================
+    
     case 'baixar_em_lote':
-        // Exibe a página para baixar documentos em lote
+        // Exibe a interface para configurar download em lote
         error_log("Ação 'baixar_em_lote' detectada. Definindo view para 'baixar_em_lote'");
         $view = 'baixar_em_lote';
         error_log("View definida como: " . $view);

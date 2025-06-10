@@ -1,10 +1,48 @@
 <?php
 /**
- * Página de gerenciamento de cursos
+ * ================================================================
+ *                    SISTEMA FACIÊNCIA ERP
+ * ================================================================
+ *  * Módulo: Gerenciamento de Cursos
+ * Descrição: Interface principal para gerenciamento de cursos acadêmicos
+ * Versão: 2.0
+ * Data de Atualização: 2024-12-19
+ * 
+ * Funcionalidades:
+ * - Dashboard com estatísticas e gráficos
+ * - Cadastro, edição e exclusão de cursos
+ * - Visualização detalhada de cursos
+ * - Gerenciamento de modalidades (presencial, EAD, híbrido)
+ * - Controle de níveis (graduação, pós-graduação, etc.)
+ * - Vinculação com polos e áreas de conhecimento
+ * - Relatórios de matrículas e turmas
+ * 
+ * Estrutura de Navegação:
+ * - dashboard: Visão geral com estatísticas
+ * - listar: Listagem paginada de cursos
+ * - novo: Formulário para criar novo curso
+ * - editar: Formulário para editar curso existente
+ * - visualizar: Detalhes completos do curso
+ * - salvar: Processamento de dados do formulário
+ * - excluir: Remoção de curso (com validações)
+ * - buscar: Pesquisa avançada de cursos
+ * 
+ * ================================================================
  */
 
-// Inicializa o sistema
+// ================================================================
+// CONFIGURAÇÕES INICIAIS E CONSTANTES
+// ================================================================
+
+// Carregamento do sistema base
 require_once __DIR__ . '/includes/init.php';
+
+// Configurações específicas do módulo
+ini_set('memory_limit', '256M'); // Aumenta limite de memória para relatórios
+
+// ================================================================
+// VERIFICAÇÃO DE AUTENTICAÇÃO E PERMISSÕES
+// ================================================================
 
 // Verifica se o usuário está autenticado
 exigirLogin();
@@ -12,13 +50,29 @@ exigirLogin();
 // Verifica se o usuário tem permissão para acessar o módulo de cursos
 exigirPermissao('cursos');
 
+// ================================================================
+// INICIALIZAÇÃO DE COMPONENTES
+// ================================================================
+
 // Instancia o banco de dados
 $db = Database::getInstance();
 
-// Define a ação atual
+// Define a ação atual baseada no parâmetro GET
 $action = $_GET['action'] ?? 'dashboard';
 
-// Função para executar consultas com tratamento de erro
+// ================================================================
+// FUNÇÕES AUXILIARES
+// ================================================================
+
+/**
+ * Executa consulta SQL retornando um único registro
+ * 
+ * @param Database $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para prepared statement
+ * @param mixed $default Valor padrão em caso de erro ou resultado vazio
+ * @return array|mixed Resultado da consulta ou valor padrão
+ */
 function executarConsulta($db, $sql, $params = [], $default = null) {
     try {
         return $db->fetchOne($sql, $params);
@@ -29,6 +83,15 @@ function executarConsulta($db, $sql, $params = [], $default = null) {
     }
 }
 
+/**
+ * Executa consulta SQL retornando múltiplos registros
+ * 
+ * @param Database $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para prepared statement
+ * @param array $default Valor padrão em caso de erro
+ * @return array Resultado da consulta ou array vazio
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
     try {
         // Registra a consulta para depuração
@@ -48,16 +111,28 @@ function executarConsultaAll($db, $sql, $params = [], $default = []) {
     }
 }
 
-// Processa a ação
+// ================================================================
+// CONTROLADOR PRINCIPAL - PROCESSAMENTO DE AÇÕES
+// ================================================================
+
+/**
+ * Roteamento principal da aplicação
+ * Processa a ação solicitada e define os dados necessários para cada view
+ */
 switch ($action) {
+    // ============================================================
+    // DASHBOARD - VISÃO GERAL E ESTATÍSTICAS
+    // ============================================================
     case 'dashboard':
-        // Exibe o dashboard de cursos
+        // Define título e view
         $titulo_pagina = 'Dashboard de Cursos';
         $view = 'dashboard';
 
-        // Carrega as estatísticas
+        // Inicializa array de estatísticas
         $stats = [];
 
+        // === VERIFICAÇÃO DE EXISTÊNCIA DAS TABELAS ===
+        
         // Verifica se a tabela cursos existe
         try {
             $sql = "SHOW TABLES LIKE 'cursos'";
@@ -94,6 +169,8 @@ switch ($action) {
             error_log('Erro ao verificar tabela matriculas: ' . $e->getMessage());
         }
 
+        // === ESTATÍSTICAS BÁSICAS ===
+        
         // Total de cursos
         if ($cursos_table_exists) {
             $sql = "SELECT COUNT(*) as total FROM cursos";
@@ -138,7 +215,7 @@ switch ($action) {
             $stats['turmas_ativas'] = 0;
         }
 
-        // Distribuição por modalidade
+        // === DISTRIBUIÇÃO POR MODALIDADE ===
         $stats['modalidade_presencial'] = 0;
         $stats['modalidade_ead'] = 0;
         $stats['modalidade_hibrido'] = 0;
@@ -149,7 +226,7 @@ switch ($action) {
                 $resultados = executarConsultaAll($db, $sql);
 
                 foreach ($resultados as $resultado) {
-                    if (isset($resultado['modalidade'])) {
+                                        if (isset($resultado['modalidade'])) {
                         if ($resultado['modalidade'] === 'presencial') {
                             $stats['modalidade_presencial'] = $resultado['total'];
                         } else if ($resultado['modalidade'] === 'ead') {
@@ -160,14 +237,14 @@ switch ($action) {
                     }
                 }
             } catch (Exception $e) {
-                // Se não tiver campo modalidade, cria dados de exemplo
+                // Se não tiver campo modalidade, cria dados proporcionais
                 $stats['modalidade_presencial'] = ceil($stats['total_cursos'] * 0.5);
                 $stats['modalidade_ead'] = ceil($stats['total_cursos'] * 0.3);
                 $stats['modalidade_hibrido'] = $stats['total_cursos'] - $stats['modalidade_presencial'] - $stats['modalidade_ead'];
             }
         }
 
-        // Distribuição por nível
+        // === DISTRIBUIÇÃO POR NÍVEL ACADÊMICO ===
         $stats['nivel_graduacao'] = 0;
         $stats['nivel_pos_graduacao'] = 0;
         $stats['nivel_mestrado'] = 0;
@@ -186,7 +263,7 @@ switch ($action) {
                     }
                 }
             } catch (Exception $e) {
-                // Se não tiver campo nivel, cria dados de exemplo
+                // Se não tiver campo nivel, cria dados proporcionais
                 $stats['nivel_graduacao'] = ceil($stats['total_cursos'] * 0.4);
                 $stats['nivel_pos_graduacao'] = ceil($stats['total_cursos'] * 0.3);
                 $stats['nivel_tecnico'] = ceil($stats['total_cursos'] * 0.2);
@@ -194,7 +271,7 @@ switch ($action) {
             }
         }
 
-        // Cursos mais populares
+        // === CURSOS MAIS POPULARES ===
         $cursos_populares = [];
         if ($cursos_table_exists && $matriculas_table_exists) {
             try {
@@ -210,7 +287,7 @@ switch ($action) {
             }
         }
 
-        // Se não encontrou cursos populares, usa os cursos mais recentes ou cria dados de exemplo
+        // Fallback para cursos populares
         if (empty($cursos_populares) && $cursos_table_exists) {
             try {
                 $sql = "SELECT id, nome, 0 as total_alunos FROM cursos ORDER BY created_at DESC LIMIT 5";
@@ -226,7 +303,7 @@ switch ($action) {
             }
         }
 
-        // Se ainda não encontrou cursos, cria dados de exemplo
+        // Dados de exemplo se não encontrou cursos
         if (empty($cursos_populares)) {
             $cursos_populares = [
                 ['id' => 1, 'nome' => 'Administração', 'total_alunos' => rand(10, 50)],
@@ -237,7 +314,7 @@ switch ($action) {
             ];
         }
 
-        // Matrículas por mês (nos últimos 6 meses)
+        // === MATRÍCULAS POR MÊS (ÚLTIMOS 6 MESES) ===
         $matriculas_por_mes = [];
         if ($matriculas_table_exists) {
             try {
@@ -255,7 +332,7 @@ switch ($action) {
             }
         }
 
-        // Se não encontrou matrículas, cria dados de exemplo
+        // Dados de exemplo para matrículas por mês
         if (empty($matriculas_por_mes)) {
             $matriculas_por_mes = [];
             for ($i = 5; $i >= 0; $i--) {
@@ -269,7 +346,7 @@ switch ($action) {
             }
         }
 
-        // Cursos recentes
+        // === CURSOS RECENTES ===
         $cursos_recentes = [];
         if ($cursos_table_exists) {
             try {
@@ -286,7 +363,7 @@ switch ($action) {
             }
         }
 
-        // Se não encontrou cursos recentes, usa os cursos populares ou cria dados de exemplo
+        // Fallback para cursos recentes
         if (empty($cursos_recentes)) {
             if (!empty($cursos_populares)) {
                 $cursos_recentes = $cursos_populares;
@@ -299,24 +376,27 @@ switch ($action) {
                     ['id' => 5, 'nome' => 'Ciência da Computação', 'modalidade' => 'ead', 'nivel' => 'graduacao', 'created_at' => date('Y-m-d H:i:s', strtotime('-5 month'))]
                 ];
             }
-        }
+                }
 
         break;
+
+    // ============================================================
+    // NOVO CURSO - FORMULÁRIO DE CRIAÇÃO
+    // ============================================================
     case 'novo':
-        // Exibe o formulário para adicionar um novo curso
         $titulo_pagina = 'Novo Curso';
         $view = 'form';
         $curso = []; // Inicializa um curso vazio
 
-        // Carrega as áreas de conhecimento para o formulário
+        // Carrega dados auxiliares para o formulário
         $areas = executarConsultaAll($db, "SELECT id, nome FROM areas_conhecimento ORDER BY nome ASC");
-
-        // Carrega os polos para o formulário
         $polos = executarConsultaAll($db, "SELECT id, nome FROM polos ORDER BY nome ASC");
         break;
 
+    // ============================================================
+    // EDITAR CURSO - FORMULÁRIO DE EDIÇÃO
+    // ============================================================
     case 'editar':
-        // Exibe o formulário para editar um curso existente
         $id = $_GET['id'] ?? 0;
 
         // Busca o curso pelo ID
@@ -324,33 +404,28 @@ switch ($action) {
         $curso = executarConsulta($db, $sql, [$id], []);
 
         if (!$curso) {
-            // Curso não encontrado, redireciona para a listagem
             setMensagem('erro', 'Curso não encontrado.');
             redirect('cursos.php');
         }
 
-        // Carrega as áreas de conhecimento para o formulário
+        // Carrega dados auxiliares para o formulário
         $areas = executarConsultaAll($db, "SELECT id, nome FROM areas_conhecimento ORDER BY nome ASC");
-
-        // Carrega os polos para o formulário
         $polos = executarConsultaAll($db, "SELECT id, nome FROM polos ORDER BY nome ASC");
-
-        // O polo principal já está no campo polo_id da tabela cursos
-        // Não é mais necessário carregar polos vinculados da tabela cursos_polos
 
         $titulo_pagina = 'Editar Curso';
         $view = 'form';
         break;
 
+    // ============================================================
+    // SALVAR CURSO - PROCESSAMENTO DO FORMULÁRIO
+    // ============================================================
     case 'salvar':
-        // Salva os dados do curso (novo ou existente)
         if (!isPost()) {
-            // Método não permitido
             setMensagem('erro', 'Método não permitido.');
             redirect('cursos.php');
         }
 
-        // Obtém os dados do formulário
+        // === COLETA DE DADOS DO FORMULÁRIO ===
         $id = $_POST['id'] ?? null;
         $nome = $_POST['nome'] ?? '';
         $descricao = $_POST['descricao'] ?? '';
@@ -365,7 +440,7 @@ switch ($action) {
         $data_fim = $_POST['data_fim'] ?? null;
         $polos = $_POST['polos'] ?? [];
 
-        // Valida os dados
+        // === VALIDAÇÃO DOS DADOS ===
         $erros = [];
 
         if (empty($nome)) {
@@ -391,17 +466,15 @@ switch ($action) {
             $curso = $_POST;
             $mensagens_erro = $erros;
 
-            // Carrega as áreas de conhecimento para o formulário
+            // Recarrega dados auxiliares
             $areas = executarConsultaAll($db, "SELECT id, nome FROM areas_conhecimento ORDER BY nome ASC");
-
-            // Carrega os polos para o formulário
             $polos_lista = executarConsultaAll($db, "SELECT id, nome FROM polos ORDER BY nome ASC");
             $polos = $polos;
 
             break;
         }
 
-        // Prepara os dados para salvar
+        // === PREPARAÇÃO DOS DADOS PARA SALVAR ===
         $dados = [
             'nome' => $nome,
             'descricao' => $descricao,
@@ -419,14 +492,14 @@ switch ($action) {
         ];
 
         try {
-            // Inicia uma transação
+            // Inicia transação para garantir integridade
             $db->beginTransaction();
 
             if ($id) {
-                // Atualiza um curso existente
+                // === ATUALIZAÇÃO DE CURSO EXISTENTE ===
                 $db->update('cursos', $dados, 'id = ?', [$id]);
 
-                // Registra o log
+                // Registra log de alteração
                 registrarLog(
                     'cursos',
                     'editar',
@@ -435,18 +508,13 @@ switch ($action) {
                     'cursos'
                 );
 
-                // Não é mais necessário atualizar polos vinculados
-                // O polo principal já está sendo atualizado na tabela cursos
-
                 $mensagem = 'Curso atualizado com sucesso.';
             } else {
-                // Adiciona a data de criação
+                // === CRIAÇÃO DE NOVO CURSO ===
                 $dados['created_at'] = date('Y-m-d H:i:s');
-
-                // Insere um novo curso
                 $id = $db->insert('cursos', $dados);
 
-                // Registra o log
+                // Registra log de criação
                 registrarLog(
                     'cursos',
                     'criar',
@@ -458,57 +526,48 @@ switch ($action) {
                 $mensagem = 'Curso adicionado com sucesso.';
             }
 
-
-
-            // Removida a inserção na tabela cursos_polos que não existe
-            // O polo principal já está sendo salvo no campo polo_id da tabela cursos
-
             setMensagem('sucesso', $mensagem);
-
-            // Confirma a transação
             $db->commit();
-
-            // Redireciona para a listagem
             redirect('cursos.php');
+
         } catch (Exception $e) {
-            // Desfaz a transação em caso de erro
             $db->rollBack();
 
-            // Erro ao salvar
+            // Exibe formulário com erro
             $titulo_pagina = $id ? 'Editar Curso' : 'Novo Curso';
             $view = 'form';
             $curso = $_POST;
             $mensagens_erro = ['Erro ao salvar o curso: ' . $e->getMessage()];
 
-            // Carrega as áreas de conhecimento para o formulário
+            // Recarrega dados auxiliares
             $areas = executarConsultaAll($db, "SELECT id, nome FROM areas_conhecimento ORDER BY nome ASC");
-
-            // Carrega os polos para o formulário
             $polos_lista = executarConsultaAll($db, "SELECT id, nome FROM polos ORDER BY nome ASC");
         }
         break;
 
+    // ============================================================
+    // EXCLUIR CURSO - REMOÇÃO COM VALIDAÇÕES
+    // ============================================================
     case 'excluir':
-        // Exclui um curso
         $id = $_GET['id'] ?? 0;
 
-        // Verifica se o usuário tem permissão para excluir
+        // Verifica permissão específica para exclusão
         exigirPermissao('cursos', 'excluir');
 
         // Busca o curso pelo ID
         $sql = "SELECT * FROM cursos WHERE id = ?";
         $curso = executarConsulta($db, $sql, [$id], []);
 
-        if (!$curso) {
-            // Curso não encontrado, redireciona para a listagem
+                if (!$curso) {
             setMensagem('erro', 'Curso não encontrado.');
             redirect('cursos.php');
         }
 
         try {
-            // Inicia uma transação
             $db->beginTransaction();
 
+            // === VALIDAÇÕES ANTES DA EXCLUSÃO ===
+            
             // Verifica se há matrículas vinculadas ao curso
             $sql = "SELECT COUNT(*) as total FROM matriculas WHERE curso_id = ?";
             $resultado = executarConsulta($db, $sql, [$id]);
@@ -527,13 +586,10 @@ switch ($action) {
                 throw new Exception("Não é possível excluir o curso pois existem {$total_turmas} turmas vinculadas a ele.");
             }
 
-            // Não é mais necessário excluir polos vinculados
-            // O polo principal já está na tabela cursos
-
-            // Exclui o curso
+            // === EXECUÇÃO DA EXCLUSÃO ===
             $db->delete('cursos', 'id = ?', [$id]);
 
-            // Registra o log
+            // Registra log da exclusão
             registrarLog(
                 'cursos',
                 'excluir',
@@ -542,27 +598,24 @@ switch ($action) {
                 'cursos'
             );
 
-            // Confirma a transação
             $db->commit();
-
             setMensagem('sucesso', 'Curso excluído com sucesso.');
-        } catch (Exception $e) {
-            // Desfaz a transação em caso de erro
-            $db->rollBack();
 
-            // Erro ao excluir
+        } catch (Exception $e) {
+            $db->rollBack();
             setMensagem('erro', 'Erro ao excluir o curso: ' . $e->getMessage());
         }
 
-        // Redireciona para a listagem
         redirect('cursos.php');
         break;
 
+    // ============================================================
+    // VISUALIZAR CURSO - DETALHES COMPLETOS
+    // ============================================================
     case 'visualizar':
-        // Exibe os detalhes de um curso
         $id = $_GET['id'] ?? 0;
 
-        // Verifica se a tabela areas_conhecimento existe
+        // === VERIFICAÇÃO DE EXISTÊNCIA DA TABELA AREAS ===
         try {
             $sql = "SHOW TABLES LIKE 'areas_conhecimento'";
             $area_table_exists = $db->fetchOne($sql) ? true : false;
@@ -571,15 +624,13 @@ switch ($action) {
             error_log('Erro ao verificar tabela areas_conhecimento: ' . $e->getMessage());
         }
 
-        // Busca o curso pelo ID
+        // === BUSCA DO CURSO COM JOIN CONDICIONAL ===
         if ($area_table_exists) {
-            // Consulta com JOIN na tabela areas_conhecimento
             $sql = "SELECT c.*, a.nome as area_nome
                     FROM cursos c
                     LEFT JOIN areas_conhecimento a ON c.area_id = a.id
                     WHERE c.id = ?";
         } else {
-            // Consulta sem JOIN (caso a tabela areas_conhecimento não exista)
             $sql = "SELECT c.*
                     FROM cursos c
                     WHERE c.id = ?";
@@ -587,7 +638,7 @@ switch ($action) {
 
         $curso = executarConsulta($db, $sql, [$id], []);
 
-        // Se não encontrou o curso, tenta uma consulta mais simples
+        // Fallback com consulta simplificada
         if (!$curso) {
             error_log('Tentando consulta simplificada para o curso ID ' . $id);
             $sql = "SELECT * FROM cursos WHERE id = ?";
@@ -595,19 +646,18 @@ switch ($action) {
         }
 
         if (!$curso) {
-            // Curso não encontrado, redireciona para a listagem
             setMensagem('erro', 'Curso não encontrado.');
             redirect('cursos.php');
         }
 
-        // Busca o polo vinculado ao curso diretamente da tabela cursos
+        // === BUSCA DO POLO VINCULADO ===
         $sql = "SELECT p.*
                 FROM polos p
                 JOIN cursos c ON p.id = c.polo_id
                 WHERE c.id = ?";
         $polos = executarConsultaAll($db, $sql, [$id]);
 
-        // Se não encontrou nenhum polo, tenta uma consulta mais simples
+        // Fallback para busca de polo
         if (empty($polos)) {
             error_log('Tentando busca simplificada para o polo do curso ID ' . $id);
             $sql = "SELECT p.* FROM polos p, cursos c WHERE c.id = ? AND c.polo_id = p.id";
@@ -615,7 +665,7 @@ switch ($action) {
             error_log('Busca simplificada - Resultado: ' . ($polos ? count($polos) . ' polos encontrados' : 'Nenhum polo encontrado'));
         }
 
-        // Busca as turmas do curso
+        // === BUSCA DAS TURMAS DO CURSO ===
         $sql = "SELECT t.*,
                        (SELECT COUNT(*) FROM matriculas m WHERE m.turma_id = t.id AND m.status = 'ativo') as total_alunos
                 FROM turmas t
@@ -623,7 +673,7 @@ switch ($action) {
                 ORDER BY t.data_inicio DESC";
         $turmas = executarConsultaAll($db, $sql, [$id]);
 
-        // Busca as disciplinas do curso
+        // === BUSCA DAS DISCIPLINAS DO CURSO ===
         $sql = "SELECT d.*
                 FROM disciplinas d
                 WHERE d.curso_id = ?
@@ -634,8 +684,11 @@ switch ($action) {
         $view = 'visualizar';
         break;
 
+    // ============================================================
+    // BUSCAR CURSOS - PESQUISA AVANÇADA
+    // ============================================================
     case 'buscar':
-        // Busca cursos por termo
+        // === PARÂMETROS DE BUSCA ===
         $termo = $_GET['termo'] ?? '';
         $campo = $_GET['campo'] ?? 'nome';
         $status = $_GET['status'] ?? 'todos';
@@ -646,21 +699,21 @@ switch ($action) {
             redirect('cursos.php');
         }
 
-        // Define os campos permitidos para busca
+        // Define campos permitidos para busca (segurança)
         $campos_permitidos = ['nome', 'codigo', 'id_legado'];
-
         if (!in_array($campo, $campos_permitidos)) {
             $campo = 'nome';
         }
 
-        // Monta a consulta SQL
+        // === CONSTRUÇÃO DA CONSULTA ===
         $where = [];
         $params = [];
 
-        // Adiciona a condição de busca
+        // Condição de busca principal
         $where[] = "c.{$campo} LIKE ?";
         $params[] = "%{$termo}%";
 
+        // Filtros adicionais
         if ($status !== 'todos') {
             $where[] = "c.status = ?";
             $params[] = $status;
@@ -676,28 +729,23 @@ switch ($action) {
             $params[] = $nivel;
         }
 
-        // Monta a cláusula WHERE
         $whereClause = "WHERE " . implode(" AND ", $where);
 
-        // Verifica se a tabela areas_conhecimento existe
+        // === VERIFICAÇÃO DE EXISTÊNCIA DA TABELA AREAS ===
         try {
             $sql = "SHOW TABLES LIKE 'areas_conhecimento'";
             $area_table_exists = $db->fetchOne($sql) ? true : false;
         } catch (Exception $e) {
             $area_table_exists = false;
             error_log('Erro ao verificar tabela areas_conhecimento: ' . $e->getMessage());
-        }
-
-        // Consulta principal
+        }        // === EXECUÇÃO DA BUSCA ===
         if ($area_table_exists) {
-            // Consulta com JOIN na tabela areas_conhecimento
             $sql = "SELECT c.*, a.nome as area_nome
                     FROM cursos c
                     LEFT JOIN areas_conhecimento a ON c.area_id = a.id
                     {$whereClause}
                     ORDER BY c.nome ASC";
         } else {
-            // Consulta sem JOIN (caso a tabela areas_conhecimento não exista)
             $sql = "SELECT c.*
                     FROM cursos c
                     {$whereClause}
@@ -720,11 +768,12 @@ switch ($action) {
 
         $titulo_pagina = 'Resultado da Busca';
         $view = 'listar';
-        break;
-
+        break;    // ============================================================
+    // LISTAR CURSOS - LISTAGEM PAGINADA (PADRÃO)
+    // ============================================================
     case 'listar':
     default:
-        // Lista todos os cursos
+        // === PARÂMETROS DE LISTAGEM ===
         $status = $_GET['status'] ?? 'todos';
         $modalidade = $_GET['modalidade'] ?? 'todas';
         $nivel = $_GET['nivel'] ?? 'todos';
@@ -732,7 +781,7 @@ switch ($action) {
         $por_pagina = 20;
         $offset = ($pagina - 1) * $por_pagina;
 
-        // Monta a consulta SQL
+        // === CONSTRUÇÃO DOS FILTROS ===
         $where = [];
         $params = [];
 
@@ -757,7 +806,7 @@ switch ($action) {
             $whereClause = "WHERE " . implode(" AND ", $where);
         }
 
-        // Verifica se a tabela areas_conhecimento existe
+        // === VERIFICAÇÃO DE EXISTÊNCIA DA TABELA AREAS ===
         try {
             $sql = "SHOW TABLES LIKE 'areas_conhecimento'";
             $area_table_exists = $db->fetchOne($sql) ? true : false;
@@ -766,9 +815,8 @@ switch ($action) {
             error_log('Erro ao verificar tabela areas_conhecimento: ' . $e->getMessage());
         }
 
-        // Consulta principal
+        // === CONSULTA PRINCIPAL COM PAGINAÇÃO ===
         if ($area_table_exists) {
-            // Consulta com JOIN na tabela areas_conhecimento
             $sql = "SELECT c.*, a.nome as area_nome
                     FROM cursos c
                     LEFT JOIN areas_conhecimento a ON c.area_id = a.id
@@ -776,7 +824,6 @@ switch ($action) {
                     ORDER BY c.nome ASC
                     LIMIT {$offset}, {$por_pagina}";
         } else {
-            // Consulta sem JOIN (caso a tabela areas_conhecimento não exista)
             $sql = "SELECT c.*
                     FROM cursos c
                     {$whereClause}
@@ -790,7 +837,7 @@ switch ($action) {
         // Registra o resultado para depuração
         error_log('Consulta principal - Resultado: ' . ($cursos ? count($cursos) . ' registros encontrados' : 'Nenhum registro encontrado'));
 
-        // Se não encontrou nenhum curso, tenta uma consulta mais simples
+        // Fallback com consulta simplificada
         if (empty($cursos)) {
             error_log('Tentando consulta simplificada...');
             $sql = "SELECT * FROM cursos LIMIT {$offset}, {$por_pagina}";
@@ -798,9 +845,8 @@ switch ($action) {
             error_log('Consulta simplificada - Resultado: ' . ($cursos ? count($cursos) . ' registros encontrados' : 'Nenhum registro encontrado'));
         }
 
-        // Conta o total de cursos
-        try {
-            $sql = "SELECT COUNT(*) as total
+        // === CONTAGEM TOTAL PARA PAGINAÇÃO ===
+        try {            $sql = "SELECT COUNT(*) as total
                     FROM cursos c
                     {$whereClause}";
             $resultado = executarConsulta($db, $sql, $params);
@@ -820,37 +866,66 @@ switch ($action) {
         $view = 'listar';
         break;
 }
+
+// ================================================================
+// TEMPLATE HTML - ESTRUTURA DA PÁGINA
+// ================================================================
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- ========================================== -->
+    <!-- META INFORMAÇÕES E CONFIGURAÇÕES          -->
+    <!-- ========================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faciência ERP - <?php echo $titulo_pagina; ?></title>
+    
+    <!-- ========================================== -->
+    <!-- ESTILOS CSS E BIBLIOTECAS EXTERNAS        -->
+    <!-- ========================================== -->
+    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Estilos customizados do sistema -->
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Chart.js para gráficos -->
+    
+    <!-- ========================================== -->
+    <!-- BIBLIOTECAS JAVASCRIPT PARA GRÁFICOS      -->
+    <!-- ========================================== -->
+    <!-- Chart.js para gráficos básicos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ApexCharts para gráficos mais avançados -->
+    <!-- ApexCharts para gráficos avançados -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body class="bg-gray-100">
+    <!-- ========================================== -->
+    <!-- ESTRUTURA PRINCIPAL DA PÁGINA             -->
+    <!-- ========================================== -->
     <div class="flex h-screen">
-        <!-- Sidebar -->
+        <!-- ========================== -->
+        <!-- BARRA LATERAL DE NAVEGAÇÃO -->
+        <!-- ========================== -->
         <?php include 'includes/sidebar.php'; ?>
 
-        <!-- Main Content -->
+        <!-- ========================== -->
+        <!-- CONTEÚDO PRINCIPAL         -->
+        <!-- ========================== -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
+            <!-- Cabeçalho da página -->
             <?php include 'includes/header.php'; ?>
 
-            <!-- Main -->
+            <!-- ========================== -->
+            <!-- ÁREA DE CONTEÚDO DINÂMICO  -->
+            <!-- ========================== -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                 <div class="container mx-auto">
+                    <!-- ==================== -->
+                    <!-- CABEÇALHO DO MÓDULO  -->
+                    <!-- ==================== -->
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-2xl font-bold text-gray-800"><?php echo $titulo_pagina; ?></h1>
-
+                        <h1 class="text-2xl font-bold text-gray-800"><?php echo $titulo_pagina; ?></h1>                        <!-- Botões de ação do cabeçalho -->
                         <div class="flex space-x-2">
+                            <!-- Botão para alternar entre dashboard e listagem -->
                             <?php if ($view === 'dashboard'): ?>
                             <a href="cursos.php?action=listar" class="btn-secondary">
                                 <i class="fas fa-list mr-2"></i> Ver Listagem
@@ -863,6 +938,7 @@ switch ($action) {
                             </a>
                             <?php endif; ?>
 
+                            <!-- Botão para criar novo curso -->
                             <?php if ($view === 'listar' || $view === 'dashboard'): ?>
                             <a href="cursos.php?action=novo" class="btn-primary">
                                 <i class="fas fa-plus mr-2"></i> Novo Curso
@@ -871,8 +947,10 @@ switch ($action) {
                         </div>
                     </div>
 
-                    <?php if (isset($mensagens_erro) && !empty($mensagens_erro)): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+                    <!-- ==================== -->
+                    <!-- MENSAGENS DE ERRO     -->
+                    <!-- ==================== -->
+                    <?php if (isset($mensagens_erro) && !empty($mensagens_erro)): ?>                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
                         <ul class="list-disc list-inside">
                             <?php foreach ($mensagens_erro as $erro): ?>
                             <li><?php echo $erro; ?></li>
@@ -881,9 +959,12 @@ switch ($action) {
                     </div>
                     <?php endif; ?>
 
+                    <!-- ==================== -->
+                    <!-- MENSAGENS DO SISTEMA  -->
+                    <!-- ==================== -->
                     <?php if (isset($_SESSION['mensagem'])): ?>
                     <?php
-                    // Determina o tipo de mensagem
+                    // Determina o tipo de mensagem (sucesso/erro)
                     $mensagem_tipo = 'erro'; // Padrão é erro
                     if (isset($_SESSION['mensagem_tipo'])) {
                         $mensagem_tipo = $_SESSION['mensagem_tipo'];
@@ -891,12 +972,12 @@ switch ($action) {
                         $mensagem_tipo = $_SESSION['mensagem']['tipo'];
                     }
 
-                    // Determina a cor baseada no tipo
+                    // Determina a cor baseada no tipo da mensagem
                     $cor = ($mensagem_tipo === 'sucesso') ? 'green' : 'red';
                     ?>
                     <div class="bg-<?php echo $cor; ?>-100 border-l-4 border-<?php echo $cor; ?>-500 text-<?php echo $cor; ?>-700 p-4 mb-6">
                         <?php
-                        // Verifica se a mensagem é um array e converte para string se necessário
+                        // Processa diferentes formatos de mensagem
                         if (is_array($_SESSION['mensagem'])) {
                             if (isset($_SESSION['mensagem']['texto'])) {
                                 echo $_SESSION['mensagem']['texto'];
@@ -909,26 +990,39 @@ switch ($action) {
                         ?>
                     </div>
                     <?php
-                    // Limpa a mensagem da sessão
+                    // Limpa a mensagem da sessão após exibição
                     unset($_SESSION['mensagem']);
                     unset($_SESSION['mensagem_tipo']);
                     endif;
-                    ?>
-
+                    ?>                    <!-- ==================== -->
+                    <!-- CONTEÚDO DINÂMICO    -->
+                    <!-- ==================== -->
                     <?php
-                    // Inclui a view correspondente
+                    /**
+                     * Inclusão das views específicas baseadas na ação atual
+                     * Cada view representa uma funcionalidade diferente do módulo:
+                     * 
+                     * - form: Formulário de criação/edição de cursos
+                     * - visualizar: Detalhes completos de um curso específico
+                     * - dashboard: Visão geral com estatísticas e gráficos
+                     * - listar: Listagem paginada de todos os cursos
+                     */
                     switch ($view) {
                         case 'form':
+                            // Formulário para criar/editar curso
                             include 'views/cursos/form.php';
                             break;
                         case 'visualizar':
+                            // Página de detalhes do curso
                             include 'views/cursos/visualizar.php';
                             break;
                         case 'dashboard':
+                            // Dashboard com estatísticas
                             include 'views/cursos/dashboard.php';
                             break;
                         case 'listar':
                         default:
+                            // Listagem de cursos (view padrão)
                             include 'views/cursos/listar.php';
                             break;
                     }
@@ -936,11 +1030,17 @@ switch ($action) {
                 </div>
             </main>
 
-            <!-- Footer -->
+            <!-- ========================== -->
+            <!-- RODAPÉ DA PÁGINA           -->
+            <!-- ========================== -->
             <?php include 'includes/footer.php'; ?>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- SCRIPTS JAVASCRIPT                        -->
+    <!-- ========================================== -->
+    <!-- Script principal do sistema -->
     <script src="js/main.js"></script>
 </body>
 </html>

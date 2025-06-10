@@ -1,10 +1,49 @@
 <?php
 /**
- * Página de gerenciamento de turmas
+ * ================================================================
+ *                    SISTEMA FACIÊNCIA ERP
+ * ================================================================
+ * 
+ * Módulo: Gerenciamento de Turmas
+ * Descrição: Interface principal para gerenciamento de turmas acadêmicas
+ * Versão: 2.0
+ * Data de Atualização: 2024-12-19
+ * 
+ * Funcionalidades:
+ * - Dashboard com estatísticas e métricas de turmas
+ * - Cadastro, edição e exclusão de turmas
+ * - Visualização detalhada de turmas e matrículas
+ * - Gerenciamento de status (planejada, em andamento, concluída, cancelada)
+ * - Vinculação com cursos e polos
+ * - Controle de cronograma e datas importantes
+ * - Relatórios de performance e ocupação
+ * 
+ * Estrutura de Navegação:
+ * - dashboard: Visão geral com estatísticas
+ * - listar: Listagem paginada de turmas
+ * - novo: Formulário para criar nova turma
+ * - editar: Formulário para editar turma existente
+ * - visualizar: Detalhes completos da turma
+ * - salvar: Processamento de dados do formulário
+ * - excluir: Remoção de turma (com validações)
+ * - buscar: Pesquisa avançada de turmas
+ * 
+ * ================================================================
  */
 
-// Inicializa o sistema
+// ================================================================
+// CONFIGURAÇÕES INICIAIS E CONSTANTES
+// ================================================================
+
+// Carregamento do sistema base
 require_once __DIR__ . '/includes/init.php';
+
+// Configurações específicas do módulo
+ini_set('memory_limit', '256M'); // Aumenta limite de memória para relatórios
+
+// ================================================================
+// VERIFICAÇÃO DE AUTENTICAÇÃO E PERMISSÕES
+// ================================================================
 
 // Verifica se o usuário está autenticado
 exigirLogin();
@@ -12,18 +51,34 @@ exigirLogin();
 // Verifica se o usuário tem permissão para acessar o módulo de turmas
 exigirPermissao('turmas');
 
+// ================================================================
+// INICIALIZAÇÃO DE COMPONENTES
+// ================================================================
+
 // Instancia o banco de dados
 $db = Database::getInstance();
 
-// Define a ação atual
+// Define a ação atual baseada no parâmetro GET
 $action = $_GET['action'] ?? 'listar';
 
-// Se há parâmetros de filtro na URL (curso_id ou polo_id), força a ação para 'listar'
+// Força ação 'listar' se há parâmetros de filtro na URL
 if (isset($_GET['curso_id']) || isset($_GET['polo_id']) || isset($_GET['status'])) {
     $action = $_GET['action'] ?? 'listar';
 }
 
-// Função para executar consultas com tratamento de erro
+// ================================================================
+// FUNÇÕES AUXILIARES
+// ================================================================
+
+/**
+ * Executa consulta SQL retornando um único registro
+ * 
+ * @param Database $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para prepared statement
+ * @param mixed $default Valor padrão em caso de erro ou resultado vazio
+ * @return array|mixed Resultado da consulta ou valor padrão
+ */
 function executarConsulta($db, $sql, $params = [], $default = null) {
     try {
         return $db->fetchOne($sql, $params);
@@ -34,6 +89,15 @@ function executarConsulta($db, $sql, $params = [], $default = null) {
     }
 }
 
+/**
+ * Executa consulta SQL retornando múltiplos registros
+ * 
+ * @param Database $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para prepared statement
+ * @param array $default Valor padrão em caso de erro
+ * @return array Resultado da consulta ou array vazio
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
     try {
         error_log('Executando consulta: ' . $sql);
@@ -47,14 +111,26 @@ function executarConsultaAll($db, $sql, $params = [], $default = []) {
     }
 }
 
-// Processa a ação
+// ================================================================
+// CONTROLADOR PRINCIPAL - PROCESSAMENTO DE AÇÕES
+// ================================================================
+
+/**
+ * Roteamento principal da aplicação
+ * Processa a ação solicitada e define os dados necessários para cada view
+ */
 switch ($action) {
+    // ============================================================
+    // DASHBOARD - VISÃO GERAL E ESTATÍSTICAS DE TURMAS
+    // ============================================================
     case 'dashboard':
-        // Exibe o dashboard de turmas
+        // Define título e view
         $titulo_pagina = 'Dashboard de Turmas';
         $view = 'dashboard';
 
-        // Verifica se as tabelas existem
+        // === VERIFICAÇÃO DE EXISTÊNCIA DAS TABELAS ===
+        
+        // Verifica se a tabela turmas existe
         try {
             $sql = "SHOW TABLES LIKE 'turmas'";
             $turmas_table_exists = $db->fetchOne($sql) ? true : false;
@@ -63,6 +139,7 @@ switch ($action) {
             error_log('Erro ao verificar tabela turmas: ' . $e->getMessage());
         }
 
+        // Verifica se a tabela cursos existe
         try {
             $sql = "SHOW TABLES LIKE 'cursos'";
             $cursos_table_exists = $db->fetchOne($sql) ? true : false;
@@ -71,6 +148,7 @@ switch ($action) {
             error_log('Erro ao verificar tabela cursos: ' . $e->getMessage());
         }
 
+        // Verifica se a tabela polos existe
         try {
             $sql = "SHOW TABLES LIKE 'polos'";
             $polos_table_exists = $db->fetchOne($sql) ? true : false;
@@ -79,6 +157,7 @@ switch ($action) {
             error_log('Erro ao verificar tabela polos: ' . $e->getMessage());
         }
 
+        // Verifica se a tabela matriculas existe
         try {
             $sql = "SHOW TABLES LIKE 'matriculas'";
             $matriculas_table_exists = $db->fetchOne($sql) ? true : false;
@@ -87,7 +166,7 @@ switch ($action) {
             error_log('Erro ao verificar tabela matriculas: ' . $e->getMessage());
         }
 
-        // Carrega as estatísticas
+        // === ESTATÍSTICAS BÁSICAS ===
         $stats = [];
 
         // Total de turmas
@@ -102,11 +181,12 @@ switch ($action) {
                 $stats['total_turmas'] = 0;
             }
 
-            // Turmas por status
+            // === DISTRIBUIÇÃO POR STATUS ===
             try {
                 $sql = "SELECT status, COUNT(*) as total FROM turmas GROUP BY status";
                 $resultados = $db->fetchAll($sql);
 
+                // Inicializa contadores de status
                 $stats['turmas_planejadas'] = 0;
                 $stats['turmas_em_andamento'] = 0;
                 $stats['turmas_concluidas'] = 0;
@@ -146,16 +226,15 @@ switch ($action) {
             $stats['turmas_canceladas'] = 0;
         }
 
-        // Total de alunos matriculados
+        // === TOTAL DE ALUNOS MATRICULADOS ===
         if ($matriculas_table_exists) {
-            $sql = "SELECT COUNT(DISTINCT aluno_id) as total FROM matriculas";
-            $resultado = executarConsulta($db, $sql);
+            $sql = "SELECT COUNT(DISTINCT aluno_id) as total FROM matriculas";            $resultado = executarConsulta($db, $sql);
             $stats['total_alunos_matriculados'] = $resultado['total'] ?? 0;
         } else {
             $stats['total_alunos_matriculados'] = 0;
         }
 
-        // Turmas por polo
+        // === TURMAS POR POLO ===
         if ($turmas_table_exists && $polos_table_exists) {
             try {
                 $sql = "SELECT p.nome as polo_nome, COUNT(t.id) as total_turmas
@@ -175,13 +254,13 @@ switch ($action) {
             error_log('Tabelas turmas ou polos não existem');
         }
 
-        // Não vamos criar dados fictícios para turmas por polo
+        // Não cria dados fictícios - usa dados reais apenas
         if (empty($turmas_por_polo)) {
             error_log('Nenhuma turma por polo encontrada no banco de dados');
             $turmas_por_polo = [];
         }
 
-        // Turmas por curso
+        // === TURMAS POR CURSO ===
         if ($turmas_table_exists && $cursos_table_exists) {
             try {
                 $sql = "SELECT c.nome as curso_nome, COUNT(t.id) as total_turmas
@@ -201,16 +280,16 @@ switch ($action) {
             error_log('Tabelas turmas ou cursos não existem');
         }
 
-        // Não vamos criar dados fictícios para turmas por curso
+        // Não cria dados fictícios - usa dados reais apenas
         if (empty($turmas_por_curso)) {
             error_log('Nenhuma turma por curso encontrada no banco de dados');
             $turmas_por_curso = [];
         }
 
-        // Matrículas por mês (nos últimos 6 meses)
+        // === MATRÍCULAS POR MÊS (ÚLTIMOS 6 MESES) ===
         if ($matriculas_table_exists) {
             try {
-                // Verificamos se a coluna created_at existe
+                // Verifica se a coluna created_at existe
                 $sql = "SHOW COLUMNS FROM matriculas LIKE 'created_at'";
                 $coluna_exists = $db->fetchOne($sql) ? true : false;
 
@@ -238,16 +317,16 @@ switch ($action) {
             error_log('Tabela matriculas não existe');
         }
 
-        // Não vamos criar dados fictícios para matrículas por mês
+        // Não cria dados fictícios - usa dados reais apenas
         if (empty($matriculas_por_mes)) {
             error_log('Nenhuma matrícula por mês encontrada no banco de dados');
             $matriculas_por_mes = [];
         }
 
-        // Turmas recentes
+        // === TURMAS RECENTES ===
         if ($turmas_table_exists) {
             try {
-                // Primeiro verificamos se a coluna created_at existe
+                // Verifica se a coluna created_at existe
                 $sql = "SHOW COLUMNS FROM turmas LIKE 'created_at'";
                 $coluna_exists = $db->fetchOne($sql) ? true : false;
 
@@ -262,23 +341,22 @@ switch ($action) {
                     ORDER BY t.created_at DESC
                     LIMIT 5";
                 } else {
-                    // Se não existir a coluna created_at, não ordenamos por ela
+                    // Se não existir a coluna created_at, ordena por ID
                     $sql = "SELECT t.*,
                            c.nome as curso_nome,
                            po.nome as polo_nome,
                            (SELECT COUNT(*) FROM matriculas m WHERE m.turma_id = t.id) as total_alunos
                     FROM turmas t
-                    LEFT JOIN cursos c ON t.curso_id = c.id
-                    LEFT JOIN polos po ON t.polo_id = po.id
+                    LEFT JOIN cursos c ON t.curso_id = c.id                    LEFT JOIN polos po ON t.polo_id = po.id
+                    ORDER BY t.id DESC
                     LIMIT 5";
                 }
 
                 $turmas_recentes = $db->fetchAll($sql);
                 error_log('Turmas recentes encontradas: ' . count($turmas_recentes));
 
-                // Se não retornou nada, pode ser um erro na consulta
+                // Fallback para consulta mais simples se necessário
                 if (empty($turmas_recentes)) {
-                    // Tenta uma consulta mais simples
                     $sql = "SELECT * FROM turmas LIMIT 5";
                     $turmas_recentes = $db->fetchAll($sql);
                     error_log('Turmas recentes (consulta simples): ' . count($turmas_recentes));
@@ -292,12 +370,14 @@ switch ($action) {
             error_log('Tabela turmas não existe');
         }
 
-        // Não vamos criar dados fictícios, apenas deixar vazio se não houver dados
+        // Não cria dados fictícios - usa dados reais apenas
         if (empty($turmas_recentes)) {
             error_log('Nenhuma turma encontrada no banco de dados');
             $turmas_recentes = [];
         }
 
+        // === CARREGAMENTO DE DADOS AUXILIARES ===
+        
         // Carrega os cursos para o filtro
         if ($cursos_table_exists) {
             $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
@@ -313,15 +393,15 @@ switch ($action) {
         } else {
             $polos = [];
         }
-        break;
-
+        break;    // ============================================================
+    // NOVA TURMA - FORMULÁRIO DE CRIAÇÃO
+    // ============================================================
     case 'nova':
-        // Exibe o formulário para adicionar uma nova turma
         $titulo_pagina = 'Nova Turma';
         $view = 'form';
         $turma = []; // Inicializa uma turma vazia
 
-        // Se foi passado um curso_id, pré-seleciona o curso
+        // === PRÉ-SELEÇÃO DE CURSO ===
         if (isset($_GET['curso_id'])) {
             $turma['curso_id'] = $_GET['curso_id'];
 
@@ -335,7 +415,7 @@ switch ($action) {
             }
         }
 
-        // Se foi passado um polo_id, pré-seleciona o polo
+        // === PRÉ-SELEÇÃO DE POLO ===
         if (isset($_GET['polo_id'])) {
             $turma['polo_id'] = $_GET['polo_id'];
             error_log('Polo ID pré-selecionado: ' . $turma['polo_id']);
@@ -350,14 +430,15 @@ switch ($action) {
             }
         }
 
-        // Carrega os cursos para o formulário - usando consulta direta
+        // === CARREGAMENTO DE DADOS AUXILIARES ===
+        
+        // Carrega os cursos para o formulário
         $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
         $cursos = $db->fetchAll($sql) ?: [];
-        error_log('Cursos carregados para o formulário (consulta direta): ' . count($cursos));
+        error_log('Cursos carregados para o formulário: ' . count($cursos));
 
         // Carrega os professores/usuários para o formulário
         try {
-            // Busca usuários que podem ser professores coordenadores
             $sql = "SELECT id, nome FROM usuarios WHERE tipo IN ('professor', 'admin', 'coordenador') AND status = 'ativo' ORDER BY nome ASC";
             $professores = $db->fetchAll($sql) ?: [];
             error_log('Professores/usuários encontrados: ' . count($professores));
@@ -366,12 +447,14 @@ switch ($action) {
             $professores = [];
         }
 
-        // Carrega os polos para o formulário - usando consulta direta
+        // Carrega os polos para o formulário
         $sql = "SELECT id, nome FROM polos ORDER BY nome ASC";
-        $polos = $db->fetchAll($sql) ?: [];
-        error_log('Polos carregados para o formulário (consulta direta): ' . count($polos));
+        $polos = $db->fetchAll($sql) ?: [];        error_log('Polos carregados para o formulário: ' . count($polos));
         break;
 
+    // ============================================================
+    // EDITAR TURMA - FORMULÁRIO DE EDIÇÃO
+    // ============================================================
     case 'editar':
         // Exibe o formulário para editar uma turma existente
         $id = $_GET['id'] ?? 0;

@@ -1,7 +1,32 @@
 <?php
 /**
- * Gerenciamento de Polos Educacionais
+ * ================================================================
+ * FACIÊNCIA ERP - MÓDULO DE GERENCIAMENTO DE POLOS EDUCACIONAIS
+ * ================================================================
+ * 
+ * Sistema completo de gestão de polos educacionais
+ * Permite criar, editar, visualizar e gerenciar polos de ensino
+ * com funcionalidades avançadas de vinculação de cursos e turmas
+ * 
+ * @version 2.0.0
+ * @author Faciência ERP Development Team
+ * @created 2024
+ * @updated 2025-06-10
+ * 
+ * Funcionalidades:
+ * - Cadastro e edição de polos educacionais
+ * - Vinculação de cursos aos polos
+ * - Vinculação de turmas aos polos
+ * - Busca inteligente de cidades (cache local + API)
+ * - Gestão de tipos de polo
+ * - Visualização detalhada com relatórios
+ * - Sistema de permissões integrado
+ * ================================================================
  */
+
+// ================================================================
+// INICIALIZAÇÃO DO SISTEMA E VERIFICAÇÕES DE SEGURANÇA
+// ================================================================
 
 // Inicializa o sistema
 require_once __DIR__ . '/includes/init.php';
@@ -12,10 +37,22 @@ exigirLogin();
 // Verifica se o usuário tem permissão para acessar o módulo de polos
 exigirPermissao('polos');
 
+// ================================================================
+// CONFIGURAÇÃO DO BANCO DE DADOS E FUNÇÕES AUXILIARES
+// ================================================================
+
 // Instancia o banco de dados
 $db = Database::getInstance();
 
-// Funções auxiliares para executar consultas
+/**
+ * Executa uma consulta SQL que retorna um único resultado
+ * 
+ * @param object $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query
+ * @param mixed $default Valor padrão se não encontrar resultado
+ * @return mixed Resultado da consulta ou valor padrão
+ */
 function executarConsulta($db, $sql, $params = [], $default = null) {
     try {
         return $db->fetchOne($sql, $params) ?: $default;
@@ -25,6 +62,15 @@ function executarConsulta($db, $sql, $params = [], $default = null) {
     }
 }
 
+/**
+ * Executa uma consulta SQL que retorna múltiplos resultados
+ * 
+ * @param object $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query
+ * @param array $default Valor padrão se não encontrar resultados
+ * @return array Resultados da consulta ou array vazio
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
     try {
         return $db->fetchAll($sql, $params) ?: $default;
@@ -34,15 +80,27 @@ function executarConsultaAll($db, $sql, $params = [], $default = []) {
     }
 }
 
-// Define a ação padrão
+// ================================================================
+// CONTROLADOR PRINCIPAL - PROCESSAMENTO DE AÇÕES
+// ================================================================
+
+// Define a ação solicitada (padrão: listar)
 $action = $_GET['action'] ?? 'listar';
 
 // Define o título da página
 $titulo_pagina = 'Gerenciamento de Polos';
 
-// Verifica se é uma ação que não precisa de HTML (como salvar, salvar_financeiro, excluir, buscar cursos, vincular cursos, buscar turmas, vincular turmas, buscar cidades, buscar responsáveis, buscar_tipos_polos ou buscar_financeiro_polo)
+// ================================================================
+// PROCESSAMENTO DE AÇÕES ESPECIAIS (AJAX/API)
+// ================================================================
+// Verifica se é uma ação que não precisa de HTML completo
+// (retorna JSON ou faz redirecionamentos diretos)
+
 if ($action === 'salvar' || $action === 'salvar_com_tipos' || $action === 'salvar_financeiro' || $action === 'salvar_financeiro_novo' || $action === 'excluir' || $action === 'buscar_cursos' || $action === 'vincular_cursos' || $action === 'buscar_turmas' || $action === 'vincular_turmas' || $action === 'buscar_cidades' || $action === 'buscar_responsaveis' || $action === 'buscar_tipos_polos' || $action === 'buscar_financeiro_polo') {
-    // Ações especiais que não precisam de HTML completo
+    
+    // ============================================================
+    // BUSCA DE CURSOS (AJAX)
+    // ============================================================
     if ($action === 'buscar_cursos') {
         // Verifica se o termo de busca foi informado
         if (!isset($_GET['termo']) || empty($_GET['termo'])) {

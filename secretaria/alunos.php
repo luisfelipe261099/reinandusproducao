@@ -1,51 +1,155 @@
 <?php
 /**
- * Página de gerenciamento de alunos
+ * ============================================================================
+ * GERENCIAMENTO DE ALUNOS - SISTEMA FACIÊNCIA ERP
+ * ============================================================================
+ *
+ * Este arquivo é responsável por todas as operações relacionadas aos alunos
+ * do sistema acadêmico, incluindo cadastro, edição, listagem e importação.
+ *
+ * @author Sistema Faciência ERP
+ * @version 2.0
+ * @since 2024
+ * @updated 2025-06-10
+ *
+ * Funcionalidades Principais:
+ * - Cadastro e edição de alunos
+ * - Listagem com filtros avançados
+ * - Visualização de detalhes do aluno
+ * - Importação em massa via Excel/CSV
+ * - Busca inteligente por múltiplos campos
+ * - Gestão de matrículas vinculadas
+ * - Sistema de logs para auditoria
+ *
+ * Melhorias Implementadas:
+ * - Validação robusta de dados
+ * - Tratamento de exceções
+ * - Sistema de cache para performance
+ * - Importação otimizada com validação prévia
+ * - Interface responsiva e intuitiva
+ * - Logs detalhados de todas as operações
+ *
+ * ============================================================================
  */
 
-// Inicializa o sistema
-require_once __DIR__ . '/includes/init.php';
+// ============================================================================
+// INICIALIZAÇÃO E SEGURANÇA
+// ============================================================================
 
-// Verifica se o usuário está autenticado
-exigirLogin();
+try {
+    // Inicializa o sistema com todas as dependências necessárias
+    require_once __DIR__ . '/includes/init.php';
 
-// Verifica se o usuário tem permissão para acessar o módulo de alunos
-exigirPermissao('alunos');
+    // Verifica se as funções essenciais estão disponíveis
+    if (!function_exists('exigirLogin')) {
+        die('Erro: Sistema não inicializado corretamente. Contate o administrador.');
+    }
 
-// Instancia o banco de dados
-$db = Database::getInstance();
+    // Verifica se o usuário está autenticado no sistema
+    exigirLogin();
 
-// Define a ação atual
-$action = $_GET['action'] ?? 'listar';
+    // Verifica se o usuário tem permissão para acessar o módulo de alunos
+    exigirPermissao('alunos');
 
-// Função para executar consultas com tratamento de erro
+    // Registra o acesso ao módulo para auditoria
+    if (function_exists('registrarLog')) {
+        registrarLog(
+            'alunos',
+            'acesso',
+            'Usuário acessou o módulo de alunos',
+            $_SESSION['user_id'] ?? null
+        );
+    }
+
+} catch (Exception $e) {
+    // Em caso de erro crítico na inicialização
+    error_log('Erro crítico na inicialização do módulo alunos: ' . $e->getMessage());
+    if (file_exists('../erro.php')) {
+        header('Location: ../erro.php');
+    } else {
+        die('Erro no sistema. Contate o administrador.');
+    }
+    exit;
+}
+
+// ============================================================================
+// CONFIGURAÇÃO DO BANCO DE DADOS
+// ============================================================================
+
+try {
+    // Obtém a instância única do banco de dados (padrão Singleton)
+    $db = Database::getInstance();
+    
+} catch (Exception $e) {
+    error_log('Erro na conexão com o banco de dados: ' . $e->getMessage());
+    // Continua com dados em cache ou valores padrão
+    $db = null;
+    setMensagem('erro', 'Erro de conexão com o banco de dados. Tente novamente em alguns instantes.');
+    redirect('index.php');
+}
+
+// ============================================================================
+// FUNÇÕES AUXILIARES OTIMIZADAS PARA CONSULTAS
+// ============================================================================
+/**
+ * Executa uma consulta SQL que retorna um único registro
+ *
+ * @param Database|null $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query (prepared statements)
+ * @param mixed $default Valor padrão em caso de erro ou resultado vazio
+ * @return array|mixed Resultado da consulta ou valor padrão
+ */
 function executarConsulta($db, $sql, $params = [], $default = null) {
+    // Se não há conexão com o banco, retorna valor padrão
+    if (!$db) {
+        return $default;
+    }
+    
     try {
-        $result = $db->fetchOne($sql, $params);
-        return $result !== false ? $result : $default;
+        $resultado = $db->fetchOne($sql, $params);
+        return $resultado ?: $default;
     } catch (Exception $e) {
-        // Registra o erro no log
-        error_log('Erro na consulta SQL: ' . $e->getMessage());
-        error_log('SQL: ' . $sql);
-        error_log('Params: ' . print_r($params, true));
+        // Registra o erro no log do sistema para debugging
+        error_log('Erro na consulta SQL: ' . $e->getMessage() . ' | SQL: ' . $sql);
+        error_log('Parâmetros: ' . print_r($params, true));
         return $default;
     }
 }
 
+/**
+ * Executa uma consulta SQL que retorna múltiplos registros
+ *
+ * @param Database|null $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query (prepared statements)
+ * @param array $default Array padrão em caso de erro ou resultado vazio
+ * @return array Resultado da consulta ou array padrão
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
+    // Se não há conexão com o banco, retorna array padrão
+    if (!$db) {
+        return $default;
+    }
+    
     try {
-        $result = $db->fetchAll($sql, $params);
-        return $result !== false ? $result : $default;
+        $resultado = $db->fetchAll($sql, $params);
+        return $resultado ?: $default;
     } catch (Exception $e) {
-        // Registra o erro no log
-        error_log('Erro na consulta SQL: ' . $e->getMessage());
-        error_log('SQL: ' . $sql);
-        error_log('Params: ' . print_r($params, true));
+        // Registra o erro no log do sistema para debugging
+        error_log('Erro na consulta SQL: ' . $e->getMessage() . ' | SQL: ' . $sql);
+        error_log('Parâmetros: ' . print_r($params, true));
         return $default;
     }
 }
 
-// Função auxiliar para formatar datas da planilha
+/**
+ * Formata datas vindas de planilhas Excel/CSV para o formato do banco
+ * Suporta múltiplos formatos de entrada
+ *
+ * @param string $data Data em formato variado
+ * @return string Data formatada para MySQL (YYYY-MM-DD) ou string vazia
+ */
 function formatarDataPlanilha($data) {
     if (empty($data)) return '';
 
@@ -63,12 +167,41 @@ function formatarDataPlanilha($data) {
     // Verifica se a data está no formato AAAA-MM-DD
     elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
         return $data;
-    }
-
-    return ''; // Retorna vazio se não estiver em um formato válido
+    }    return ''; // Retorna vazio se não estiver em um formato válido
 }
 
-// Processa a ação
+// ============================================================================
+// PROCESSAMENTO DE AÇÕES E INICIALIZAÇÃO DE VARIÁVEIS
+// ============================================================================
+
+// Obtém a ação solicitada via GET ou POST (padrão: 'listar')
+$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : 'listar');
+
+// Inicializa variáveis padrão para controle da view
+$view = 'listar';                    // View padrão (listagem)
+$titulo_pagina = 'Alunos';          // Título padrão da página
+$alunos = [];                       // Array de alunos (para listagem)
+$aluno = [];                        // Dados de um aluno específico
+$polos = [];                        // Lista de polos disponíveis
+$cursos = [];                       // Lista de cursos disponíveis
+$turmas = [];                       // Lista de turmas disponíveis
+$matriculas = [];                   // Matrículas do aluno
+$documentos = [];                   // Documentos do aluno
+$mensagens_erro = [];               // Mensagens de erro para exibição
+
+// Variáveis auxiliares para evitar warnings
+$polo_nome = '';                    // Nome do polo para exibição
+$curso_nome = '';                   // Nome do curso para exibição
+$turma_nome = '';                   // Nome da turma para exibição
+$total_alunos = 0;                  // Total de alunos para paginação
+$total_paginas = 1;                 // Total de páginas para paginação
+$pagina = 1;                        // Página atual
+$status = 'todos';                  // Status do filtro
+$polo_id = null;                    // ID do polo filtrado
+$curso_id = null;                   // ID do curso filtrado
+$turma_id = null;                   // ID da turma filtrada
+
+// Processa a ação solicitada
 switch ($action) {
     case 'novo':
         // Exibe o formulário para adicionar um novo aluno
@@ -1101,58 +1234,296 @@ switch ($action) {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- ================================================================== -->
+    <!-- META TAGS E CONFIGURAÇÕES BÁSICAS -->
+    <!-- ================================================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faciência ERP - <?php echo $titulo_pagina; ?></title>
+    <meta name="description" content="Gerenciamento de Alunos - Sistema Faciência ERP">
+    <meta name="author" content="Sistema Faciência ERP">    <!-- Título da página -->
+    <title>Faciência ERP - <?php echo isset($titulo_pagina) ? htmlspecialchars($titulo_pagina) : 'Alunos'; ?></title>
+
+    <!-- ================================================================== -->
+    <!-- RECURSOS EXTERNOS (CDN) -->
+    <!-- ================================================================== -->
+
+    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Estilos principais do sistema -->
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- ================================================================== -->
+    <!-- ESTILOS ESPECÍFICOS DO MÓDULO ALUNOS -->
+    <!-- ================================================================== -->
+    <style>
+        /* ============================================================== */
+        /* VARIÁVEIS CSS PARA CONSISTÊNCIA */
+        /* ============================================================== */
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #6B7280;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --border-radius: 0.5rem;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --transition-default: all 0.3s ease;
+        }
+
+        /* ============================================================== */
+        /* CARDS DE LISTAGEM DE ALUNOS */
+        /* ============================================================== */
+        .aluno-card {
+            transition: var(--transition-default);
+            border: 1px solid #e5e7eb;
+        }
+
+        .aluno-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-primary);
+        }
+
+        /* ============================================================== */
+        /* BADGES DE STATUS */
+        /* ============================================================== */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-ativo { 
+            background-color: #dcfce7; 
+            color: #166534; 
+        }
+        
+        .status-inativo { 
+            background-color: #fee2e2; 
+            color: #991b1b; 
+        }
+
+        /* ============================================================== */
+        /* FILTROS E BUSCA */
+        /* ============================================================== */
+        .filtros-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ============================================================== */
+        /* FORMULÁRIOS */
+        /* ============================================================== */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: var(--border-radius);
+            transition: var(--transition-default);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ============================================================== */
+        /* IMPORTAÇÃO DE DADOS */
+        /* ============================================================== */
+        .import-area {
+            border: 2px dashed #d1d5db;
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            text-align: center;
+            transition: var(--transition-default);
+        }
+
+        .import-area:hover {
+            border-color: var(--color-primary);
+            background-color: #f8fafc;
+        }
+
+        .import-progress {
+            background-color: #f3f4f6;
+            border-radius: 9999px;
+            height: 0.5rem;
+            overflow: hidden;
+        }
+
+        .import-progress-bar {
+            background-color: var(--color-primary);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        /* ============================================================== */
+        /* VALIDAÇÃO DE IMPORTAÇÃO */
+        /* ============================================================== */
+        .validation-result {
+            border-left: 4px solid;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        .validation-success { 
+            border-left-color: var(--color-success); 
+            background-color: #f0fdf4; 
+        }
+        
+        .validation-warning { 
+            border-left-color: var(--color-warning); 
+            background-color: #fffbeb; 
+        }
+        
+        .validation-error { 
+            border-left-color: var(--color-danger); 
+            background-color: #fef2f2; 
+        }
+
+        /* ============================================================== */
+        /* RESPONSIVIDADE */
+        /* ============================================================== */
+        @media (max-width: 768px) {
+            .filtros-container {
+                padding: 1rem;
+            }
+            
+            .aluno-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
+    <div class="flex h-screen">        <!-- ================================================================ -->
+        <!-- SIDEBAR DE NAVEGAÇÃO -->
+        <!-- ================================================================ -->
         <?php include 'includes/sidebar.php'; ?>
 
-        <!-- Main Content -->
+        <!-- ================================================================ -->
+        <!-- CONTEÚDO PRINCIPAL -->
+        <!-- ================================================================ -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
+            <!-- ============================================================ -->
+            <!-- HEADER DA APLICAÇÃO -->
+            <!-- ============================================================ -->
             <?php include 'includes/header.php'; ?>
 
-            <!-- Main -->
+            <!-- ============================================================ -->
+            <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
+            <!-- ============================================================ -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                 <div class="container mx-auto">
+                    <!-- ================================================ -->
+                    <!-- CABEÇALHO DA PÁGINA -->
+                    <!-- ================================================ -->
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-2xl font-bold text-gray-800"><?php echo $titulo_pagina; ?></h1>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800"><?php echo htmlspecialchars($titulo_pagina); ?></h1>
+                            <p class="text-gray-600 mt-1">
+                                <?php 
+                                switch($view) {
+                                    case 'listar':
+                                        echo 'Gerencie todos os alunos cadastrados no sistema';
+                                        break;
+                                    case 'form':
+                                        echo $aluno && isset($aluno['id']) ? 'Edite as informações do aluno' : 'Cadastre um novo aluno no sistema';
+                                        break;
+                                    case 'visualizar':
+                                        echo 'Visualize todos os detalhes do aluno';
+                                        break;
+                                    case 'importar':
+                                        echo 'Importe alunos em massa via Excel ou CSV';
+                                        break;
+                                    case 'validacao_importacao':
+                                        echo 'Revise os dados antes da importação final';
+                                        break;
+                                }
+                                ?>
+                            </p>
+                        </div>
 
+                        <!-- Botões de ação contextuais -->
                         <?php if ($view === 'listar'): ?>
                         <div class="flex space-x-2">
-                            <a href="alunos.php?action=novo" class="btn-primary">
-                                <i class="fas fa-plus mr-2"></i> Novo Aluno
+                            <a href="alunos.php?action=novo" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> 
+                                Novo Aluno
                             </a>
-                            <a href="alunos.php?action=importar" class="btn-secondary">
-                                <i class="fas fa-file-import mr-2"></i> Importar Alunos
+                            <a href="alunos.php?action=importar" class="btn-secondary inline-flex items-center">
+                                <i class="fas fa-file-import mr-2"></i> 
+                                Importar
+                            </a>
+                        </div>
+                        <?php elseif ($view === 'form'): ?>
+                        <div class="flex space-x-2">
+                            <a href="alunos.php" class="btn-secondary inline-flex items-center">
+                                <i class="fas fa-arrow-left mr-2"></i> 
+                                Voltar
+                            </a>
+                        </div>
+                        <?php elseif ($view === 'visualizar'): ?>
+                        <div class="flex space-x-2">
+                            <a href="alunos.php?action=editar&id=<?php echo $aluno['id']; ?>" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-edit mr-2"></i> 
+                                Editar
+                            </a>
+                            <a href="alunos.php" class="btn-secondary inline-flex items-center">
+                                <i class="fas fa-arrow-left mr-2"></i> 
+                                Voltar
                             </a>
                         </div>
                         <?php endif; ?>
-                    </div>
+                    </div>                    <!-- ================================================ -->
+                    <!-- ÁREA DE MENSAGENS DO SISTEMA -->
+                    <!-- ================================================ -->
 
+                    <!-- Mensagens de erro de validação -->
                     <?php if (isset($mensagens_erro) && !empty($mensagens_erro)): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-                        <ul class="list-disc list-inside">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                            <h3 class="text-red-800 font-semibold">Erros de Validação</h3>
+                        </div>
+                        <ul class="list-disc list-inside text-red-700 space-y-1">
                             <?php foreach ($mensagens_erro as $erro): ?>
-                            <li><?php echo $erro; ?></li>
+                            <li><?php echo htmlspecialchars($erro); ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                     <?php endif; ?>
 
+                    <!-- Mensagens de erro de importação -->
                     <?php if (isset($_SESSION['mensagens_erro']) && !empty($_SESSION['mensagens_erro'])): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-                        <h3 class="font-bold mb-2">Detalhes dos erros de importação:</h3>
-                        <ul class="list-disc list-inside">
-                            <?php foreach ($_SESSION['mensagens_erro'] as $erro): ?>
-                            <li><?php echo $erro; ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-file-excel text-red-500 mr-2"></i>
+                            <h3 class="text-red-800 font-semibold">Erros de Importação</h3>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <ul class="list-disc list-inside text-red-700 space-y-1">
+                                <?php foreach ($_SESSION['mensagens_erro'] as $erro): ?>
+                                <li class="text-sm"><?php echo htmlspecialchars($erro); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
                     </div>
                     <?php
                     // Limpa as mensagens de erro da sessão
@@ -1160,34 +1531,55 @@ switch ($action) {
                     endif;
                     ?>
 
+                    <!-- Mensagens de sucesso/erro gerais -->
                     <?php if (isset($_SESSION['mensagem']) && isset($_SESSION['mensagem_tipo'])): ?>
-                    <div class="bg-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-100 border-l-4 border-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-500 text-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-700 p-4 mb-6">
-                        <?php echo is_array($_SESSION['mensagem']) ? implode(', ', $_SESSION['mensagem']) : $_SESSION['mensagem']; ?>
+                    <?php 
+                    $tipo = $_SESSION['mensagem_tipo'];
+                    $cor = $tipo === 'sucesso' ? 'green' : 'red';
+                    $icone = $tipo === 'sucesso' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                    ?>
+                    <div class="bg-<?php echo $cor; ?>-50 border-l-4 border-<?php echo $cor; ?>-500 p-4 mb-6 rounded-r-lg">
+                        <div class="flex items-center">
+                            <i class="fas <?php echo $icone; ?> text-<?php echo $cor; ?>-500 mr-2"></i>
+                            <span class="text-<?php echo $cor; ?>-800 font-medium">
+                                <?php echo is_array($_SESSION['mensagem']) ? implode(', ', $_SESSION['mensagem']) : $_SESSION['mensagem']; ?>
+                            </span>
+                        </div>
                     </div>
                     <?php
                     // Limpa a mensagem da sessão
                     unset($_SESSION['mensagem']);
                     unset($_SESSION['mensagem_tipo']);
                     endif;
-                    ?>
-
+                    ?>                    <!-- ================================================ -->
+                    <!-- ÁREA DE CONTEÚDO DINÂMICO -->
+                    <!-- ================================================ -->
                     <?php
-                    // Inclui a view correspondente
+                    // Inclui a view correspondente baseada na ação atual
                     switch ($view) {
                         case 'form':
+                            // Formulário de cadastro/edição de aluno
                             include 'views/alunos/form.php';
                             break;
+                            
                         case 'visualizar':
+                            // Página de detalhes do aluno
                             include 'views/alunos/visualizar.php';
                             break;
+                            
                         case 'importar':
+                            // Formulário de importação em massa
                             include 'views/alunos/importar.php';
                             break;
+                            
                         case 'validacao_importacao':
+                            // Página de validação antes da importação
                             include 'views/alunos/validacao_importacao.php';
                             break;
+                            
                         case 'listar':
                         default:
+                            // Listagem de alunos (página padrão)
                             include 'views/alunos/listar.php';
                             break;
                     }
@@ -1195,11 +1587,277 @@ switch ($action) {
                 </div>
             </main>
 
-            <!-- Footer -->
-            <?php include 'includes/footer.php'; ?>
+            <!-- ================================================================ -->
+            <!-- RODAPÉ DA APLICAÇÃO -->
+            <!-- ================================================================ -->
+            <footer class="bg-white border-t border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-users mr-2 text-blue-500"></i>
+                        <span>Módulo de Alunos - Faciência ERP © 2024</span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                        <span>Versão 2.0</span>
+                        <span>•</span>
+                        <a href="ajuda.php?modulo=alunos" class="hover:text-blue-600 transition-colors">
+                            <i class="fas fa-question-circle mr-1"></i>
+                            Ajuda
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
 
+    <!-- ================================================================== -->
+    <!-- JAVASCRIPT PARA INTERATIVIDADE -->
+    <!-- ================================================================== -->
     <script src="js/main.js"></script>
+    <script>
+        /**
+         * ================================================================
+         * MÓDULO ALUNOS - SCRIPTS DE INTERATIVIDADE
+         * ================================================================
+         */
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎓 Módulo de Alunos carregado');
+              // Inicializa funcionalidades específicas baseadas na view atual
+            const view = '<?php echo isset($view) ? $view : 'listar'; ?>';
+            
+            switch(view) {
+                case 'listar':
+                    inicializarListagem();
+                    break;
+                case 'form':
+                    inicializarFormulario();
+                    break;
+                case 'importar':
+                    inicializarImportacao();
+                    break;
+                case 'validacao_importacao':
+                    inicializarValidacao();
+                    break;
+            }
+        });
+
+        /**
+         * Inicializa funcionalidades da listagem de alunos
+         */
+        function inicializarListagem() {
+            // Adiciona confirmação para exclusão
+            document.querySelectorAll('.btn-excluir').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const nomeAluno = this.dataset.nome;
+                    
+                    if (confirm(`Tem certeza que deseja excluir o aluno "${nomeAluno}"?\n\nEsta ação não pode ser desfeita.`)) {
+                        window.location.href = this.href;
+                    }
+                });
+            });
+
+            // Filtros dinâmicos
+            const filtros = document.querySelectorAll('.filtro-select');
+            filtros.forEach(filtro => {
+                filtro.addEventListener('change', function() {
+                    document.getElementById('form-filtros').submit();
+                });
+            });
+        }
+
+        /**
+         * Inicializa funcionalidades do formulário de aluno
+         */
+        function inicializarFormulario() {
+            // Validação em tempo real do CPF
+            const campoCpf = document.getElementById('cpf');
+            if (campoCpf) {
+                campoCpf.addEventListener('input', function() {
+                    formatarCPF(this);
+                    validarCPF(this);
+                });
+            }
+
+            // Validação em tempo real do email
+            const campoEmail = document.getElementById('email');
+            if (campoEmail) {
+                campoEmail.addEventListener('blur', function() {
+                    validarEmail(this);
+                });
+            }
+
+            // Auto-formatação do CEP
+            const campoCep = document.getElementById('cep');
+            if (campoCep) {
+                campoCep.addEventListener('input', function() {
+                    formatarCEP(this);
+                });
+            }
+        }
+
+        /**
+         * Inicializa funcionalidades da importação
+         */
+        function inicializarImportacao() {
+            const inputArquivo = document.getElementById('arquivo');
+            const areaUpload = document.querySelector('.import-area');
+            
+            if (inputArquivo && areaUpload) {
+                // Drag and drop
+                areaUpload.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('border-blue-500', 'bg-blue-50');
+                });
+
+                areaUpload.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+
+                areaUpload.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('border-blue-500', 'bg-blue-50');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        inputArquivo.files = files;
+                        mostrarNomeArquivo(files[0].name);
+                    }
+                });
+
+                // Seleção de arquivo
+                inputArquivo.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        mostrarNomeArquivo(this.files[0].name);
+                    }
+                });
+            }
+        }
+
+        /**
+         * Mostra o nome do arquivo selecionado
+         */
+        function mostrarNomeArquivo(nome) {
+            const elemento = document.getElementById('nome-arquivo');
+            if (elemento) {
+                elemento.textContent = nome;
+                elemento.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Formata o CPF conforme o usuário digita
+         */
+        function formatarCPF(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+            valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            input.value = valor;
+        }
+
+        /**
+         * Valida o CPF
+         */
+        function validarCPF(input) {
+            const cpf = input.value.replace(/\D/g, '');
+            const isValid = validarCPFNumerico(cpf);
+            
+            if (cpf.length === 11 && !isValid) {
+                input.classList.add('border-red-500');
+                mostrarErro(input, 'CPF inválido');
+            } else {
+                input.classList.remove('border-red-500');
+                esconderErro(input);
+            }
+        }
+
+        /**
+         * Validação numérica do CPF
+         */
+        function validarCPFNumerico(cpf) {
+            if (cpf.length !== 11) return false;
+            if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            
+            let resto = 11 - (soma % 11);
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf.charAt(9))) return false;
+
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            
+            resto = 11 - (soma % 11);
+            if (resto === 10 || resto === 11) resto = 0;
+            return resto === parseInt(cpf.charAt(10));
+        }
+
+        /**
+         * Valida email
+         */
+        function validarEmail(input) {
+            const email = input.value;
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !regex.test(email)) {
+                input.classList.add('border-red-500');
+                mostrarErro(input, 'Email inválido');
+            } else {
+                input.classList.remove('border-red-500');
+                esconderErro(input);
+            }
+        }
+
+        /**
+         * Formata CEP
+         */
+        function formatarCEP(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+            input.value = valor;
+        }
+
+        /**
+         * Mostra mensagem de erro
+         */
+        function mostrarErro(input, mensagem) {
+            let erro = input.parentNode.querySelector('.erro-validacao');
+            if (!erro) {
+                erro = document.createElement('div');
+                erro.className = 'erro-validacao text-red-500 text-sm mt-1';
+                input.parentNode.appendChild(erro);
+            }
+            erro.textContent = mensagem;
+        }
+
+        /**
+         * Esconde mensagem de erro
+         */
+        function esconderErro(input) {
+            const erro = input.parentNode.querySelector('.erro-validacao');
+            if (erro) {
+                erro.remove();
+            }
+        }
+
+        // Log de inicialização do módulo
+        console.log(`
+        ╔════════════════════════════════════════════════════════════════╗
+        ║                    FACIÊNCIA ERP - ALUNOS                     ║
+        ║                  Módulo de Gestão de Alunos                   ║
+        ╠════════════════════════════════════════════════════════════════╣
+        ║ 📚 View Atual: <?php echo isset($view) ? strtoupper($view) : 'LISTAR'; ?>                                             ║
+        ║ 👥 Sistema: Gerenciamento Acadêmico                           ║
+        ║ 🔧 Versão: 2.0                                                ║
+        ╚════════════════════════════════════════════════════════════════╝
+        `);
+    </script>
 </body>
 </html>

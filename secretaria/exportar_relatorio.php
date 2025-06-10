@@ -190,127 +190,210 @@ switch ($tipo) {
                    number_format(($estatisticas_matriculas['matriculas_canceladas'] / $estatisticas_matriculas['total_matriculas']) * 100, 1) : 0) . '%'];
 
         $titulo = 'Relatório de Estatísticas';
-        break;
-
-    case 'documentos':
+        break;    case 'documentos':
         // Obtém os filtros
         $filtro_polo = isset($_GET['polo_id']) ? (int)$_GET['polo_id'] : 0;
         $filtro_tipo_documento = isset($_GET['tipo_documento_id']) ? (int)$_GET['tipo_documento_id'] : 0;
         $filtro_data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : date('Y-m-d', strtotime('-6 months'));
         $filtro_data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : date('Y-m-d');
+        $filtro_tab = isset($_GET['tab']) ? $_GET['tab'] : 'emitidos'; // emitidos ou solicitacoes
+        $filtro_status = isset($_GET['status']) ? $_GET['status'] : '';
 
-        // Constrói a consulta SQL para o relatório de documentos
-        $sql_documentos = "SELECT 
-                            p.nome as polo_nome,
-                            td.nome as tipo_documento,
-                            COUNT(cd.id) as total_solicitados,
-                            COUNT(CASE WHEN cd.status IN ('pronto', 'entregue') THEN cd.id END) as total_emitidos,
-                            COUNT(CASE WHEN cd.status IN ('solicitado', 'processando') THEN cd.id END) as total_pendentes,
-                            SUM(cd.valor_total) as valor_total
-                        FROM chamados_documentos cd
-                        JOIN polos p ON cd.polo_id = p.id
-                        JOIN tipos_documentos td ON cd.tipo_documento_id = td.id
-                        WHERE cd.created_at BETWEEN ? AND ?";
+        if ($filtro_tab === 'emitidos') {
+            // Consulta para documentos emitidos
+            $sql_documentos = "SELECT 
+                                de.numero_documento,
+                                td.nome as tipo_documento,
+                                a.nome as aluno_nome,
+                                a.cpf as aluno_cpf,
+                                c.nome as curso_nome,
+                                p.nome as polo_nome,
+                                de.data_emissao,
+                                de.data_validade,
+                                de.status,
+                                de.codigo_verificacao
+                                FROM documentos_emitidos de
+                                LEFT JOIN tipos_documentos td ON de.tipo_documento_id = td.id
+                                LEFT JOIN alunos a ON de.aluno_id = a.id
+                                LEFT JOIN polos p ON de.polo_id = p.id
+                                LEFT JOIN cursos c ON de.curso_id = c.id
+                                WHERE de.data_emissao BETWEEN ? AND ?";
 
-        $params_documentos = [$filtro_data_inicio . ' 00:00:00', $filtro_data_fim . ' 23:59:59'];
+            $params_documentos = [$filtro_data_inicio, $filtro_data_fim];
 
-        // Aplica os filtros
-        if ($filtro_polo > 0) {
-            $sql_documentos .= " AND p.id = ?";
-            $params_documentos[] = $filtro_polo;
+            // Aplica os filtros para documentos emitidos
+            if ($filtro_tipo_documento > 0) {
+                $sql_documentos .= " AND de.tipo_documento_id = ?";
+                $params_documentos[] = $filtro_tipo_documento;
+            }
+
+            if ($filtro_polo > 0) {
+                $sql_documentos .= " AND de.polo_id = ?";
+                $params_documentos[] = $filtro_polo;
+            }
+
+            if (!empty($filtro_status)) {
+                $sql_documentos .= " AND de.status = ?";
+                $params_documentos[] = $filtro_status;
+            }
+
+            $sql_documentos .= " ORDER BY de.data_emissao DESC";
+
+            // Define as colunas para o relatório de documentos emitidos
+            $colunas = [
+                'Número Documento', 'Tipo', 'Aluno', 'CPF', 'Curso', 'Polo', 
+                'Data Emissão', 'Data Validade', 'Status', 'Código Verificação'
+            ];
+
+            $titulo = 'Relatório de Documentos Emitidos';
+
+        } else {
+            // Consulta para solicitações de documentos
+            $sql_documentos = "SELECT 
+                                td.nome as tipo_documento,
+                                a.nome as aluno_nome,
+                                a.cpf as aluno_cpf,
+                                p.nome as polo_nome,
+                                sd.quantidade,
+                                sd.finalidade,
+                                sd.valor_total,
+                                sd.pago,
+                                sd.status,
+                                sd.data_solicitacao,
+                                sd.observacoes,
+                                u.nome as solicitante_nome
+                                FROM solicitacoes_documentos sd
+                                LEFT JOIN tipos_documentos td ON sd.tipo_documento_id = td.id
+                                LEFT JOIN alunos a ON sd.aluno_id = a.id
+                                LEFT JOIN polos p ON sd.polo_id = p.id
+                                LEFT JOIN usuarios u ON sd.solicitante_id = u.id
+                                WHERE sd.data_solicitacao BETWEEN ? AND ?";
+
+            $params_documentos = [$filtro_data_inicio, $filtro_data_fim];
+
+            // Aplica os filtros para solicitações
+            if ($filtro_tipo_documento > 0) {
+                $sql_documentos .= " AND sd.tipo_documento_id = ?";
+                $params_documentos[] = $filtro_tipo_documento;
+            }
+
+            if ($filtro_polo > 0) {
+                $sql_documentos .= " AND sd.polo_id = ?";
+                $params_documentos[] = $filtro_polo;
+            }
+
+            if (!empty($filtro_status)) {
+                $sql_documentos .= " AND sd.status = ?";
+                $params_documentos[] = $filtro_status;
+            }
+
+            $sql_documentos .= " ORDER BY sd.data_solicitacao DESC";
+
+            // Define as colunas para o relatório de solicitações
+            $colunas = [
+                'Tipo', 'Aluno', 'CPF', 'Polo', 'Quantidade', 'Finalidade', 
+                'Valor Total', 'Pago', 'Status', 'Data Solicitação', 'Observações', 'Solicitante'
+            ];
+
+            $titulo = 'Relatório de Solicitações de Documentos';
         }
-
-        if ($filtro_tipo_documento > 0) {
-            $sql_documentos .= " AND td.id = ?";
-            $params_documentos[] = $filtro_tipo_documento;
-        }
-
-        $sql_documentos .= " GROUP BY p.id, td.id ORDER BY p.nome, td.nome";
 
         // Executa a consulta
-        $dados_documentos = $db->fetchAll($sql_documentos, $params_documentos);
-
-        // Define as colunas para o relatório
-        $colunas = [
-            'Polo', 'Tipo de Documento', 'Solicitados', 'Emitidos', 'Pendentes', 'Valor Total'
-        ];
+        $dados_documentos = $db->fetchAll($sql_documentos, $params_documentos) ?: [];
 
         // Formata os dados para exportação
         foreach ($dados_documentos as $dado) {
-            $dados[] = [
-                $dado['polo_nome'],
-                $dado['tipo_documento'],
-                $dado['total_solicitados'],
-                $dado['total_emitidos'],
-                $dado['total_pendentes'],
-                'R$ ' . number_format($dado['valor_total'], 2, ',', '.')
-            ];
+            if ($filtro_tab === 'emitidos') {
+                $dados[] = [
+                    $dado['numero_documento'] ?: 'N/A',
+                    $dado['tipo_documento'] ?: 'N/A',
+                    $dado['aluno_nome'] ?: 'N/A',
+                    $dado['aluno_cpf'] ?: 'N/A',
+                    $dado['curso_nome'] ?: 'N/A',
+                    $dado['polo_nome'] ?: 'N/A',
+                    $dado['data_emissao'] ? date('d/m/Y', strtotime($dado['data_emissao'])) : 'N/A',
+                    $dado['data_validade'] ? date('d/m/Y', strtotime($dado['data_validade'])) : 'N/A',
+                    ucfirst($dado['status']),
+                    $dado['codigo_verificacao'] ?: 'N/A'
+                ];
+            } else {
+                $dados[] = [
+                    $dado['tipo_documento'] ?: 'N/A',
+                    $dado['aluno_nome'] ?: 'N/A',
+                    $dado['aluno_cpf'] ?: 'N/A',
+                    $dado['polo_nome'] ?: 'N/A',
+                    $dado['quantidade'] ?: 1,
+                    $dado['finalidade'] ?: 'N/A',
+                    'R$ ' . number_format($dado['valor_total'] ?: 0, 2, ',', '.'),
+                    $dado['pago'] ? 'Sim' : 'Não',
+                    ucfirst($dado['status']),
+                    $dado['data_solicitacao'] ? date('d/m/Y', strtotime($dado['data_solicitacao'])) : 'N/A',
+                    $dado['observacoes'] ?: 'N/A',
+                    $dado['solicitante_nome'] ?: 'N/A'
+                ];
+            }
         }
 
-        $titulo = 'Relatório de Documentos';
-        break;
-
-    case 'chamados':
+        break;    case 'chamados':
         // Obtém os filtros
         $filtro_status = isset($_GET['status']) ? $_GET['status'] : '';
-        $filtro_tipo = isset($_GET['tipo']) ? $_GET['tipo'] : '';
-        $filtro_departamento = isset($_GET['departamento']) ? $_GET['departamento'] : '';
+        $filtro_tipo_solicitacao = isset($_GET['tipo_solicitacao']) ? $_GET['tipo_solicitacao'] : '';
         $filtro_data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : date('Y-m-d', strtotime('-6 months'));
         $filtro_data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : date('Y-m-d');
 
-        // Constrói a consulta SQL para o relatório de chamados
-        $sql_chamados = "SELECT 
-                            cc.nome as categoria,
-                            COUNT(c.id) as total,
-                            COUNT(CASE WHEN c.status = 'aberto' THEN c.id END) as abertos,
-                            COUNT(CASE WHEN c.status = 'em_andamento' THEN c.id END) as em_andamento,
-                            COUNT(CASE WHEN c.status = 'resolvido' THEN c.id END) as resolvidos,
-                            AVG(CASE WHEN c.tempo_resolucao IS NOT NULL THEN c.tempo_resolucao ELSE NULL END) / 60 as tempo_medio
-                        FROM chamados c
-                        JOIN categorias_chamados cc ON c.categoria_id = cc.id
-                        WHERE c.data_abertura BETWEEN ? AND ?";
+        // Constrói a consulta SQL para o relatório de solicitações do site
+        $sql_solicitacoes = "SELECT 
+                            ss.protocolo,
+                            ss.nome_empresa,
+                            ss.cnpj,
+                            ss.nome_solicitante,
+                            ss.tipo_solicitacao,
+                            ss.quantidade,
+                            ss.status,
+                            ss.data_solicitacao,
+                            ss.observacoes
+                        FROM solicitacoes_s ss
+                        WHERE ss.data_solicitacao BETWEEN ? AND ?";
 
-        $params_chamados = [$filtro_data_inicio . ' 00:00:00', $filtro_data_fim . ' 23:59:59'];
+        $params_solicitacoes = [$filtro_data_inicio . ' 00:00:00', $filtro_data_fim . ' 23:59:59'];
 
         // Aplica os filtros
         if (!empty($filtro_status)) {
-            $sql_chamados .= " AND c.status = ?";
-            $params_chamados[] = $filtro_status;
+            $sql_solicitacoes .= " AND ss.status = ?";
+            $params_solicitacoes[] = $filtro_status;
         }
 
-        if (!empty($filtro_tipo)) {
-            $sql_chamados .= " AND c.tipo = ?";
-            $params_chamados[] = $filtro_tipo;
+        if (!empty($filtro_tipo_solicitacao)) {
+            $sql_solicitacoes .= " AND ss.tipo_solicitacao = ?";
+            $params_solicitacoes[] = $filtro_tipo_solicitacao;
         }
 
-        if (!empty($filtro_departamento)) {
-            $sql_chamados .= " AND c.departamento = ?";
-            $params_chamados[] = $filtro_departamento;
-        }
-
-        $sql_chamados .= " GROUP BY cc.id ORDER BY total DESC";
+        $sql_solicitacoes .= " ORDER BY ss.data_solicitacao DESC";
 
         // Executa a consulta
-        $dados_chamados = $db->fetchAll($sql_chamados, $params_chamados);
+        $dados_solicitacoes = $db->fetchAll($sql_solicitacoes, $params_solicitacoes);
 
         // Define as colunas para o relatório
         $colunas = [
-            'Categoria', 'Total', 'Abertos', 'Em Andamento', 'Resolvidos', 'Tempo Médio (horas)'
+            'Protocolo', 'Empresa', 'CNPJ', 'Solicitante', 'Tipo Solicitação', 'Quantidade', 'Status', 'Data Solicitação', 'Observações'
         ];
 
         // Formata os dados para exportação
-        foreach ($dados_chamados as $dado) {
+        foreach ($dados_solicitacoes as $dado) {
             $dados[] = [
-                $dado['categoria'],
-                $dado['total'],
-                $dado['abertos'] . ' (' . ($dado['total'] > 0 ? round(($dado['abertos'] / $dado['total']) * 100, 1) : 0) . '%)',
-                $dado['em_andamento'] . ' (' . ($dado['total'] > 0 ? round(($dado['em_andamento'] / $dado['total']) * 100, 1) : 0) . '%)',
-                $dado['resolvidos'] . ' (' . ($dado['total'] > 0 ? round(($dado['resolvidos'] / $dado['total']) * 100, 1) : 0) . '%)',
-                $dado['tempo_medio'] !== null ? number_format($dado['tempo_medio'], 1, ',', '.') : 'N/A'
+                $dado['protocolo'] ?: 'N/A',
+                $dado['nome_empresa'] ?: 'N/A',
+                $dado['cnpj'] ?: 'N/A',
+                $dado['nome_solicitante'] ?: 'N/A',
+                $dado['tipo_solicitacao'] ?: 'N/A',
+                $dado['quantidade'] ?: 0,
+                ucfirst($dado['status']),
+                $dado['data_solicitacao'] ? date('d/m/Y H:i', strtotime($dado['data_solicitacao'])) : 'N/A',
+                $dado['observacoes'] ?: 'N/A'
             ];
         }
 
-        $titulo = 'Relatório de Chamados';
+        $titulo = 'Relatório de Solicitações do Site';
         break;
 
     default:

@@ -1,10 +1,50 @@
 <?php
 /**
- * Página de gerenciamento de disciplinas
+ * ================================================================
+ *                    SISTEMA FACIÊNCIA ERP
+ * ================================================================
+ * 
+ * Módulo: Gerenciamento de Disciplinas
+ * Descrição: Interface principal para gerenciamento de disciplinas acadêmicas
+ * Versão: 2.0
+ * Data de Atualização: 2024-12-19
+ * 
+ * Funcionalidades:
+ * - Cadastro, edição e exclusão de disciplinas
+ * - Visualização detalhada de disciplinas
+ * - Vinculação com cursos e professores
+ * - Controle de carga horária e período
+ * - Gerenciamento de status (ativo/inativo)
+ * - Associação com turmas
+ * - Busca avançada e filtros
+ * - Paginação de resultados
+ * 
+ * Estrutura de Navegação:
+ * - listar: Listagem paginada de disciplinas
+ * - nova: Formulário para criar nova disciplina
+ * - editar: Formulário para editar disciplina existente
+ * - visualizar: Detalhes completos da disciplina
+ * - salvar: Processamento de dados do formulário
+ * - excluir: Remoção de disciplina (com validações)
+ * - buscar: Pesquisa avançada de disciplinas
+ * - cadastrar_professor: Cadastro rápido de professor via AJAX
+ * 
+ * ================================================================
  */
 
-// Inicializa o sistema
+// ================================================================
+// CONFIGURAÇÕES INICIAIS E CONSTANTES
+// ================================================================
+
+// Carregamento do sistema base
 require_once __DIR__ . '/includes/init.php';
+
+// Configurações específicas do módulo
+ini_set('memory_limit', '256M'); // Aumenta limite de memória para relatórios
+
+// ================================================================
+// VERIFICAÇÃO DE AUTENTICAÇÃO E PERMISSÕES
+// ================================================================
 
 // Verifica se o usuário está autenticado
 exigirLogin();
@@ -12,10 +52,14 @@ exigirLogin();
 // Verifica se o usuário tem permissão para acessar o módulo de disciplinas
 exigirPermissao('disciplinas');
 
+// ================================================================
+// INICIALIZAÇÃO DE COMPONENTES
+// ================================================================
+
 // Instancia o banco de dados
 $db = Database::getInstance();
 
-// Define a ação atual
+// Define a ação atual baseada no parâmetro GET
 $action = $_GET['action'] ?? 'listar';
 
 // Função para executar consultas com tratamento de erro
@@ -59,6 +103,9 @@ function executarConsultaAll($db, $sql, $params = [], $default = []) {
 
 // Processa a ação
 switch ($action) {
+    // ============================================================
+    // NOVA DISCIPLINA - FORMULÁRIO DE CRIAÇÃO
+    // ============================================================
     case 'nova':
         // Exibe o formulário para adicionar uma nova disciplina
         $titulo_pagina = 'Nova Disciplina';
@@ -115,10 +162,12 @@ switch ($action) {
         $professores = executarConsultaAll($db, $sql);
 
         // Carrega as turmas ativas
-        $sql = "SELECT id, nome FROM turmas WHERE status = 'ativo' ORDER BY nome ASC";
-        $turmas = executarConsultaAll($db, $sql);
+        $sql = "SELECT id, nome FROM turmas WHERE status = 'ativo' ORDER BY nome ASC";        $turmas = executarConsultaAll($db, $sql);
         break;
 
+    // ============================================================
+    // EDITAR DISCIPLINA - FORMULÁRIO DE EDIÇÃO
+    // ============================================================
     case 'editar':
         // Exibe o formulário para editar uma disciplina existente
         $id = $_GET['id'] ?? 0;
@@ -176,10 +225,12 @@ switch ($action) {
         $turmas_associadas = executarConsultaAll($db, $sql, [$id]);
         $disciplina['turmas_selecionadas'] = array_column($turmas_associadas, 'turma_id');
 
-        $titulo_pagina = 'Editar Disciplina';
-        $view = 'form';
+        $titulo_pagina = 'Editar Disciplina';        $view = 'form';
         break;
 
+    // ============================================================
+    // SALVAR DISCIPLINA - PROCESSAMENTO DE DADOS
+    // ============================================================
     case 'salvar':
         // Salva os dados da disciplina (nova ou existente)
         if (!isPost()) {
@@ -418,10 +469,12 @@ switch ($action) {
                         array_unshift($professores, $professor_especifico);
                     }
                 }
-            }
-        }
+            }        }
         break;
 
+    // ============================================================
+    // EXCLUIR DISCIPLINA - REMOÇÃO COM VALIDAÇÕES
+    // ============================================================
     case 'excluir':
         // Exclui uma disciplina
         $id = $_GET['id'] ?? 0;
@@ -467,10 +520,12 @@ switch ($action) {
             setMensagem('erro', 'Erro ao excluir a disciplina: ' . $e->getMessage());
         }
 
-        // Redireciona para a listagem
-        redirect('disciplinas.php');
+        // Redireciona para a listagem        redirect('disciplinas.php');
         break;
 
+    // ============================================================
+    // CADASTRAR PROFESSOR - AJAX PARA CRIAÇÃO RÁPIDA
+    // ============================================================
     case 'cadastrar_professor':
         // Cadastra um novo professor via AJAX
         if (!isPost()) {
@@ -510,9 +565,11 @@ switch ($action) {
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar professor: ' . $e->getMessage()]);
-        }
-        exit;
+        }        exit;
 
+    // ============================================================
+    // VISUALIZAR DISCIPLINA - DETALHES COMPLETOS
+    // ============================================================
     case 'visualizar':
         // Exibe os detalhes de uma disciplina
         $id = $_GET['id'] ?? 0;
@@ -533,10 +590,12 @@ switch ($action) {
             redirect('disciplinas.php');
         }
 
-        $titulo_pagina = 'Detalhes da Disciplina';
-        $view = 'visualizar';
+        $titulo_pagina = 'Detalhes da Disciplina';        $view = 'visualizar';
         break;
 
+    // ============================================================
+    // BUSCAR DISCIPLINAS - PESQUISA AVANÇADA
+    // ============================================================
     case 'buscar':
         // Busca disciplinas por termo
         $termo = $_GET['termo'] ?? '';
@@ -612,25 +671,24 @@ switch ($action) {
         }
 
         if (!isset($curso_id)) {
-            $curso_id = null;
-        }
-        break;
-
+            $curso_id = null;        }
+        break;    // ============================================================
+    // LISTAR DISCIPLINAS - LISTAGEM PAGINADA COM FILTROS
+    // ============================================================
     case 'listar':
     default:
-        // Lista todas as disciplinas
+        // === CONFIGURAÇÃO DE PAGINAÇÃO ===
         $status = $_GET['status'] ?? 'todos';
         $curso_id = $_GET['curso_id'] ?? null;
         $ordenar = $_GET['ordenar'] ?? null;
-        $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
         $por_pagina = 20;
         $offset = ($pagina - 1) * $por_pagina;
 
-        // Monta a consulta SQL
+        // === CONSTRUÇÃO DE FILTROS ===
         $where = [];
         $params = [];
 
-        // Adiciona condição de status apenas se não for 'todos'
         if ($status !== 'todos') {
             $where[] = "d.status = ?";
             $params[] = $status;
@@ -641,80 +699,22 @@ switch ($action) {
             $params[] = $curso_id;
         }
 
-        // Monta a cláusula WHERE
         $whereClause = '';
         if (!empty($where)) {
             $whereClause = "WHERE " . implode(" AND ", $where);
         }
 
-        // Define a ordenação
+        // === DEFINIÇÃO DE ORDENAÇÃO ===
         $orderBy = "d.nome ASC";
         if ($ordenar === 'recentes') {
             $orderBy = "d.created_at DESC";
         }
 
-        // CORREÇÃO DIRETA: Consulta extremamente simplificada para garantir que todas as disciplinas sejam listadas
-        if ($status === 'todos' && empty($curso_id)) {
-            // Consulta direta na tabela disciplinas sem joins para evitar problemas
-            // Limitando a 200 disciplinas para não sobrecarregar o servidor
-            $sql = "SELECT * FROM disciplinas ORDER BY nome ASC LIMIT 200";
-
-            error_log("CORREÇÃO DIRETA: Executando consulta SQL direta na tabela disciplinas");
-
-            try {
-                // Executa a consulta diretamente usando PDO para evitar qualquer problema com a função executarConsultaAll
-                $stmt = $db->getConnection()->prepare($sql);
-                $stmt->execute();
-                $disciplinas_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                error_log("CORREÇÃO DIRETA: Consulta retornou " . count($disciplinas_raw) . " disciplinas");
-
-                // Agora buscamos os dados relacionados para cada disciplina
-                $disciplinas = [];
-                foreach ($disciplinas_raw as $disc) {
-                    // Busca o nome do curso
-                    if (!empty($disc['curso_id'])) {
-                        $sql_curso = "SELECT nome FROM cursos WHERE id = ?";
-                        $stmt_curso = $db->getConnection()->prepare($sql_curso);
-                        $stmt_curso->execute([$disc['curso_id']]);
-                        $curso = $stmt_curso->fetch(PDO::FETCH_ASSOC);
-                        $disc['curso_nome'] = $curso ? $curso['nome'] : 'Curso não encontrado';
-                    } else {
-                        $disc['curso_nome'] = 'Curso não definido';
-                    }
-
-                    // Busca o nome do professor
-                    if (!empty($disc['professor_padrao_id'])) {
-                        $sql_prof = "SELECT nome FROM professores WHERE id = ?";
-                        $stmt_prof = $db->getConnection()->prepare($sql_prof);
-                        $stmt_prof->execute([$disc['professor_padrao_id']]);
-                        $professor = $stmt_prof->fetch(PDO::FETCH_ASSOC);
-                        $disc['professor_nome'] = $professor ? $professor['nome'] : 'Professor não encontrado';
-                    } else {
-                        $disc['professor_nome'] = null;
-                    }
-
-                    $disciplinas[] = $disc;
-                }
-
-                error_log("CORREÇÃO DIRETA: Processamento completo, retornando " . count($disciplinas) . " disciplinas com dados relacionados");
-            } catch (Exception $e) {
-                error_log("ERRO CRÍTICO na consulta direta: " . $e->getMessage());
-                error_log("Stack trace: " . $e->getTraceAsString());
-
-                // Fallback para consulta simples sem joins
-                $sql_fallback = "SELECT * FROM disciplinas LIMIT 100";
-                $stmt_fallback = $db->getConnection()->prepare($sql_fallback);
-                $stmt_fallback->execute();
-                $disciplinas = $stmt_fallback->fetchAll(PDO::FETCH_ASSOC);
-
-                error_log("FALLBACK: Consulta retornou " . count($disciplinas) . " disciplinas");
-            }
-        } else {
-            // Consulta com filtros
+        // === CONSULTA PRINCIPAL COM PAGINAÇÃO ===
+        try {
             $sql = "SELECT d.*,
-                       c.nome as curso_nome,
-                       p.nome as professor_nome
+                           c.nome as curso_nome,
+                           p.nome as professor_nome
                     FROM disciplinas d
                     LEFT JOIN cursos c ON d.curso_id = c.id
                     LEFT JOIN professores p ON d.professor_padrao_id = p.id
@@ -722,125 +722,58 @@ switch ($action) {
                     ORDER BY {$orderBy}
                     LIMIT {$offset}, {$por_pagina}";
 
-            error_log("Executando consulta SQL com filtros: " . $sql);
+            error_log("Executando consulta principal: " . $sql);
             error_log("Parâmetros: " . json_encode($params));
+            
+            $disciplinas = executarConsultaAll($db, $sql, $params);
+            error_log("Disciplinas encontradas: " . count($disciplinas));
+
+        } catch (Exception $e) {
+            error_log("Erro na consulta principal: " . $e->getMessage());
+            $disciplinas = [];
+        }
+
+        // === CONTAGEM TOTAL PARA PAGINAÇÃO ===
+        try {
+            $sql_count = "SELECT COUNT(*) as total
+                          FROM disciplinas d
+                          {$whereClause}";
+            $resultado = executarConsulta($db, $sql_count, $params);
+            $total_disciplinas = $resultado['total'] ?? 0;
+            
+            error_log("Total de disciplinas para paginação: " . $total_disciplinas);
+        } catch (Exception $e) {
+            error_log("Erro ao contar disciplinas: " . $e->getMessage());
+            $total_disciplinas = 0;
+        }
+
+        // === CÁLCULO DE PAGINAÇÃO ===
+        $total_paginas = $total_disciplinas > 0 ? ceil($total_disciplinas / $por_pagina) : 1;
+        
+        // Ajusta página atual se estiver fora do range
+        if ($pagina > $total_paginas && $total_paginas > 0) {
+            $pagina = $total_paginas;
+            $offset = ($pagina - 1) * $por_pagina;
+            
+            // Executa novamente a consulta com a página corrigida
+            $sql = "SELECT d.*,
+                           c.nome as curso_nome,
+                           p.nome as professor_nome
+                    FROM disciplinas d
+                    LEFT JOIN cursos c ON d.curso_id = c.id
+                    LEFT JOIN professores p ON d.professor_padrao_id = p.id
+                    {$whereClause}
+                    ORDER BY {$orderBy}
+                    LIMIT {$offset}, {$por_pagina}";
             $disciplinas = executarConsultaAll($db, $sql, $params);
         }
 
-        // Verifica se há disciplinas na tabela
-        $sql_check = "SELECT COUNT(*) as total FROM disciplinas";
-        $total_check = executarConsulta($db, $sql_check);
-        error_log("Total de disciplinas na tabela: " . ($total_check['total'] ?? 0));
-
-        // Se não houver disciplinas, vamos criar algumas para teste
-        if (($total_check['total'] ?? 0) == 0) {
-            error_log("Nenhuma disciplina encontrada na tabela. Criando disciplinas de teste...");
-
-            try {
-                // Verifica se existem cursos
-                $sql_cursos = "SELECT id FROM cursos LIMIT 1";
-                $curso = executarConsulta($db, $sql_cursos);
-
-                if (!$curso) {
-                    error_log("Nenhum curso encontrado. Criando curso de teste...");
-
-                    // Cria um curso de teste
-                    $dados_curso = [
-                        'nome' => 'Curso de Teste',
-                        'descricao' => 'Curso criado automaticamente para teste',
-                        'carga_horaria' => 120,
-                        'status' => 'ativo',
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ];
-
-                    $curso_id = $db->insert('cursos', $dados_curso);
-                    error_log("Curso de teste criado com ID: " . $curso_id);
-                } else {
-                    $curso_id = $curso['id'];
-                    error_log("Usando curso existente com ID: " . $curso_id);
-                }
-
-                // Cria algumas disciplinas de teste
-                $disciplinas_teste = [
-                    [
-                        'nome' => 'Matemática Básica',
-                        'codigo' => 'MAT001',
-                        'curso_id' => $curso_id,
-                        'carga_horaria' => 60,
-                        'status' => 'ativo'
-                    ],
-                    [
-                        'nome' => 'Português Instrumental',
-                        'codigo' => 'PORT001',
-                        'curso_id' => $curso_id,
-                        'carga_horaria' => 40,
-                        'status' => 'ativo'
-                    ],
-                    [
-                        'nome' => 'Introdução à Informática',
-                        'codigo' => 'INF001',
-                        'curso_id' => $curso_id,
-                        'carga_horaria' => 80,
-                        'status' => 'ativo'
-                    ]
-                ];
-
-                foreach ($disciplinas_teste as $disc) {
-                    $disc['created_at'] = date('Y-m-d H:i:s');
-                    $disc['updated_at'] = date('Y-m-d H:i:s');
-
-                    $id = $db->insert('disciplinas', $disc);
-                    error_log("Disciplina de teste criada: " . $disc['nome'] . " (ID: " . $id . ")");
-                }
-
-                // Recarrega a lista de disciplinas
-                if ($status === 'todos' && empty($curso_id)) {
-                    $sql = "SELECT d.*,
-                           c.nome as curso_nome,
-                           p.nome as professor_nome
-                        FROM disciplinas d
-                        LEFT JOIN cursos c ON d.curso_id = c.id
-                        LEFT JOIN professores p ON d.professor_padrao_id = p.id
-                        ORDER BY {$orderBy}";
-
-                    error_log("Recarregando disciplinas após criar disciplinas de teste");
-                    $disciplinas = executarConsultaAll($db, $sql, []);
-                }
-
-                error_log("Total de disciplinas após criar disciplinas de teste: " . count($disciplinas));
-            } catch (Exception $e) {
-                error_log("Erro ao criar disciplinas de teste: " . $e->getMessage());
-            }
-        }
-
-        error_log("Total de disciplinas encontradas na consulta: " . count($disciplinas));
-
-
-
-        // Conta o total de disciplinas
-        $sql = "SELECT COUNT(*) as total
-                FROM disciplinas d
-                {$whereClause}";
-        $resultado = executarConsulta($db, $sql, $params);
-        $total_disciplinas = $resultado['total'] ?? 0;
-
-        error_log("Total de disciplinas para paginação: " . $total_disciplinas);
-
-        // Se estamos mostrando todas as disciplinas, ajusta a variável de disciplinas
-        if ($status === 'todos' && empty($curso_id)) {
-            // Já temos todas as disciplinas na variável $disciplinas
-            $total_paginas = 1;
-        } else {
-            // Calcula o total de páginas
-            $total_paginas = ceil($total_disciplinas / $por_pagina);
-        }
-
+        // === DADOS AUXILIARES ===
         // Carrega os cursos para o filtro
         $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
         $cursos = executarConsultaAll($db, $sql);
 
-        // Busca estatísticas para o dashboard
+        // === ESTATÍSTICAS DO DASHBOARD ===
         try {
             // Total de disciplinas por status
             $sql = "SELECT status, COUNT(*) as total FROM disciplinas GROUP BY status";
@@ -867,12 +800,12 @@ switch ($action) {
 
             // Busca as disciplinas mais recentes para exibir no dashboard
             $sql = "SELECT d.*,
-                       c.nome as curso_nome,
-                       p.nome as professor_nome
-                FROM disciplinas d
-                LEFT JOIN cursos c ON d.curso_id = c.id
-                LEFT JOIN professores p ON d.professor_padrao_id = p.id
-                ORDER BY d.created_at DESC LIMIT 5";
+                           c.nome as curso_nome,
+                           p.nome as professor_nome
+                    FROM disciplinas d
+                    LEFT JOIN cursos c ON d.curso_id = c.id
+                    LEFT JOIN professores p ON d.professor_padrao_id = p.id
+                    ORDER BY d.created_at DESC LIMIT 5";
             $disciplinas_recentes = executarConsultaAll($db, $sql);
 
             // Busca os cursos com mais disciplinas

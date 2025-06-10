@@ -250,15 +250,28 @@ if (mobileMenuButton) {
     });
 }
 
-// Carrega indicadores rápidos
-fetch('ajax/indicadores_rapidos.php')
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('total-alunos').textContent = data.total_alunos || '0';
-            document.getElementById('matriculas-ativas').textContent = data.matriculas_ativas || '0';
-            document.getElementById('total-cursos').textContent = data.total_cursos || '0';
-        }
-    })
-    .catch(error => console.log('Erro ao carregar indicadores:', error));
+// Carrega indicadores rápidos (desabilitado temporariamente para debug)
+// fetch('../ajax/indicadores_rapidos.php')
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.success) {
+//             const totalAlunosEl = document.getElementById('total-alunos');
+//             const matriculasAtivasEl = document.getElementById('matriculas-ativas');
+//             const totalCursosEl = document.getElementById('total-cursos');
+//             
+//             if (totalAlunosEl) {
+//                 totalAlunosEl.textContent = (data.total_alunos || 0).toLocaleString('pt-BR');
+//             }
+//             if (matriculasAtivasEl) {
+//                 matriculasAtivasEl.textContent = (data.matriculas_ativas || 0).toLocaleString('pt-BR');
+//             }
+//             if (totalCursosEl) {
+//                 totalCursosEl.textContent = (data.total_cursos || 0).toLocaleString('pt-BR');
+//             }
+//         }
+//     })
+//     .catch(error => {
+//         console.log('Erro ao carregar indicadores:', error);
+//         // Mantém os valores originais do PHP em caso de erro
+//     });
 </script>

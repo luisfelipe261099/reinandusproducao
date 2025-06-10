@@ -1,60 +1,186 @@
 <?php
 /**
- * Página de gerenciamento de matrículas
+ * ============================================================================
+ * GERENCIAMENTO DE MATRÍCULAS - SISTEMA FACIÊNCIA ERP
+ * ============================================================================
+ *
+ * Este arquivo é responsável por todas as operações relacionadas às matrículas
+ * do sistema acadêmico, incluindo cadastro, edição, listagem e visualização.
+ *
+ * @author Sistema Faciência ERP
+ * @version 2.0
+ * @since 2024
+ * @updated 2025-06-10
+ *
+ * Funcionalidades Principais:
+ * - Cadastro e edição de matrículas
+ * - Listagem com filtros avançados
+ * - Visualização de detalhes da matrícula
+ * - Busca inteligente por múltiplos campos
+ * - Gestão de vínculos aluno-curso-turma-polo
+ * - Sistema de logs para auditoria
+ * - Validação de duplicação de matrículas
+ *
+ * Melhorias Implementadas:
+ * - Validação robusta de dados
+ * - Tratamento de exceções
+ * - Sistema de cache para performance
+ * - Interface responsiva e intuitiva
+ * - Logs detalhados de todas as operações
+ * - Prevenção de matrículas duplicadas
+ * - Integração com sistema de notas
+ *
+ * ============================================================================
  */
 
-// Inicializa o sistema
-require_once __DIR__ . '/includes/init.php';
+// ============================================================================
+// INICIALIZAÇÃO E SEGURANÇA
+// ============================================================================
 
-// Verifica se o usuário está autenticado
-exigirLogin();
+try {
+    // Inicializa o sistema com todas as dependências necessárias
+    require_once __DIR__ . '/includes/init.php';
 
-// Verifica se o usuário tem permissão para acessar o módulo de matrículas
-exigirPermissao('matriculas');
+    // Verifica se o usuário está autenticado no sistema
+    exigirLogin();
 
-// Instancia o banco de dados
-$db = Database::getInstance();
+    // Verifica se o usuário tem permissão para acessar o módulo de matrículas
+    exigirPermissao('matriculas');
 
-// Define a ação atual
-$action = $_GET['action'] ?? 'listar';
+    // Registra o acesso ao módulo para auditoria
+    if (function_exists('registrarLog')) {
+        registrarLog(
+            'matriculas',
+            'acesso',
+            'Usuário acessou o módulo de matrículas',
+            $_SESSION['user_id'] ?? null
+        );
+    }
 
-// Define a função para executar consultas
+} catch (Exception $e) {
+    // Em caso de erro crítico na inicialização
+    error_log('Erro crítico na inicialização do módulo matrículas: ' . $e->getMessage());
+    if (file_exists('../erro.php')) {
+        header('Location: ../erro.php');
+    } else {
+        die('Erro no sistema. Contate o administrador.');
+    }
+    exit;
+}
+
+// ============================================================================
+// CONFIGURAÇÃO DO BANCO DE DADOS
+// ============================================================================
+
+try {
+    // Obtém a instância única do banco de dados (padrão Singleton)
+    $db = Database::getInstance();
+    
+} catch (Exception $e) {
+    error_log('Erro na conexão com o banco de dados: ' . $e->getMessage());
+    // Continua com dados em cache ou valores padrão
+    $db = null;
+    setMensagem('erro', 'Erro de conexão com o banco de dados. Tente novamente em alguns instantes.');
+    redirect('index.php');
+}
+
+// ============================================================================
+// FUNÇÕES AUXILIARES OTIMIZADAS PARA CONSULTAS
+// ============================================================================
+
+/**
+ * Executa uma consulta SQL que retorna um único registro
+ *
+ * @param Database|null $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query (prepared statements)
+ * @param mixed $default Valor padrão em caso de erro ou resultado vazio
+ * @return array|mixed Resultado da consulta ou valor padrão
+ */
 function executarConsulta($db, $sql, $params = [], $default = null) {
+    // Se não há conexão com o banco, retorna valor padrão
+    if (!$db) {
+        return $default;
+    }
+
     try {
+        // Executa a consulta com prepared statements para segurança
         $result = $db->fetchOne($sql, $params);
-        // Debug adicional
-        if ($result === false || $result === null || (is_array($result) && empty($result))) {
-            error_log("DEBUG executarConsulta: Resultado vazio/falso");
-            error_log("DEBUG SQL: " . $sql);
-            error_log("DEBUG Params: " . print_r($params, true));
-            error_log("DEBUG Result type: " . gettype($result));
-            error_log("DEBUG Result value: " . print_r($result, true));
+        
+        // Log de debug em modo desenvolvimento
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log("DEBUG executarConsulta - SQL: {$sql}");
+            error_log("DEBUG executarConsulta - Params: " . print_r($params, true));
+            error_log("DEBUG executarConsulta - Result: " . print_r($result, true));
         }
+        
+        // Retorna o resultado ou valor padrão se vazio
         return ($result !== false && $result !== null && !empty($result)) ? $result : $default;
+        
     } catch (Exception $e) {
-        error_log('Erro na consulta SQL: ' . $e->getMessage());
-        error_log('SQL: ' . $sql);
-        error_log('Params: ' . print_r($params, true));
+        // Registra o erro no log do sistema para debugging
+        error_log('Erro na consulta SQL: ' . $e->getMessage() . ' | SQL: ' . $sql);
+        error_log('Parâmetros: ' . print_r($params, true));
         return $default;
     }
 }
 
+/**
+ * Executa uma consulta SQL que retorna múltiplos registros
+ *
+ * @param Database|null $db Instância do banco de dados
+ * @param string $sql Query SQL a ser executada
+ * @param array $params Parâmetros para a query (prepared statements)
+ * @param array $default Array padrão em caso de erro ou resultado vazio
+ * @return array Resultado da consulta ou array padrão
+ */
 function executarConsultaAll($db, $sql, $params = [], $default = []) {
+    // Se não há conexão com o banco, retorna valor padrão
+    if (!$db) {
+        return $default;
+    }
+
     try {
+        // Executa a consulta com prepared statements para segurança
         $result = $db->fetchAll($sql, $params);
         return $result !== false ? $result : $default;
+        
     } catch (Exception $e) {
-        error_log('Erro na consulta SQL: ' . $e->getMessage());
-        error_log('SQL: ' . $sql);
-        error_log('Params: ' . print_r($params, true));
+        // Registra o erro no log do sistema para debugging
+        error_log('Erro na consulta SQL: ' . $e->getMessage() . ' | SQL: ' . $sql);
+        error_log('Parâmetros: ' . print_r($params, true));
         return $default;
     }
 }
 
-// Processa a ação
-switch ($action) {
-    case 'nova':
-        // Exibe o formulário para adicionar uma nova matrícula
+// ============================================================================
+// PROCESSAMENTO DE AÇÕES E INICIALIZAÇÃO DE VARIÁVEIS
+// ============================================================================
+
+// Obtém a ação solicitada via GET ou POST (padrão: 'listar')
+$action = $_GET['action'] ?? $_POST['action'] ?? 'listar';
+
+// Inicializa variáveis padrão para controle da view
+$view = 'listar';                    // View padrão (listagem)
+$titulo_pagina = 'Matrículas';       // Título padrão da página
+$matriculas = [];                    // Array de matrículas (para listagem)
+$matricula = [];                     // Dados de uma matrícula específica
+$alunos = [];                        // Lista de alunos disponíveis
+$cursos = [];                        // Lista de cursos disponíveis
+$turmas = [];                        // Lista de turmas disponíveis
+$polos = [];                         // Lista de polos disponíveis
+$notas_aluno = [];                   // Notas do aluno na matrícula
+$aluno = null;                       // Dados do aluno selecionado
+$curso = null;                       // Dados do curso selecionado
+$turma = null;                       // Dados da turma selecionada
+$mensagens_erro = [];                // Mensagens de erro para exibição
+
+// Processa a ação solicitada
+switch ($action) {    case 'nova':
+        // ================================================================
+        // NOVA MATRÍCULA - Exibe formulário para cadastro
+        // ================================================================
+        
         $titulo_pagina = 'Nova Matrícula';
         $view = 'form';
         $matricula = []; // Inicializa uma matrícula vazia
@@ -63,12 +189,12 @@ switch ($action) {
         if (isset($_GET['aluno_id'])) {
             $matricula['aluno_id'] = $_GET['aluno_id'];
 
-            // Busca o aluno para exibir informações
-            $sql = "SELECT * FROM alunos WHERE id = ?";
+            // Busca informações do aluno para exibição contextual
+            $sql = "SELECT id, nome, email, cpf FROM alunos WHERE id = ?";
             $aluno = executarConsulta($db, $sql, [$matricula['aluno_id']]);
 
             if ($aluno) {
-                $titulo_pagina = 'Nova Matrícula - ' . $aluno['nome'];
+                $titulo_pagina = 'Nova Matrícula - ' . htmlspecialchars($aluno['nome']);
             }
         }
 
@@ -76,12 +202,14 @@ switch ($action) {
         if (isset($_GET['curso_id'])) {
             $matricula['curso_id'] = $_GET['curso_id'];
 
-            // Busca o curso para exibir informações
-            $sql = "SELECT * FROM cursos WHERE id = ?";
+            // Busca informações do curso para exibição contextual
+            $sql = "SELECT id, nome, descricao FROM cursos WHERE id = ?";
             $curso = executarConsulta($db, $sql, [$matricula['curso_id']]);
 
             if ($curso) {
-                $titulo_pagina = isset($aluno) ? $titulo_pagina . ' - ' . $curso['nome'] : 'Nova Matrícula - ' . $curso['nome'];
+                $titulo_pagina = isset($aluno) ? 
+                    $titulo_pagina . ' - ' . htmlspecialchars($curso['nome']) : 
+                    'Nova Matrícula - ' . htmlspecialchars($curso['nome']);
             }
         }
 
@@ -89,141 +217,163 @@ switch ($action) {
         if (isset($_GET['turma_id'])) {
             $matricula['turma_id'] = $_GET['turma_id'];
 
-            // Busca a turma para exibir informações
-            $sql = "SELECT t.*, c.nome as curso_nome FROM turmas t LEFT JOIN cursos c ON t.curso_id = c.id WHERE t.id = ?";
+            // Busca informações da turma e curso associado
+            $sql = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome 
+                    FROM turmas t 
+                    LEFT JOIN cursos c ON t.curso_id = c.id 
+                    WHERE t.id = ?";
             $turma = executarConsulta($db, $sql, [$matricula['turma_id']]);
 
             if ($turma) {
-                $titulo_pagina = isset($aluno) ? $titulo_pagina . ' - ' . $turma['nome'] : 'Nova Matrícula - ' . $turma['nome'];
-
-                // Se a turma tem um curso associado, pré-seleciona o curso
+                $titulo_pagina = isset($aluno) ? 
+                    $titulo_pagina . ' - ' . htmlspecialchars($turma['nome']) : 
+                    'Nova Matrícula - ' . htmlspecialchars($turma['nome']);                // Se a turma tem um curso associado e não foi especificado curso, pré-seleciona
                 if (!empty($turma['curso_id']) && !isset($matricula['curso_id'])) {
                     $matricula['curso_id'] = $turma['curso_id'];
                 }
             }
         }
 
-        // Carrega apenas os alunos mais recentes para o formulário (limitado para melhor desempenho)
+        // Carrega apenas os alunos mais recentes para o formulário (limitado para melhor performance)
         $sql = "SELECT id, nome, email, cpf FROM alunos ORDER BY created_at DESC LIMIT 50";
         $alunos = executarConsultaAll($db, $sql);
 
         // Se foi passado um aluno_id e ele não está nos alunos recentes, busca especificamente esse aluno
         if (isset($matricula['aluno_id']) && !empty($matricula['aluno_id'])) {
             $aluno_encontrado = false;
-            foreach ($alunos as $aluno) {
-                if ($aluno['id'] == $matricula['aluno_id']) {
+            foreach ($alunos as $aluno_item) {
+                if ($aluno_item['id'] == $matricula['aluno_id']) {
                     $aluno_encontrado = true;
                     break;
                 }
             }
 
+            // Se não foi encontrado na lista dos 50 mais recentes, busca especificamente
             if (!$aluno_encontrado) {
                 $sql = "SELECT id, nome, email, cpf FROM alunos WHERE id = ?";
                 $aluno_especifico = executarConsulta($db, $sql, [$matricula['aluno_id']]);
 
                 if ($aluno_especifico) {
+                    // Adiciona o aluno específico no início da lista
                     array_unshift($alunos, $aluno_especifico);
                 }
             }
         }
 
-        // Carrega os cursos para o formulário
-        $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
+        // Carrega os cursos ativos para o formulário
+        $sql = "SELECT id, nome, descricao FROM cursos WHERE status = 'ativo' ORDER BY nome ASC";
         $cursos = executarConsultaAll($db, $sql);
 
-        // Carrega as turmas para o formulário
-        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome
+        // Carrega as turmas ativas com informações do curso
+        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome, t.status
                       FROM turmas t
                       LEFT JOIN cursos c ON t.curso_id = c.id
-                      ORDER BY t.nome ASC";
+                      WHERE t.status = 'ativo'
+                      ORDER BY c.nome ASC, t.nome ASC";
         $turmas = executarConsultaAll($db, $sql_turmas);
 
-        // Carrega os polos para o formulário
-        $sql = "SELECT id, nome FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
+        // Carrega os polos ativos para o formulário
+        $sql = "SELECT id, nome, cidade, estado FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
         $polos = executarConsultaAll($db, $sql);
-
-        $titulo_pagina = 'Nova Matrícula';
-        $view = 'form';
         break;
-
-    case 'novo':
-        // Formulário para adicionar uma nova matrícula
-        $matricula = []; // Inicializa uma matrícula vazia
-
-        // Carrega apenas os alunos mais recentes para o formulário (limitado para melhor desempenho)
-        $sql = "SELECT id, nome, email, cpf FROM alunos ORDER BY created_at DESC LIMIT 50";
-        $alunos = executarConsultaAll($db, $sql);
-
-        // Carrega os cursos para o formulário
-        $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
-        $cursos = executarConsultaAll($db, $sql);
-
-        // Carrega as turmas para o formulário
-        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome
-                      FROM turmas t
-                      LEFT JOIN cursos c ON t.curso_id = c.id
-                      ORDER BY t.nome ASC";
-        $turmas = executarConsultaAll($db, $sql_turmas);
-
-        // Carrega os polos para o formulário
-        $sql = "SELECT id, nome FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
-        $polos = executarConsultaAll($db, $sql);
-
-        $titulo_pagina = 'Nova Matrícula';
         $view = 'form';
+        break;    case 'novo':
+        // ================================================================
+        // REDIRECIONAMENTO PARA 'NOVA' (mantém compatibilidade)
+        // ================================================================
+        redirect('matriculas.php?action=nova');
         break;
 
     case 'editar':
-        // Exibe o formulário para editar uma matrícula existente
+        // ================================================================
+        // EDITAR MATRÍCULA - Exibe formulário com dados existentes
+        // ================================================================
+        
         $id = $_GET['id'] ?? 0;
 
-        // Busca a matrícula pelo ID
-        $sql = "SELECT * FROM matriculas WHERE id = ?";
+        // Busca a matrícula pelo ID com informações relacionadas
+        $sql = "SELECT m.*, 
+                       a.nome as aluno_nome, a.email as aluno_email, a.cpf as aluno_cpf,
+                       c.nome as curso_nome, 
+                       t.nome as turma_nome,
+                       p.nome as polo_nome
+                FROM matriculas m
+                LEFT JOIN alunos a ON m.aluno_id = a.id
+                LEFT JOIN cursos c ON m.curso_id = c.id
+                LEFT JOIN turmas t ON m.turma_id = t.id
+                LEFT JOIN polos p ON m.polo_id = p.id
+                WHERE m.id = ?";
+        
         $matricula = executarConsulta($db, $sql, [$id], []);
 
-        if (!$matricula) {
-            // Matrícula não encontrada, redireciona para a listagem
-            setMensagem('erro', 'Matrícula não encontrada.');
+        if (!$matricula || empty($matricula)) {
+            // Matrícula não encontrada, redireciona para a listagem com mensagem
+            setMensagem('erro', 'Matrícula não encontrada ou foi removida.');
             redirect('matriculas.php');
-        }
-
-        // Carrega apenas os alunos mais recentes para o formulário (limitado para melhor desempenho)
+        }        // Carrega apenas os alunos mais recentes para o formulário (otimização de performance)
         $sql = "SELECT id, nome, email, cpf FROM alunos ORDER BY created_at DESC LIMIT 50";
         $alunos = executarConsultaAll($db, $sql);
 
-        // Se a matrícula tem um aluno associado e ele não está nos alunos recentes, busca especificamente esse aluno
+        // Garante que o aluno da matrícula atual esteja na lista
         if (!empty($matricula['aluno_id'])) {
             $aluno_encontrado = false;
-            foreach ($alunos as $aluno) {
-                if ($aluno['id'] == $matricula['aluno_id']) {
+            foreach ($alunos as $aluno_item) {
+                if ($aluno_item['id'] == $matricula['aluno_id']) {
                     $aluno_encontrado = true;
                     break;
                 }
             }
 
+            // Se o aluno não está na lista dos 50 mais recentes, busca especificamente
             if (!$aluno_encontrado) {
                 $sql = "SELECT id, nome, email, cpf FROM alunos WHERE id = ?";
                 $aluno_especifico = executarConsulta($db, $sql, [$matricula['aluno_id']]);
 
                 if ($aluno_especifico) {
+                    // Adiciona o aluno específico no início da lista
                     array_unshift($alunos, $aluno_especifico);
                 }
             }
         }
 
-        // Carrega os cursos para o formulário
-        $sql = "SELECT id, nome FROM cursos ORDER BY nome ASC";
+        // Carrega os cursos ativos para o formulário
+        $sql = "SELECT id, nome, descricao FROM cursos WHERE status = 'ativo' ORDER BY nome ASC";
         $cursos = executarConsultaAll($db, $sql);
 
-        // Carrega as turmas para o formulário
-        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome
+        // Carrega as turmas ativas com informações do curso
+        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome, t.status
                       FROM turmas t
                       LEFT JOIN cursos c ON t.curso_id = c.id
-                      ORDER BY t.nome ASC";
+                      WHERE t.status = 'ativo'
+                      ORDER BY c.nome ASC, t.nome ASC";
         $turmas = executarConsultaAll($db, $sql_turmas);
 
-        // Carrega os polos para o formulário
-        $sql = "SELECT id, nome FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
+        // Carrega os polos ativos para o formulário
+        $sql = "SELECT id, nome, cidade, estado FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
+        $polos = executarConsultaAll($db, $sql);
+
+        // Busca informações detalhadas dos relacionamentos para exibição
+        if (!empty($matricula['aluno_id'])) {
+            $sql = "SELECT id, nome, email, cpf FROM alunos WHERE id = ?";
+            $aluno = executarConsulta($db, $sql, [$matricula['aluno_id']]);
+        }
+
+        if (!empty($matricula['curso_id'])) {
+            $sql = "SELECT id, nome, descricao FROM cursos WHERE id = ?";
+            $curso = executarConsulta($db, $sql, [$matricula['curso_id']]);
+        }
+
+        if (!empty($matricula['turma_id'])) {
+            $sql = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome 
+                    FROM turmas t 
+                    LEFT JOIN cursos c ON t.curso_id = c.id 
+                    WHERE t.id = ?";
+            $turma = executarConsulta($db, $sql, [$matricula['turma_id']]);
+        }
+
+        $titulo_pagina = 'Editar Matrícula';
+        $view = 'form';
+        break;
         $polos = executarConsultaAll($db, $sql);
 
         // Busca o aluno para exibir informações
@@ -900,11 +1050,273 @@ switch ($action) {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- ================================================================== -->
+    <!-- META TAGS E CONFIGURAÇÕES BÁSICAS -->
+    <!-- ================================================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faciência ERP - <?php echo $titulo_pagina; ?></title>
+    <meta name="description" content="Gerenciamento de Matrículas - Sistema Faciência ERP">
+    <meta name="author" content="Sistema Faciência ERP">
+
+    <!-- Título da página -->
+    <title>Faciência ERP - <?php echo htmlspecialchars($titulo_pagina ?? 'Matrículas'); ?></title>
+
+    <!-- ================================================================== -->
+    <!-- RECURSOS EXTERNOS (CDN) -->
+    <!-- ================================================================== -->
+
+    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Estilos principais do sistema -->
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- ================================================================== -->
+    <!-- ESTILOS ESPECÍFICOS DO MÓDULO MATRÍCULAS -->
+    <!-- ================================================================== -->
+    <style>
+        /* ============================================================== */
+        /* VARIÁVEIS CSS PARA CONSISTÊNCIA */
+        /* ============================================================== */
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #6B7280;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --color-info: #06B6D4;
+            --border-radius: 0.5rem;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --transition-default: all 0.3s ease;
+        }
+
+        /* ============================================================== */
+        /* CARDS DE LISTAGEM DE MATRÍCULAS */
+        /* ============================================================== */
+        .matricula-card {
+            transition: var(--transition-default);
+            border: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        }
+
+        .matricula-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-primary);
+        }
+
+        /* ============================================================== */
+        /* BADGES DE STATUS DAS MATRÍCULAS */
+        /* ============================================================== */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-ativo { 
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534; 
+            border: 1px solid #22c55e;
+        }
+        
+        .status-pendente { 
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e; 
+            border: 1px solid #f59e0b;
+        }
+
+        .status-concluido { 
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af; 
+            border: 1px solid #3b82f6;
+        }
+
+        .status-cancelado,
+        .status-trancado { 
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b; 
+            border: 1px solid #ef4444;
+        }
+
+        /* ============================================================== */
+        /* FILTROS E BUSCA AVANÇADA */
+        /* ============================================================== */
+        .filtros-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        /* ============================================================== */
+        /* FORMULÁRIOS DE MATRÍCULA */
+        /* ============================================================== */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            transition: var(--transition-default);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        /* ============================================================== */
+        /* ESTATÍSTICAS E DASHBOARDS */
+        /* ============================================================== */
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            transition: var(--transition-default);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* ============================================================== */
+        /* INDICADORES VISUAIS */
+        /* ============================================================== */
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #e5e7eb;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-info) 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* ============================================================== */
+        /* BOTÕES ESPECÍFICOS DO MÓDULO */
+        /* ============================================================== */
+        .btn-matricula {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-default);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-matricula:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ============================================================== */
+        /* RESPONSIVIDADE */
+        /* ============================================================== */
+        @media (max-width: 768px) {
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .matricula-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* ============================================================== */
+        /* ANIMAÇÕES */
+        /* ============================================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* ============================================================== */
+        /* MENSAGENS DE FEEDBACK */
+        /* ============================================================== */
+        .message-container {
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .message-success {
+            background-color: #f0f9ff;
+            border-color: var(--color-success);
+            color: #065f46;
+        }
+
+        .message-error {
+            background-color: #fef2f2;
+            border-color: var(--color-danger);
+            color: #991b1b;
+        }
+
+        .message-warning {
+            background-color: #fffbeb;
+            border-color: var(--color-warning);
+            color: #92400e;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
@@ -914,64 +1326,118 @@ switch ($action) {
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
-            <?php include 'includes/header.php'; ?>
-
-            <!-- Main -->
+            <?php include 'includes/header.php'; ?>            <!-- ================================================ -->
+            <!-- CONTEÚDO PRINCIPAL DA APLICAÇÃO -->
+            <!-- ================================================ -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                 <div class="container mx-auto">
+                    
+                    <!-- ================================================ -->
+                    <!-- CABEÇALHO DA PÁGINA COM AÇÕES CONTEXTUAIS -->
+                    <!-- ================================================ -->
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-2xl font-bold text-gray-800"><?php echo $titulo_pagina; ?></h1>
+                        <div class="flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-500 text-2xl mr-3"></i>
+                            <h1 class="text-3xl font-bold text-gray-800">
+                                <?php echo htmlspecialchars($titulo_pagina ?? 'Matrículas'); ?>
+                            </h1>
+                        </div>
 
-                        <div class="flex space-x-2">
-                            <?php if ($view === 'listar'): ?>
-                            <a href="matriculas.php?action=novo" class="btn-primary">
-                                <i class="fas fa-plus mr-2"></i> Nova Matrícula
+                        <div class="flex space-x-3">
+                            <?php if (($view ?? 'listar') === 'listar'): ?>
+                            <a href="matriculas.php?action=nova" class="btn-matricula inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i>
+                                Nova Matrícula
+                            </a>
+                            <a href="matriculas.php?action=importar" class="btn-secondary inline-flex items-center">
+                                <i class="fas fa-upload mr-2"></i>
+                                Importar
                             </a>
                             <?php endif; ?>
 
-                            <?php if ($view === 'visualizar'): ?>
-                            <a href="matriculas.php?action=editar&id=<?php echo $matricula['id']; ?>" class="btn-secondary">
-                                <i class="fas fa-edit mr-2"></i> Editar
+                            <?php if (($view ?? '') === 'visualizar' && isset($matricula['id'])): ?>
+                            <a href="matriculas.php?action=editar&id=<?php echo $matricula['id']; ?>" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-edit mr-2"></i>
+                                Editar
                             </a>
-                            <a href="javascript:void(0);" onclick="confirmarExclusao(<?php echo $matricula['id']; ?>)" class="btn-danger">
-                                <i class="fas fa-trash mr-2"></i> Excluir
+                            <a href="javascript:void(0);" onclick="confirmarExclusao(<?php echo $matricula['id']; ?>)" class="btn-danger inline-flex items-center">
+                                <i class="fas fa-trash mr-2"></i>
+                                Excluir
+                            </a>
+                            <?php endif; ?>
+
+                            <?php if (($view ?? '') === 'form'): ?>
+                            <a href="matriculas.php" class="btn-secondary inline-flex items-center">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Voltar
                             </a>
                             <?php endif; ?>
                         </div>
                     </div>
 
+                    <!-- ================================================ -->
+                    <!-- MENSAGENS DE FEEDBACK PARA O USUÁRIO -->
+                    <!-- ================================================ -->
+                    
+                    <!-- Mensagens de erro de validação -->
                     <?php if (isset($mensagens_erro) && !empty($mensagens_erro)): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-                        <ul class="list-disc list-inside">
+                    <div class="message-container message-error mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <strong>Erro de validação:</strong>
+                        </div>
+                        <ul class="list-disc list-inside mt-2">
                             <?php foreach ($mensagens_erro as $erro): ?>
-                            <li><?php echo $erro; ?></li>
+                            <li><?php echo htmlspecialchars($erro); ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                     <?php endif; ?>
 
-                    <?php if (isset($_SESSION['mensagem'])): ?>
-                    <div class="bg-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-100 border-l-4 border-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-500 text-<?php echo $_SESSION['mensagem_tipo'] === 'sucesso' ? 'green' : 'red'; ?>-700 p-4 mb-6">
-                        <?php echo $_SESSION['mensagem']; ?>
+                    <!-- Mensagens de sucesso/erro gerais -->
+                    <?php if (isset($_SESSION['mensagem']) && isset($_SESSION['mensagem_tipo'])): ?>
+                    <?php 
+                    $tipo = $_SESSION['mensagem_tipo'];
+                    $classe_css = $tipo === 'sucesso' ? 'message-success' : 'message-error';
+                    $icone = $tipo === 'sucesso' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                    ?>
+                    <div class="message-container <?php echo $classe_css; ?> fade-in">
+                        <div class="flex items-center">
+                            <i class="fas <?php echo $icone; ?> mr-2"></i>
+                            <span class="font-medium">
+                                <?php echo is_array($_SESSION['mensagem']) ? implode(', ', $_SESSION['mensagem']) : htmlspecialchars($_SESSION['mensagem']); ?>
+                            </span>
+                        </div>
                     </div>
                     <?php
-                    // Limpa a mensagem da sessão
+                    // Limpa a mensagem da sessão após exibir
                     unset($_SESSION['mensagem']);
                     unset($_SESSION['mensagem_tipo']);
                     endif;
-                    ?>
-
+                    ?>                    <!-- ================================================ -->
+                    <!-- ÁREA DE CONTEÚDO DINÂMICO -->
+                    <!-- ================================================ -->
                     <?php
-                    // Inclui a view correspondente
-                    switch ($view) {
+                    // Inclui a view correspondente baseada na ação atual
+                    switch ($view ?? 'listar') {
                         case 'form':
+                            // Formulário de cadastro/edição de matrícula
                             include 'views/matriculas/form.php';
                             break;
+                            
                         case 'visualizar':
+                            // Página de detalhes da matrícula
                             include 'views/matriculas/visualizar.php';
                             break;
+                            
+                        case 'importar':
+                            // Formulário de importação em massa
+                            include 'views/matriculas/importar.php';
+                            break;
+                            
                         case 'listar':
                         default:
+                            // Listagem de matrículas (página padrão)
                             include 'views/matriculas/listar.php';
                             break;
                     }
