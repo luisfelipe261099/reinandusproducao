@@ -172,9 +172,7 @@ function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
         } catch (Exception $e) {
             error_log("Erro ao adicionar coluna mec: " . $e->getMessage());
         }
-    }
-
-    // Busca dados detalhados do aluno com polo da matrícula mais recente (primeiro tenta ativa)
+    }    // PRIMEIRA TENTATIVA: Busca matrícula ativa mais recente (prioridade máxima)
     $sql = "SELECT a.*,
                c.nome as curso_nome,
                c.carga_horaria as curso_carga_horaria,
@@ -183,23 +181,27 @@ function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
                t.id as turma_id,
                m.id as matricula_id,
                m.status as matricula_status,
+               m.polo_id as matricula_polo_id,
                p.nome as polo_nome,
                p.razao_social as polo_razao_social,
                " . ($coluna_mec_existe ? "p.mec as polo_mec," : "") . "
                p.id as polo_id
             FROM alunos a
-            LEFT JOIN cursos c ON a.curso_id = c.id
             LEFT JOIN matriculas m ON a.id = m.aluno_id AND m.status = 'ativo'
+            LEFT JOIN cursos c ON m.curso_id = c.id
             LEFT JOIN turmas t ON m.turma_id = t.id
             LEFT JOIN polos p ON m.polo_id = p.id
             WHERE a.id = ?
             ORDER BY m.created_at DESC
             LIMIT 1";
 
+    error_log("[DECLARACOES] Primeira consulta - Matrícula ativa para aluno ID: $aluno_id");
     $aluno = executarConsulta($db, $sql, [$aluno_id]);
 
-    // Se não encontrou com matrícula ativa OU se não tem carga horária da turma, tenta buscar qualquer matrícula
-    if (!$aluno || empty($aluno['polo_nome']) || empty($aluno['turma_carga_horaria'])) {
+    // SEGUNDA TENTATIVA: Se não encontrou matrícula ativa, busca qualquer matrícula
+    if (!$aluno || empty($aluno['polo_nome'])) {
+        error_log("[DECLARACOES] Segunda consulta - Qualquer matrícula para aluno ID: $aluno_id");
+        
         $sql = "SELECT a.*,
                    c.nome as curso_nome,
                    c.carga_horaria as curso_carga_horaria,
@@ -208,38 +210,37 @@ function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
                    t.id as turma_id,
                    m.id as matricula_id,
                    m.status as matricula_status,
+                   m.polo_id as matricula_polo_id,
                    p.nome as polo_nome,
                    p.razao_social as polo_razao_social,
                    " . ($coluna_mec_existe ? "p.mec as polo_mec," : "") . "
                    p.id as polo_id
                 FROM alunos a
-                LEFT JOIN cursos c ON a.curso_id = c.id
                 LEFT JOIN matriculas m ON a.id = m.aluno_id
+                LEFT JOIN cursos c ON m.curso_id = c.id
                 LEFT JOIN turmas t ON m.turma_id = t.id
                 LEFT JOIN polos p ON m.polo_id = p.id
                 WHERE a.id = ?
                 ORDER BY m.created_at DESC
                 LIMIT 1";
 
-        $aluno_temp = executarConsulta($db, $sql, [$aluno_id]);
+        $aluno = executarConsulta($db, $sql, [$aluno_id]);
+    }    // Log do resultado das consultas de matrícula
+    if ($aluno && !empty($aluno['polo_nome'])) {
+        error_log("[DECLARACOES] Polo encontrado via matrícula - Polo: {$aluno['polo_nome']} (ID: {$aluno['polo_id']})");
+    }    // Se ainda não encontrou o polo na matrícula, tenta pelo polo_id do aluno
+    if (!$aluno || empty($aluno['polo_nome'])) {
+        error_log("[DECLARACOES] ATENÇÃO: Usando polo_id do aluno como fallback - Aluno ID: $aluno_id, Polo ID do aluno: " . ($aluno['polo_id'] ?? 'NULL'));
+        
+        if (!empty($aluno['polo_id'])) {
+            $sql_polo = "SELECT nome, razao_social FROM polos WHERE id = ?";
+            $polo = executarConsulta($db, $sql_polo, [$aluno['polo_id']]);
 
-        // Se encontrou dados na segunda consulta, usa eles
-        if ($aluno_temp) {
-            // Se a primeira consulta não retornou dados OU se a segunda tem carga horária da turma e a primeira não
-            if (!$aluno || (!empty($aluno_temp['turma_carga_horaria']) && empty($aluno['turma_carga_horaria']))) {
-                $aluno = $aluno_temp;
+            if ($polo && !empty($polo['nome'])) {
+                $aluno['polo_nome'] = $polo['nome'];
+                $aluno['polo_razao_social'] = $polo['razao_social'];
+                error_log("[DECLARACOES] Polo encontrado via polo_id do aluno - Polo: {$polo['nome']}");
             }
-        }
-    }
-
-    // Se ainda não encontrou o polo na matrícula, tenta pelo polo_id do aluno
-    if (!$aluno || empty($aluno['polo_nome']) && !empty($aluno['polo_id'])) {
-        $sql_polo = "SELECT nome, razao_social FROM polos WHERE id = ?";
-        $polo = executarConsulta($db, $sql_polo, [$aluno['polo_id']]);
-
-        if ($polo && !empty($polo['nome'])) {
-            $aluno['polo_nome'] = $polo['nome'];
-            $aluno['polo_razao_social'] = $polo['razao_social'];
         }
     }
 
@@ -257,9 +258,7 @@ function buscarDadosAlunoCompletoParaDocumento($db, $aluno_id) {
             $aluno['polo_razao_social'] = 'Não informado';
             $aluno['polo_id'] = 1; // valor padrão
         }
-    }
-
-    // Se razao_social estiver vazia, usa o nome do polo
+    }    // Se razao_social estiver vazia, usa o nome do polo
     if (empty($aluno['polo_razao_social'])) {
         $aluno['polo_razao_social'] = $aluno['polo_nome'];
     }

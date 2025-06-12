@@ -91,47 +91,37 @@
 
             <!-- Turma -->
             <div>
-                <label for="turma_id" class="block text-sm font-medium text-gray-700 mb-1">Turma</label>
-                <select name="turma_id" id="turma_id" class="form-select w-full">
+                <label for="turma_id" class="block text-sm font-medium text-gray-700 mb-1">Turma</label>                <select name="turma_id" id="turma_id" class="form-select w-full">
                     <option value="">Selecione uma turma (opcional)...</option>
                     <?php foreach ($turmas as $turma): ?>
-                    <option value="<?php echo $turma['id']; ?>" <?php echo isset($matricula['turma_id']) && $matricula['turma_id'] == $turma['id'] ? 'selected' : ''; ?> data-curso-id="<?php echo $turma['curso_id']; ?>">
+                    <option value="<?php echo $turma['id']; ?>" <?php echo isset($matricula['turma_id']) && $matricula['turma_id'] == $turma['id'] ? 'selected' : ''; ?> data-curso-id="<?php echo $turma['curso_id']; ?>" data-polo-id="<?php echo $turma['polo_id'] ?? ''; ?>">
                         <?php echo htmlspecialchars($turma['nome']); ?> <?php echo isset($turma['curso_nome']) ? '(' . htmlspecialchars($turma['curso_nome']) . ')' : ''; ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
                 <p class="text-xs text-gray-500 mt-1">A turma deve pertencer ao curso selecionado.</p>
-            </div>
-
-            <!-- Polo -->
+            </div>            <!-- Polo -->
             <div>
                 <label for="polo_id" class="block text-sm font-medium text-gray-700 mb-1">Polo *</label>
-                <?php if (empty($polos)): ?>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-2">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                Não há polos cadastrados. <a href="polos.php?action=novo" class="font-medium underline text-yellow-700 hover:text-yellow-600">Cadastre um polo</a> antes de continuar.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <select name="polo_id" id="polo_id" class="form-select w-full" required disabled>
-                    <option value="">Nenhum polo disponível</option>
-                </select>
-                <?php else: ?>
                 <select name="polo_id" id="polo_id" class="form-select w-full" required>
                     <option value="">Selecione um polo...</option>
-                    <?php foreach ($polos as $polo): ?>
-                    <option value="<?php echo $polo['id']; ?>" <?php echo isset($matricula['polo_id']) && $matricula['polo_id'] == $polo['id'] ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($polo['nome']); ?>
-                    </option>
-                    <?php endforeach; ?>
+                    <?php if (!empty($polos)): ?>
+                        <?php foreach ($polos as $polo): ?>
+                        <option value="<?php echo $polo['id']; ?>" <?php echo isset($matricula['polo_id']) && $matricula['polo_id'] == $polo['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($polo['nome']); ?><?php echo isset($polo['cidade']) && $polo['cidade'] ? ' - ' . htmlspecialchars($polo['cidade']) : ''; ?>
+                        </option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option value="">Aguarde... carregando polos</option>
+                    <?php endif; ?>
                 </select>
-                <?php endif; ?>
+                <p class="text-xs text-gray-500 mt-1">
+                    <?php if (!empty($polos)): ?>
+                        Selecione o polo onde a matrícula será realizada. (<?php echo count($polos); ?> polos disponíveis)
+                    <?php else: ?>
+                        Carregando polos disponíveis...
+                    <?php endif; ?>
+                </p>
             </div>
 
             <!-- Status -->
@@ -379,6 +369,118 @@
 
             alunoNomeDisplay.classList.remove('hidden');
             alunosResultados.classList.add('hidden');
+        }
+    });
+
+    // ============================================================================
+    // FILTRO DE TURMAS POR CURSO
+    // ============================================================================
+      document.addEventListener('DOMContentLoaded', function() {
+        const cursoSelect = document.getElementById('curso_id');
+        const turmaSelect = document.getElementById('turma_id');
+        const poloSelect = document.getElementById('polo_id');
+        
+        if (cursoSelect && turmaSelect) {
+            // Função para filtrar turmas
+            function filtrarTurmas() {
+                const cursoSelecionado = cursoSelect.value;
+                const turmaAtual = turmaSelect.value; // Salva a turma atual para não perder a seleção
+                
+                // Mostra/esconde as opções de turma baseado no curso selecionado
+                Array.from(turmaSelect.options).forEach(function(option) {
+                    if (option.value === '') {
+                        // Sempre mostra a opção padrão "Selecione uma turma"
+                        option.style.display = 'block';
+                    } else {
+                        const cursoIdDaTurma = option.getAttribute('data-curso-id');
+                        if (!cursoSelecionado || cursoIdDaTurma === cursoSelecionado) {
+                            option.style.display = 'block';
+                        } else {
+                            option.style.display = 'none';
+                            // Se a turma atual não pertence ao curso selecionado, limpa a seleção
+                            if (option.value === turmaAtual) {
+                                turmaSelect.value = '';
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Função para pré-selecionar polo baseado na turma
+            function selecionarPoloPorTurma() {
+                const turmaSelecionada = turmaSelect.value;
+                if (turmaSelecionada) {
+                    const turmaOption = turmaSelect.querySelector(`option[value="${turmaSelecionada}"]`);
+                    if (turmaOption) {
+                        const poloIdDaTurma = turmaOption.getAttribute('data-polo-id');
+                        if (poloIdDaTurma && poloSelect) {
+                            poloSelect.value = poloIdDaTurma;
+                        }
+                    }
+                }
+            }
+            
+            // Função para carregar polos do curso
+            function carregarPolos() {
+                const cursoSelecionado = cursoSelect.value;
+                
+                if (!cursoSelecionado) {
+                    return;
+                }
+                
+                // Faz uma requisição AJAX para buscar os polos do curso
+                fetch(`ajax/buscar_polos.php?curso_id=${cursoSelecionado}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.polos) {
+                            // Salva o polo atualmente selecionado
+                            const poloAtual = poloSelect.value;
+                            
+                            // Limpa as opções atuais (exceto a primeira)
+                            while (poloSelect.children.length > 1) {
+                                poloSelect.removeChild(poloSelect.lastChild);
+                            }
+                            
+                            // Adiciona os polos encontrados
+                            data.polos.forEach(polo => {
+                                const option = document.createElement('option');
+                                option.value = polo.id;
+                                option.textContent = polo.nome;
+                                poloSelect.appendChild(option);
+                            });
+                            
+                            // Restaura o polo selecionado se ainda existir
+                            if (poloAtual) {
+                                poloSelect.value = poloAtual;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar polos:', error);
+                    });
+            }
+            
+            // Aplica o filtro quando o curso for alterado
+            cursoSelect.addEventListener('change', function() {
+                filtrarTurmas();
+                carregarPolos();
+            });
+            
+            // Pré-seleciona polo quando turma for alterada
+            turmaSelect.addEventListener('change', function() {
+                selecionarPoloPorTurma();
+            });
+            
+            // Aplica o filtro na inicialização se já houver um curso selecionado
+            if (cursoSelect.value) {
+                filtrarTurmas();
+                carregarPolos();
+            }
+            
+            // Pré-seleciona polo se já houver uma turma selecionada
+            if (turmaSelect.value) {
+                selecionarPoloPorTurma();
+            }
         }
     });
 </script>

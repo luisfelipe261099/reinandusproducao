@@ -216,54 +216,37 @@ function verDetalhes(boletoId) {
 }
 
 // Função para excluir boleto
-function excluirBoleto(boletoId, descricao) {
-    const confirmacao = confirm(`Tem certeza que deseja excluir o boleto:\n"${descricao}"?\n\nEsta ação não pode ser desfeita.`);
-    
-    if (!confirmacao) {
-        return;
+function excluirBoleto(boletoId, descricaoBoleto) {
+    console.log('Função excluirBoleto chamada com ID:', boletoId, 'Descrição:', descricaoBoleto);
+    if (confirm(`Tem certeza que deseja excluir o boleto "${descricaoBoleto}" (ID: ${boletoId})? Esta ação não pode ser desfeita.`)) {
+        console.log('Usuário confirmou a exclusão.');
+
+        // Criar um formulário dinamicamente
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'boletos.php'; // A action é a própria página que processa o POST
+
+        // Adicionar campo de ação
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'excluir_boleto';
+        form.appendChild(actionInput);
+
+        // Adicionar campo com o ID do boleto
+        const boletoIdInput = document.createElement('input');
+        boletoIdInput.type = 'hidden';
+        boletoIdInput.name = 'boleto_id';
+        boletoIdInput.value = boletoId;
+        form.appendChild(boletoIdInput);
+
+        // Adicionar o formulário ao corpo do documento e submetê-lo
+        document.body.appendChild(form);
+        console.log('Formulário de exclusão criado e pronto para ser submetido:', form);
+        form.submit();
+    } else {
+        console.log('Usuário cancelou a exclusão.');
     }
-
-    // Mostra loading
-    const loadingDiv = document.createElement('div');
-    loadingDiv.innerHTML = `
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <div class="flex items-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mr-3"></div>
-                    <span class="text-lg">Excluindo boleto...</span>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(loadingDiv);
-
-    // Faz a requisição de exclusão
-    fetch('ajax/excluir_boleto.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: boletoId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.body.removeChild(loadingDiv);
-        
-        if (data.success) {
-            Financeiro.showNotification('Boleto excluído com sucesso!', 'success');
-            // Recarrega a página após 1 segundo
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            Financeiro.showNotification(data.message || 'Erro ao excluir boleto', 'error');
-        }
-    })
-    .catch(error => {
-        document.body.removeChild(loadingDiv);
-        console.error('Erro:', error);
-        Financeiro.showNotification('Erro ao excluir boleto', 'error');
-    });
 }
 
 // Funções para busca de alunos

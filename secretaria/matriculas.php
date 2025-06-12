@@ -262,19 +262,17 @@ switch ($action) {    case 'nova':
 
         // Carrega os cursos ativos para o formulário
         $sql = "SELECT id, nome, descricao FROM cursos WHERE status = 'ativo' ORDER BY nome ASC";
-        $cursos = executarConsultaAll($db, $sql);
-
-        // Carrega as turmas ativas com informações do curso
-        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome, t.status
+        $cursos = executarConsultaAll($db, $sql);        // Carrega as turmas ativas com informações do curso e polo        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, t.polo_id, c.nome as curso_nome, p.nome as polo_nome, t.status
+              // Carrega todas as turmas com informações do curso e polo (sem filtro de status para debug)
+        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, t.polo_id, c.nome as curso_nome, p.nome as polo_nome, t.status
                       FROM turmas t
                       LEFT JOIN cursos c ON t.curso_id = c.id
-                      WHERE t.status = 'ativo'
+                      LEFT JOIN polos p ON t.polo_id = p.id
                       ORDER BY c.nome ASC, t.nome ASC";
-        $turmas = executarConsultaAll($db, $sql_turmas);
-
-        // Carrega os polos ativos para o formulário
-        $sql = "SELECT id, nome, cidade, estado FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
+        $turmas = executarConsultaAll($db, $sql_turmas);        // Carrega todos os polos para o formulário (sem filtro de status para debug)
+        $sql = "SELECT id, nome, cidade, estado, status FROM polos ORDER BY nome ASC";
         $polos = executarConsultaAll($db, $sql);
+  
         break;
         $view = 'form';
         break;    case 'novo':
@@ -338,59 +336,31 @@ switch ($action) {    case 'nova':
 
         // Carrega os cursos ativos para o formulário
         $sql = "SELECT id, nome, descricao FROM cursos WHERE status = 'ativo' ORDER BY nome ASC";
-        $cursos = executarConsultaAll($db, $sql);
-
-        // Carrega as turmas ativas com informações do curso
-        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome, t.status
+        $cursos = executarConsultaAll($db, $sql);        // Carrega todas as turmas com informações do curso e polo (sem filtro de status para debug)
+        $sql_turmas = "SELECT t.id, t.nome, t.curso_id, t.polo_id, c.nome as curso_nome, p.nome as polo_nome, t.status
                       FROM turmas t
                       LEFT JOIN cursos c ON t.curso_id = c.id
-                      WHERE t.status = 'ativo'
+                      LEFT JOIN polos p ON t.polo_id = p.id
                       ORDER BY c.nome ASC, t.nome ASC";
-        $turmas = executarConsultaAll($db, $sql_turmas);
-
-        // Carrega os polos ativos para o formulário
-        $sql = "SELECT id, nome, cidade, estado FROM polos WHERE status = 'ativo' ORDER BY nome ASC";
+        $turmas = executarConsultaAll($db, $sql_turmas);        // Carrega todos os polos para o formulário (sem filtro de status para debug)
+        $sql = "SELECT id, nome, cidade, estado, status FROM polos ORDER BY nome ASC";
         $polos = executarConsultaAll($db, $sql);
+  
 
         // Busca informações detalhadas dos relacionamentos para exibição
         if (!empty($matricula['aluno_id'])) {
             $sql = "SELECT id, nome, email, cpf FROM alunos WHERE id = ?";
             $aluno = executarConsulta($db, $sql, [$matricula['aluno_id']]);
-        }
-
-        if (!empty($matricula['curso_id'])) {
-            $sql = "SELECT id, nome, descricao FROM cursos WHERE id = ?";
+        }        if (!empty($matricula['curso_id'])) {
+            $sql = "SELECT id, nome, descricao, polo_id FROM cursos WHERE id = ?";
             $curso = executarConsulta($db, $sql, [$matricula['curso_id']]);
         }
 
         if (!empty($matricula['turma_id'])) {
-            $sql = "SELECT t.id, t.nome, t.curso_id, c.nome as curso_nome 
+            $sql = "SELECT t.id, t.nome, t.curso_id, t.polo_id, c.nome as curso_nome 
                     FROM turmas t 
                     LEFT JOIN cursos c ON t.curso_id = c.id 
                     WHERE t.id = ?";
-            $turma = executarConsulta($db, $sql, [$matricula['turma_id']]);
-        }
-
-        $titulo_pagina = 'Editar Matrícula';
-        $view = 'form';
-        break;
-        $polos = executarConsultaAll($db, $sql);
-
-        // Busca o aluno para exibir informações
-        if (!empty($matricula['aluno_id'])) {
-            $sql = "SELECT * FROM alunos WHERE id = ?";
-            $aluno = executarConsulta($db, $sql, [$matricula['aluno_id']]);
-        }
-
-        // Busca o curso para exibir informações
-        if (!empty($matricula['curso_id'])) {
-            $sql = "SELECT * FROM cursos WHERE id = ?";
-            $curso = executarConsulta($db, $sql, [$matricula['curso_id']]);
-        }
-
-        // Busca a turma para exibir informações
-        if (!empty($matricula['turma_id'])) {
-            $sql = "SELECT t.*, c.nome as curso_nome FROM turmas t LEFT JOIN cursos c ON t.curso_id = c.id WHERE t.id = ?";
             $turma = executarConsulta($db, $sql, [$matricula['turma_id']]);
         }
 

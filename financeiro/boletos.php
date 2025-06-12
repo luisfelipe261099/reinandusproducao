@@ -54,25 +54,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($postAction === 'excluir_boleto') {
         $boletoId = intval($_POST['boleto_id']);
-        
-        if ($boletoId > 0) {            try {
+        error_log("[BOLETO_DELETE_ATTEMPT] Tentativa de exclusão do boleto ID: " . $boletoId . " pelo usuário tipo: " . $userType); // Log de tentativa
+
+        if ($boletoId > 0) {
+            try {
                 // Primeiro, verificar se o boleto existe
-                $boleto = $db->fetchOne("SELECT id FROM boletos WHERE id = ?", [$boletoId]);
+                $boleto = $db->fetchOne("SELECT id, nosso_numero, linha_digitavel FROM boletos WHERE id = ?", [$boletoId]);
                 
                 if (!$boleto) {
-                    $_SESSION['error'] = 'Boleto não encontrado.';
+                    $_SESSION['error'] = 'Boleto não encontrado (ID: ' . $boletoId . ').';
+                    error_log("[BOLETO_DELETE_FAIL] Boleto não encontrado. ID: " . $boletoId);
                 } else {
+                    error_log("[BOLETO_DELETE_INFO] Boleto encontrado para exclusão. ID: " . $boletoId . ", Nosso Número: " . ($boleto['nosso_numero'] ?? 'N/A'));
                     // Remover arquivos PDF relacionados (baseado no padrão de nomenclatura)
-                    $arquivosPdf = [
+                    // Ajustar os caminhos e nomes de arquivo conforme a estrutura real de salvamento
+                    $arquivosParaRemover = [];
+                    $padroesNomeArquivo = [
                         '../uploads/boletos/boleto_' . $boletoId . '.pdf',
-                        '../uploads/boletos/' . $boletoId . '.pdf',
-                        '../uploads/boletos/boleto_' . $boletoId . '.html'
+                        '../uploads/boletos/boleto_' . $boletoId . '_' . date('Y-m-d') . '.pdf', // Padrão usado na geração
+                        '../uploads/boletos/' . $boletoId . '.pdf', // Outro padrão possível
+                        '../uploads/boletos/boleto_' . $boletoId . '.html' // Caso seja salvo como HTML
                     ];
+
+                    // Se tiver nosso_numero, pode haver um arquivo com ele no nome
+                    if (!empty($boleto['nosso_numero'])) {
+                        $padroesNomeArquivo[] = '../uploads/boletos/' . $boleto['nosso_numero'] . '.pdf';
+                         $padroesNomeArquivo[] = '../uploads/boletos/boleto_' . $boleto['nosso_numero'] . '.pdf';
+                    }
                     
-                    foreach ($arquivosPdf as $arquivoPdf) {
-                        if (file_exists($arquivoPdf)) {
-                            unlink($arquivoPdf);
-                            error_log("Arquivo removido: $arquivoPdf");
+                    foreach ($padroesNomeArquivo as $arquivo) {
+                        if (file_exists($arquivo)) {
+                            if (unlink($arquivo)) {
+                                error_log("[BOLETO_DELETE_FILE_SUCCESS] Arquivo removido: $arquivo");
+                            } else {
+                                error_log("[BOLETO_DELETE_FILE_FAIL] Falha ao remover arquivo: $arquivo");
+                            }
+                        } else {
+                            error_log("[BOLETO_DELETE_FILE_NOT_FOUND] Arquivo não encontrado para remoção: $arquivo");
                         }
                     }
                     
@@ -80,16 +98,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $result = $db->delete('boletos', 'id = ?', [$boletoId]);
                     
                     if ($result > 0) {
-                        $_SESSION['success'] = 'Boleto excluído com sucesso!';
+                        $_SESSION['success'] = 'Boleto (ID: ' . $boletoId . ') excluído com sucesso!';
+                        error_log("[BOLETO_DELETE_DB_SUCCESS] Boleto excluído do DB. ID: " . $boletoId . ". Linhas afetadas: " . $result);
                     } else {
-                        $_SESSION['error'] = 'Erro ao excluir boleto do banco de dados.';
+                        // Verifica se o boleto ainda existe, pode ter sido excluído em outra requisição
+                        $checkAgain = $db->fetchOne("SELECT id FROM boletos WHERE id = ?", [$boletoId]);
+                        if (!$checkAgain) {
+                             $_SESSION['success'] = 'Boleto (ID: ' . $boletoId . ') já havia sido excluído ou não foi encontrado para exclusão no DB.';
+                             error_log("[BOLETO_DELETE_DB_ALREADY_GONE] Boleto já não estava no DB ou não foi encontrado na segunda verificação. ID: " . $boletoId);
+                        } else {
+                            $_SESSION['error'] = 'Erro ao excluir boleto (ID: ' . $boletoId . ') do banco de dados. Nenhuma linha afetada.';
+                            error_log("[BOLETO_DELETE_DB_FAIL] Erro ao excluir boleto do DB. ID: " . $boletoId . ". Nenhuma linha afetada. Resultado: " . $result);
+                        }
                     }
                 }
             } catch (Exception $e) {
-                $_SESSION['error'] = 'Erro ao excluir boleto: ' . $e->getMessage();
+                $_SESSION['error'] = 'Erro crítico ao excluir boleto (ID: ' . $boletoId . '): ' . $e->getMessage();
+                error_log("[BOLETO_DELETE_EXCEPTION] Exceção ao excluir boleto. ID: " . $boletoId . ". Erro: " . $e->getMessage());
+                error_log("Stack Trace: " . $e->getTraceAsString());
             }
         } else {
-            $_SESSION['error'] = 'ID do boleto inválido.';
+            $_SESSION['error'] = 'ID do boleto inválido para exclusão.';
+            error_log("[BOLETO_DELETE_INVALID_ID] ID do boleto inválido fornecido: " . $_POST['boleto_id']);
         }
         
         header('Location: boletos.php');
@@ -299,7 +329,7 @@ $pageTitle = 'Boletos Bancários';
                                                 <i class="fas fa-eye"></i>
                                             </button>
 
-                                            <button onclick="excluirBoleto(<?php echo $boleto['id']; ?>, '<?php echo addslashes($boleto['descricao']); ?>')"
+                                            <button onclick="excluirBoleto(<?php echo $boleto['id']; ?>, <?php echo htmlspecialchars(json_encode($boleto['descricao']), ENT_QUOTES, 'UTF-8'); ?>)"
                                                     class="text-red-600 hover:text-red-900" title="Excluir Boleto">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -575,109 +605,8 @@ $pageTitle = 'Boletos Bancários';
 
     <!-- Modal para mostrar linha digitável -->
     <div id="modal-linha-digitavel" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900">Linha Digitável</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p id="linha-digitavel-texto" class="text-sm text-gray-500 font-mono"></p>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button onclick="copiarLinhaDigitavel()" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-green-600">
-                        Copiar
-                    </button>
-                    <button onclick="fecharModal()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600">
-                        Fechar
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <script>
-        // Funções para o modal
-        function mostrarLinhaDigitavel(linha) {
-            document.getElementById('linha-digitavel-texto').textContent = linha;
-            document.getElementById('modal-linha-digitavel').classList.remove('hidden');
-        }
-
-        function fecharModal() {
-            document.getElementById('modal-linha-digitavel').classList.add('hidden');
-        }
-
-        function copiarLinhaDigitavel() {
-            const texto = document.getElementById('linha-digitavel-texto').textContent;
-            navigator.clipboard.writeText(texto).then(function() {
-                alert('Linha digitável copiada!');
-            });
-        }        function verDetalhes(id) {
-            // Implementar visualização de detalhes
-            alert('Funcionalidade de detalhes será implementada. ID: ' + id);
-        }
-
-        function excluirBoleto(id, descricao) {
-            if (confirm('Tem certeza que deseja excluir o boleto "' + descricao + '"?\n\nEsta ação não pode ser desfeita.')) {
-                // Criar um formulário para enviar a requisição POST
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'boletos.php';
-                
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'excluir_boleto';
-                
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'boleto_id';
-                idInput.value = id;
-                
-                form.appendChild(actionInput);
-                form.appendChild(idInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
-        // Função para alterar tipo de boleto
-        function alterarTipoBoleto() {
-            const tipo = document.getElementById('tipo-boleto').value;
-            const secaoAluno = document.getElementById('secao-aluno');
-            const secaoPolo = document.getElementById('secao-polo');
-            
-            // Esconde todas as seções
-            secaoAluno.classList.add('hidden');
-            secaoPolo.classList.add('hidden');
-            
-            // Mostra a seção apropriada
-            if (tipo === 'mensalidade') {
-                secaoAluno.classList.remove('hidden');
-                document.getElementById('referencia-id').value = '';
-            } else if (tipo === 'polo') {
-                secaoPolo.classList.remove('hidden');
-                document.getElementById('referencia-id').value = '';
-            }
-        }
-
-        function preencherDadosPolo() {
-            const select = document.getElementById('polo-select');
-            const option = select.options[select.selectedIndex];
-            
-            if (option.value) {
-                document.getElementById('referencia-id').value = option.value;
-                document.getElementById('nome-pagador').value = option.dataset.nome;
-                document.getElementById('descricao').value = 'Cobrança do polo: ' + option.dataset.nome;
-            }
-        }
-
-        function limparSelecaoAluno() {
-            document.getElementById('aluno-selecionado').classList.add('hidden');
-            document.getElementById('busca-aluno').value = '';
-            document.getElementById('aluno-id-hidden').value = '';
-            document.getElementById('referencia-id').value = '';
-        }
-    </script>
-
-    <script src="js/financeiro.js"></script>
+    <script src="js/financeiro.js"></script> <!-- Load this first -->
     <script src="js/boletos.js"></script>
 </body>
 </html>

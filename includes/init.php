@@ -8,6 +8,16 @@
 // Carrega as configurações
 require_once __DIR__ . '/../config/config.php';
 
+// Autoload vendor libraries
+$globalAutoloaderPath = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($globalAutoloaderPath)) {
+    require_once $globalAutoloaderPath;
+    // You can enable this log for debugging if needed:
+    // error_log("[Init] Composer autoloader included from: " . $globalAutoloaderPath);
+} else {
+    error_log("[Init] CRITICAL: Composer autoloader NOT FOUND at: " . $globalAutoloaderPath . ". Many parts of the system may fail. Ensure 'vendor' directory is at the project root and 'composer install' has been run.");
+}
+
 // Carrega as funções do sistema
 require_once __DIR__ . '/functions.php';
 
