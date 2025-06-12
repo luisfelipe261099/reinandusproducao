@@ -152,9 +152,7 @@ function gerarBoletoBancario($db, $dados) {
             $linha_digitavel = $dados_boleto['texto_linha_digitavel'] ?? '';
             $codigo_barras = $dados_boleto['texto_codigo_barras'] ?? '';
             $url_boleto = $dados_boleto['url_acesso_boleto'] ?? '';
-        }
-
-        // Salva o boleto no banco de dados
+        }        // Salva o boleto no banco de dados
         $boleto_id = salvarBoleto($db, $dados, [
             'nosso_numero' => $nosso_numero,
             'linha_digitavel' => $linha_digitavel,
@@ -163,10 +161,14 @@ function gerarBoletoBancario($db, $dados) {
             'ambiente' => 'producao'
         ]);
 
+        // Gera o PDF do boleto
+        $pdf_info = gerarPDFBoleto($db, $boleto_id);
+
         return [
             'status' => 'sucesso',
-            'mensagem' => 'Boleto gerado com sucesso via API do Itaú.',
-            'boleto_id' => $boleto_id
+            'mensagem' => 'Boleto gerado com sucesso via API do Itaú.' . ($pdf_info ? ' PDF disponível.' : ''),
+            'boleto_id' => $boleto_id,
+            'pdf_url' => $pdf_info['url'] ?? null
         ];
 
     } catch (Exception $e) {
@@ -186,9 +188,7 @@ function gerarBoletoTeste($db, $dados) {
         $nosso_numero = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
         $linha_digitavel = '34191.12345 67890.101112 13141.516171 8 ' . date('ymd') . sprintf('%010d', $valor * 100);
         $codigo_barras = '34198' . date('ymd') . sprintf('%010d', $valor * 100) . '191123456789010111213141516171';
-        $url_boleto = 'https://exemplo.com/boleto/' . $nosso_numero . '.pdf';
-
-        // Salva o boleto no banco de dados
+        $url_boleto = 'https://exemplo.com/boleto/' . $nosso_numero . '.pdf';        // Salva o boleto no banco de dados
         $boleto_id = salvarBoleto($db, $dados, [
             'nosso_numero' => $nosso_numero,
             'linha_digitavel' => $linha_digitavel,
@@ -197,10 +197,14 @@ function gerarBoletoTeste($db, $dados) {
             'ambiente' => 'teste'
         ]);
 
+        // Gera o PDF do boleto
+        $pdf_info = gerarPDFBoleto($db, $boleto_id);
+
         return [
             'status' => 'sucesso',
-            'mensagem' => 'Boleto gerado com sucesso (modo de teste).',
-            'boleto_id' => $boleto_id
+            'mensagem' => 'Boleto gerado com sucesso (modo de teste).' . ($pdf_info ? ' PDF disponível.' : ''),
+            'boleto_id' => $boleto_id,
+            'pdf_url' => $pdf_info['url'] ?? null
         ];
 
     } catch (Exception $e) {
@@ -214,41 +218,25 @@ function gerarBoletoTeste($db, $dados) {
 
 function salvarBoleto($db, $dados, $dadosBoleto) {
     try {
-        // Primeiro, cria a tabela se não existir
-        $db->query("
-            CREATE TABLE IF NOT EXISTS `boletos` (
-              `id` int(11) NOT NULL AUTO_INCREMENT,
-              `tipo` enum('mensalidade','polo','avulso') NOT NULL,
-              `referencia_id` int(11) DEFAULT NULL,
-              `valor` decimal(10,2) NOT NULL,
-              `data_vencimento` date NOT NULL,
-              `descricao` varchar(255) NOT NULL,
-              `nome_pagador` varchar(255) NOT NULL,
-              `cpf_pagador` varchar(14) NOT NULL,
-              `endereco` varchar(255) DEFAULT NULL,
-              `bairro` varchar(100) DEFAULT NULL,
-              `cidade` varchar(100) DEFAULT NULL,
-              `uf` varchar(2) DEFAULT NULL,
-              `cep` varchar(10) DEFAULT NULL,
-              `multa` decimal(5,2) DEFAULT 2.00,
-              `juros` decimal(5,2) DEFAULT 1.00,
-              `nosso_numero` varchar(20) DEFAULT NULL,
-              `linha_digitavel` varchar(100) DEFAULT NULL,
-              `codigo_barras` varchar(100) DEFAULT NULL,
-              `url_boleto` varchar(500) DEFAULT NULL,
-              `ambiente` enum('teste','producao') DEFAULT 'teste',
-              `status` enum('pendente','pago','vencido','cancelado') NOT NULL DEFAULT 'pendente',
-              `data_pagamento` date DEFAULT NULL,
-              `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ");
+        // Verifica quais colunas existem na tabela boletos
+        $colunas_existentes = [];
+        try {
+            $describe = $db->query("DESCRIBE boletos");
+            while ($row = $describe->fetch()) {
+                $colunas_existentes[] = $row['Field'];
+            }
+        } catch (Exception $e) {
+            error_log('Erro ao verificar estrutura da tabela boletos: ' . $e->getMessage());
+            // Lista básica de colunas que sempre existem
+            $colunas_existentes = ['id', 'tipo_entidade', 'entidade_id', 'valor', 'data_vencimento', 'descricao', 
+                                 'nome_pagador', 'cpf_pagador', 'endereco', 'bairro', 'cidade', 'uf', 'cep',
+                                 'nosso_numero', 'linha_digitavel', 'codigo_barras', 'url_boleto', 'status'];
+        }
 
-        // Insere o boleto
+        // Monta os dados base que sempre existem
         $dadosInsert = [
-            'tipo' => $dados['tipo'],
-            'referencia_id' => $dados['referencia_id'] ?: null,
+            'tipo_entidade' => $dados['tipo_entidade'],
+            'entidade_id' => $dados['entidade_id'] ?: null,
             'valor' => $dados['valor'],
             'data_vencimento' => $dados['data_vencimento'],
             'descricao' => $dados['descricao'],
@@ -259,19 +247,58 @@ function salvarBoleto($db, $dados, $dadosBoleto) {
             'cidade' => $dados['cidade'],
             'uf' => $dados['uf'],
             'cep' => $dados['cep'],
-            'multa' => $dados['multa'],
-            'juros' => $dados['juros'],
             'nosso_numero' => $dadosBoleto['nosso_numero'],
             'linha_digitavel' => $dadosBoleto['linha_digitavel'],
             'codigo_barras' => $dadosBoleto['codigo_barras'],
             'url_boleto' => $dadosBoleto['url_boleto'],
-            'ambiente' => $dadosBoleto['ambiente']
+            'status' => 'pendente'
         ];
 
-        return $db->insert('boletos', $dadosInsert);
+        // Adiciona colunas opcionais apenas se existirem
+        if (in_array('multa', $colunas_existentes)) {
+            $dadosInsert['multa'] = $dados['multa'] ?? 2.00;
+        }
+        
+        if (in_array('juros', $colunas_existentes)) {
+            $dadosInsert['juros'] = $dados['juros'] ?? 1.00;
+        }
+        
+        if (in_array('ambiente', $colunas_existentes)) {
+            $dadosInsert['ambiente'] = $dadosBoleto['ambiente'] ?? 'teste';
+        }
+        
+        if (in_array('banco', $colunas_existentes)) {
+            $dadosInsert['banco'] = $dados['banco'] ?? 'itau';
+        }
+        
+        if (in_array('carteira', $colunas_existentes)) {
+            $dadosInsert['carteira'] = $dados['carteira'] ?? '109';
+        }
+        
+        if (in_array('desconto', $colunas_existentes)) {
+            $dadosInsert['desconto'] = $dados['desconto'] ?? 0.00;
+        }
+        
+        if (in_array('data_emissao', $colunas_existentes)) {
+            $dadosInsert['data_emissao'] = date('Y-m-d');
+        }
+        
+        if (in_array('created_at', $colunas_existentes)) {
+            $dadosInsert['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        // Log para debug
+        error_log("Salvando boleto com dados: " . json_encode($dadosInsert));
+
+        $boleto_id = $db->insert('boletos', $dadosInsert);
+        
+        error_log("Boleto salvo com ID: $boleto_id");
+        
+        return $boleto_id;
 
     } catch (Exception $e) {
         error_log('Erro ao salvar boleto no banco: ' . $e->getMessage());
+        error_log('Dados que tentou inserir: ' . json_encode($dadosInsert ?? []));
         throw $e;
     }
 }
@@ -307,4 +334,55 @@ function gerarLinhaDigitavel($codigoBarras) {
     $campo5 = substr($codigoBarras, 5, 14);
     
     return $campo1 . ' ' . $campo2 . ' ' . $campo3 . ' ' . $campo4 . ' ' . $campo5;
+}
+
+/**
+ * Gera o PDF do boleto após criação
+ */
+function gerarPDFBoleto($db, $boleto_id) {
+    try {
+        // Busca os dados completos do boleto
+        $boleto = $db->fetchOne("
+            SELECT b.*,
+                   CASE
+                       WHEN b.tipo_entidade = 'aluno' THEN a.nome
+                       WHEN b.tipo_entidade = 'polo' THEN p.nome
+                       ELSE b.nome_pagador
+                   END as pagador_nome
+            FROM boletos b
+            LEFT JOIN alunos a ON b.tipo_entidade = 'aluno' AND b.entidade_id = a.id
+            LEFT JOIN polos p ON b.tipo_entidade = 'polo' AND b.entidade_id = p.id
+            WHERE b.id = ?
+        ", [$boleto_id]);
+        
+        if (!$boleto) {
+            throw new Exception("Boleto não encontrado para gerar PDF");
+        }
+        
+        // Verifica se tem dados suficientes para gerar o PDF
+        if (empty($boleto['linha_digitavel']) && empty($boleto['codigo_barras'])) {
+            error_log("Boleto {$boleto_id} não tem dados suficientes para gerar PDF");
+            return false;
+        }
+        
+        // Inclui a classe de PDF
+        require_once __DIR__ . '/boleto_pdf.php';
+        
+        // Cria o gerador de PDF
+        $pdfGenerator = new BoletoPDF($boleto);
+        
+        // Gera e salva o PDF
+        $pdf_info = $pdfGenerator->gerarPDF(true);
+        
+        // Atualiza o banco com o caminho do PDF
+        $db->update('boletos', [
+            'url_boleto' => $pdf_info['url']
+        ], 'id = ?', [$boleto_id]);
+        
+        return $pdf_info;
+        
+    } catch (Exception $e) {
+        error_log("Erro ao gerar PDF do boleto {$boleto_id}: " . $e->getMessage());
+        return false;
+    }
 }

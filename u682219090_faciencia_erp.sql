@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Tempo de geração: 10/06/2025 às 18:46
+-- Tempo de geração: 11/06/2025 às 19:36
 -- Versão do servidor: 10.11.10-MariaDB-log
 -- Versão do PHP: 7.2.34
 
@@ -543,7 +543,11 @@ CREATE TABLE `categorias_chamados` (
 CREATE TABLE `categorias_financeiras` (
   `id` int(10) UNSIGNED NOT NULL,
   `nome` varchar(100) NOT NULL,
-  `tipo` enum('receita','despesa') NOT NULL
+  `tipo` enum('receita','despesa') NOT NULL,
+  `cor` varchar(8) NOT NULL DEFAULT '#3498db',
+  `status` enum('ativo','inativo') NOT NULL DEFAULT 'ativo',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -829,6 +833,23 @@ CREATE TABLE `configuracoes_documentos` (
   `descricao` text DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `configuracoes_financeiras`
+--
+
+CREATE TABLE `configuracoes_financeiras` (
+  `id` int(11) NOT NULL,
+  `chave` varchar(100) NOT NULL,
+  `valor` text DEFAULT NULL,
+  `descricao` varchar(255) DEFAULT NULL,
+  `tipo` enum('texto','numero','boolean','json') DEFAULT 'texto',
+  `grupo` varchar(50) DEFAULT 'geral',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1981,7 +2002,9 @@ ALTER TABLE `categorias_chamados`
 -- Índices de tabela `categorias_financeiras`
 --
 ALTER TABLE `categorias_financeiras`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_tipo` (`tipo`),
+  ADD KEY `idx_status` (`status`);
 
 --
 -- Índices de tabela `chamados`
@@ -2069,6 +2092,14 @@ ALTER TABLE `configuracoes`
 ALTER TABLE `configuracoes_documentos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `chave` (`chave`);
+
+--
+-- Índices de tabela `configuracoes_financeiras`
+--
+ALTER TABLE `configuracoes_financeiras`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `chave` (`chave`),
+  ADD KEY `idx_grupo` (`grupo`);
 
 --
 -- Índices de tabela `configuracoes_sistema`
@@ -2625,6 +2656,12 @@ ALTER TABLE `configuracoes`
 -- AUTO_INCREMENT de tabela `configuracoes_documentos`
 --
 ALTER TABLE `configuracoes_documentos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `configuracoes_financeiras`
+--
+ALTER TABLE `configuracoes_financeiras`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

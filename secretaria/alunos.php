@@ -662,11 +662,12 @@ switch ($action) {
             $atualizados = 0;
             $ignorados = 0;
             $erros = 0;
-            $mensagens_erro = [];
-
-            // Inicia uma transação apenas se não for validação
+            $mensagens_erro = [];            // Inicia uma transação apenas se não for validação
             if (!$apenas_validar) {
+                error_log("IMPORTAÇÃO DEBUG: Iniciando transação para importação real");
                 $db->beginTransaction();
+            } else {
+                error_log("IMPORTAÇÃO DEBUG: Modo validação - transação não iniciada");
             }
 
             // Array para armazenar resultados da validação
@@ -814,23 +815,32 @@ switch ($action) {
                     ];
 
                     continue;
-                }
-
-                // Verifica se o aluno já existe pelo CPF ou email
+                }                // Verifica se o aluno já existe pelo CPF ou email
                 $aluno_existente = null;
                 if (!empty($cpf)) {
-                    $sql = "SELECT id, nome FROM alunos WHERE cpf = ?";
-                    $aluno_existente = executarConsulta($db, $sql, [$cpf]);
+                    // Remove formatação do CPF para comparação
+                    $cpf_limpo = preg_replace('/[^0-9]/', '', $cpf);
+                    $sql = "SELECT id, nome, cpf FROM alunos WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?";
+                    $aluno_existente = executarConsulta($db, $sql, [$cpf_limpo]);
+                    
+                    // Log para debug
+                    error_log("IMPORTAÇÃO DEBUG: Verificando CPF '{$cpf}' (limpo: '{$cpf_limpo}') - Encontrado: " . ($aluno_existente ? "SIM (ID: {$aluno_existente['id']})" : "NÃO"));
                 }
 
                 // Se não encontrou pelo CPF e a opção de identificar por email está ativada, tenta encontrar pelo email
                 if (!$aluno_existente && $identificar_por_email && !empty($email)) {
-                    $sql = "SELECT id, nome FROM alunos WHERE email = ?";
+                    $sql = "SELECT id, nome, email FROM alunos WHERE email = ?";
                     $aluno_existente = executarConsulta($db, $sql, [$email]);
 
                     if ($aluno_existente) {
                         $mensagem_linha = "Aluno encontrado pelo email (CPF não corresponde)";
+                        error_log("IMPORTAÇÃO DEBUG: Aluno encontrado pelo email '{$email}' - ID: {$aluno_existente['id']}");
                     }
+                }
+                
+                // Log adicional para debug
+                if (!$aluno_existente) {
+                    error_log("IMPORTAÇÃO DEBUG: Novo aluno será inserido - Nome: '{$nome}', CPF: '{$cpf}', Email: '{$email}'");
                 }
 
                 // Prepara os dados para salvar
@@ -1007,19 +1017,26 @@ switch ($action) {
                     } else {
                         // Define o tipo de operação
                         $tipo_operacao = 'inserir';
-                        $mensagem_linha = "Será inserido como novo aluno";
-
-                        // Se não for apenas validação, insere o aluno
+                        $mensagem_linha = "Será inserido como novo aluno";                        // Se não for apenas validação, insere o aluno
                         if (!$apenas_validar) {
+                            // Log para debug
+                            error_log("IMPORTAÇÃO DEBUG: Inserindo novo aluno - Nome: '{$nome}', CPF: '{$cpf}', Email: '{$email}'");
+                            error_log("IMPORTAÇÃO DEBUG: Dados do aluno: " . json_encode($dados_aluno));
+                            
                             // Adiciona a data de criação
                             $dados_aluno['created_at'] = date('Y-m-d H:i:s');
 
                             // Insere um novo aluno
                             $id = $db->insert('alunos', $dados_aluno);
+                            
+                            // Log do resultado
+                            error_log("IMPORTAÇÃO DEBUG: Aluno inserido com ID: " . ($id ? $id : 'FALHOU'));
 
                             // Cria uma matrícula para o aluno se curso_id e turma_id estiverem definidos
-                            if (!empty($curso_id)) {
-                                try {
+                            if (!empty($curso_id)) {                                try {
+                                    // Log para debug
+                                    error_log("IMPORTAÇÃO DEBUG: Criando matrícula para aluno ID {$id} no curso ID {$curso_id}");
+                                    
                                     // Prepara os dados da matrícula
                                     $dados_matricula = [
                                         'aluno_id' => $id,
@@ -1037,12 +1054,13 @@ switch ($action) {
                                         'updated_at' => date('Y-m-d H:i:s')
                                     ];
 
-
+                                    // Log dos dados da matrícula
+                                    error_log("IMPORTAÇÃO DEBUG: Dados da matrícula: " . json_encode($dados_matricula));
 
                                     // Insere a matrícula
                                     $matricula_id = $db->insert('matriculas', $dados_matricula);
 
-                                    error_log("Matrícula criada para o aluno ID {$id} no curso ID {$curso_id}" .
+                                    error_log("IMPORTAÇÃO DEBUG: Matrícula criada com ID: " . ($matricula_id ? $matricula_id : 'FALHOU') . " para o aluno ID {$id} no curso ID {$curso_id}" .
                                               (!empty($turma_id) ? " e turma ID {$turma_id}" : ""));
                                 } catch (Exception $e) {
                                     error_log("Erro ao criar matrícula para o aluno ID {$id}: " . $e->getMessage());
@@ -1088,11 +1106,11 @@ switch ($action) {
                         'operacao' => $tipo_operacao
                     ];
                 }
-            }
-
-            // Confirma a transação apenas se não for validação
+            }            // Confirma a transação apenas se não for validação
             if (!$apenas_validar) {
+                error_log("IMPORTAÇÃO DEBUG: Fazendo commit da transação. Total: {$total}, Inseridos: {$inseridos}, Atualizados: {$atualizados}, Erros: {$erros}");
                 $db->commit();
+                error_log("IMPORTAÇÃO DEBUG: Commit realizado com sucesso");
             }
 
             // Remove o arquivo temporário

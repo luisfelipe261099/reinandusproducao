@@ -1,0 +1,21 @@
+# Proteção do diretório de boletos
+# Permite apenas arquivos PDF
+<Files ~ "\.(pdf)$">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Bloqueia outros tipos de arquivo
+<Files ~ "\.(php|html|js|css|txt)$">
+    Order deny,allow
+    Deny from all
+</Files>
+
+# Impede listagem de diretório
+Options -Indexes
+
+# Cache para PDFs (30 dias)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType application/pdf "access plus 30 days"
+</IfModule>

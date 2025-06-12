@@ -215,6 +215,169 @@ function verDetalhes(boletoId) {
         });
 }
 
+// Função para excluir boleto
+function excluirBoleto(boletoId, descricao) {
+    const confirmacao = confirm(`Tem certeza que deseja excluir o boleto:\n"${descricao}"?\n\nEsta ação não pode ser desfeita.`);
+    
+    if (!confirmacao) {
+        return;
+    }
+
+    // Mostra loading
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerHTML = `
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mr-3"></div>
+                    <span class="text-lg">Excluindo boleto...</span>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(loadingDiv);
+
+    // Faz a requisição de exclusão
+    fetch('ajax/excluir_boleto.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: boletoId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.body.removeChild(loadingDiv);
+        
+        if (data.success) {
+            Financeiro.showNotification('Boleto excluído com sucesso!', 'success');
+            // Recarrega a página após 1 segundo
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            Financeiro.showNotification(data.message || 'Erro ao excluir boleto', 'error');
+        }
+    })
+    .catch(error => {
+        document.body.removeChild(loadingDiv);
+        console.error('Erro:', error);
+        Financeiro.showNotification('Erro ao excluir boleto', 'error');
+    });
+}
+
+// Funções para busca de alunos
+let buscaAlunoTimeout;
+
+function inicializarBuscaAluno() {
+    const campoBusca = document.getElementById('busca-aluno');
+    const resultados = document.getElementById('resultados-aluno');
+    const loading = document.getElementById('loading-aluno');
+    
+    if (!campoBusca || !resultados) return;
+    
+    campoBusca.addEventListener('input', function() {
+        clearTimeout(buscaAlunoTimeout);
+        const termo = this.value.trim();
+        
+        if (termo.length < 2) {
+            resultados.innerHTML = '';
+            resultados.classList.add('hidden');
+            return;
+        }
+        
+        loading.classList.remove('hidden');
+        
+        buscaAlunoTimeout = setTimeout(() => {
+            buscarAlunos(termo);
+        }, 300);
+    });
+    
+    // Fecha resultados ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!campoBusca.contains(e.target) && !resultados.contains(e.target)) {
+            resultados.classList.add('hidden');
+        }
+    });
+}
+
+function buscarAlunos(termo) {
+    const resultados = document.getElementById('resultados-aluno');
+    const loading = document.getElementById('loading-aluno');
+    
+    fetch(`ajax/buscar_alunos.php?termo=${encodeURIComponent(termo)}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loading.classList.add('hidden');
+        
+        if (data.error) {
+            resultados.innerHTML = `<div class="p-3 text-red-500">${data.error}</div>`;
+            resultados.classList.remove('hidden');
+            return;
+        }
+        
+        if (data.alunos.length === 0) {
+            resultados.innerHTML = '<div class="p-3 text-gray-500 text-center">Nenhum aluno encontrado</div>';
+            resultados.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        data.alunos.forEach(aluno => {
+            html += `
+                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b" 
+                     onclick="selecionarAluno(${aluno.id}, '${aluno.nome}', '${aluno.cpf}')">
+                    <div class="font-medium text-gray-900">${aluno.nome}</div>
+                    <div class="text-sm text-gray-500">CPF: ${aluno.cpf_formatado}</div>
+                    ${aluno.email ? `<div class="text-sm text-gray-400">${aluno.email}</div>` : ''}
+                </div>`;
+        });
+        
+        resultados.innerHTML = html;
+        resultados.classList.remove('hidden');
+        
+        if (data.limite_atingido) {
+            resultados.innerHTML += '<div class="p-2 text-xs text-gray-400 text-center">Digite mais caracteres para refinar a busca</div>';
+        }
+    })
+    .catch(error => {
+        loading.classList.add('hidden');
+        console.error('Erro na busca:', error);
+        resultados.innerHTML = '<div class="p-3 text-red-500">Erro ao buscar alunos</div>';
+        resultados.classList.remove('hidden');
+    });
+}
+
+function selecionarAluno(id, nome, cpf) {
+    // Preenche os campos
+    document.getElementById('referencia-id').value = id;
+    document.getElementById('nome-pagador').value = nome;
+    document.getElementById('cpf-pagador').value = cpf;
+    document.getElementById('descricao').value = `Mensalidade - ${nome}`;
+    
+    // Mostra o aluno selecionado
+    document.getElementById('nome-aluno-selecionado').textContent = nome;
+    document.getElementById('cpf-aluno-selecionado').textContent = `CPF: ${cpf}`;
+    document.getElementById('aluno-selecionado').classList.remove('hidden');
+    
+    // Esconde os resultados
+    document.getElementById('resultados-aluno').classList.add('hidden');
+    document.getElementById('busca-aluno').value = '';
+}
+
+function limparSelecaoAluno() {
+    document.getElementById('referencia-id').value = '';
+    document.getElementById('nome-pagador').value = '';
+    document.getElementById('cpf-pagador').value = '';
+    document.getElementById('descricao').value = 'Mensalidade - ';
+    document.getElementById('aluno-selecionado').classList.add('hidden');
+    document.getElementById('busca-aluno').value = '';
+}
+
 // Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
     // Aplica máscaras nos campos
@@ -229,4 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dataVencimento.min = amanha.toISOString().split('T')[0];
         dataVencimento.value = amanha.toISOString().split('T')[0];
     }
+    
+    // Inicializa busca de alunos
+    inicializarBuscaAluno();
 });

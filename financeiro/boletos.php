@@ -16,14 +16,15 @@ $action = $_GET['action'] ?? 'listar';
 
 // Processa ações
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $postAction = $_POST['action'] ?? '';
+    $postAction = $_POST['action'] ?? '';    if ($postAction === 'gerar_boleto') {
+        require_once 'includes/boleto_functions_compativel.php';
 
-    if ($postAction === 'gerar_boleto') {
-        require_once 'includes/boleto_functions.php';
-
+        // Dados do formulário (funciona com qualquer estrutura)
         $dados = [
             'tipo' => $_POST['tipo'],
+            'tipo_entidade' => $_POST['tipo'], // Compatibilidade
             'referencia_id' => $_POST['referencia_id'],
+            'entidade_id' => $_POST['referencia_id'], // Compatibilidade
             'valor' => str_replace(['R$', '.', ','], ['', '', '.'], $_POST['valor']),
             'data_vencimento' => $_POST['data_vencimento'],
             'descricao' => $_POST['descricao'],
@@ -31,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'cpf_pagador' => $_POST['cpf_pagador'],
             'endereco' => $_POST['endereco'],
             'bairro' => $_POST['bairro'],
+            'cidade' => $_POST['cidade'],            'bairro' => $_POST['bairro'],
             'cidade' => $_POST['cidade'],
             'uf' => $_POST['uf'],
             'cep' => $_POST['cep'],
@@ -38,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'juros' => floatval($_POST['juros'] ?? 1)
         ];
 
-        $resultado = gerarBoletoBancario($db, $dados);
+        $resultado = gerarBoletoBancarioCompativel($db, $dados);
 
         if ($resultado['status'] === 'sucesso') {
             $_SESSION['success'] = $resultado['mensagem'];
@@ -49,36 +51,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: boletos.php');
         exit;
     }
+
+    if ($postAction === 'excluir_boleto') {
+        $boletoId = intval($_POST['boleto_id']);
+        
+        if ($boletoId > 0) {            try {
+                // Primeiro, verificar se o boleto existe
+                $boleto = $db->fetchOne("SELECT id FROM boletos WHERE id = ?", [$boletoId]);
+                
+                if (!$boleto) {
+                    $_SESSION['error'] = 'Boleto não encontrado.';
+                } else {
+                    // Remover arquivos PDF relacionados (baseado no padrão de nomenclatura)
+                    $arquivosPdf = [
+                        '../uploads/boletos/boleto_' . $boletoId . '.pdf',
+                        '../uploads/boletos/' . $boletoId . '.pdf',
+                        '../uploads/boletos/boleto_' . $boletoId . '.html'
+                    ];
+                    
+                    foreach ($arquivosPdf as $arquivoPdf) {
+                        if (file_exists($arquivoPdf)) {
+                            unlink($arquivoPdf);
+                            error_log("Arquivo removido: $arquivoPdf");
+                        }
+                    }
+                    
+                    // Excluir o boleto do banco de dados
+                    $result = $db->delete('boletos', 'id = ?', [$boletoId]);
+                    
+                    if ($result > 0) {
+                        $_SESSION['success'] = 'Boleto excluído com sucesso!';
+                    } else {
+                        $_SESSION['error'] = 'Erro ao excluir boleto do banco de dados.';
+                    }
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = 'Erro ao excluir boleto: ' . $e->getMessage();
+            }
+        } else {
+            $_SESSION['error'] = 'ID do boleto inválido.';
+        }
+        
+        header('Location: boletos.php');
+        exit;
+    }
 }
 
 // Busca dados
 try {
     if ($action === 'listar') {
+        // Configuração da paginação
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $limit = 20; // Boletos por página
+        $offset = ($page - 1) * $limit;
+        
+        // Busca total de registros para paginação
+        $totalRecords = $db->fetchOne("
+            SELECT COUNT(*) as total
+            FROM boletos b
+            LEFT JOIN alunos a ON b.tipo_entidade = 'aluno' AND b.entidade_id = a.id
+            LEFT JOIN polos p ON b.tipo_entidade = 'polo' AND b.entidade_id = p.id
+        ");
+        $totalPages = ceil($totalRecords['total'] / $limit);
+        
+        // Query adaptada para a estrutura existente da tabela boletos com paginação
         $boletos = $db->fetchAll("
             SELECT b.*,
                    CASE
-                       WHEN b.tipo = 'mensalidade' THEN a.nome
-                       WHEN b.tipo = 'polo' THEN p.nome
+                       WHEN b.tipo_entidade = 'aluno' THEN a.nome
+                       WHEN b.tipo_entidade = 'polo' THEN p.nome
                        ELSE b.nome_pagador
                    END as pagador_nome
             FROM boletos b
-            LEFT JOIN alunos a ON b.tipo = 'mensalidade' AND b.referencia_id = a.id
-            LEFT JOIN polos p ON b.tipo = 'polo' AND b.referencia_id = p.id
+            LEFT JOIN alunos a ON b.tipo_entidade = 'aluno' AND b.entidade_id = a.id
+            LEFT JOIN polos p ON b.tipo_entidade = 'polo' AND b.entidade_id = p.id
             ORDER BY b.created_at DESC
+            LIMIT $limit OFFSET $offset
         ");
+    } else {
+        $totalPages = 0;
+        $page = 1;
+        $totalRecords = ['total' => 0];
     }
 
-    // Busca apenas alguns alunos iniciais para evitar travamento
-    $alunos = []; // Será carregado via AJAX
-
-    // Busca polos para seleção (geralmente são poucos)
+    // Busca polos para seleção
     $polos = $db->fetchAll("SELECT id, nome FROM polos ORDER BY nome");
 
 } catch (Exception $e) {
-    $tabelasNaoExistem = true;
+    $_SESSION['error'] = 'Erro ao carregar dados: ' . $e->getMessage();
     $boletos = [];
-    $alunos = [];
     $polos = [];
+    $totalPages = 0;
+    $page = 1;
+    $totalRecords = ['total' => 0];
 }
 
 $pageTitle = 'Boletos Bancários';
@@ -99,26 +164,33 @@ $pageTitle = 'Boletos Bancários';
         <?php include 'includes/sidebar.php'; ?>
 
         <div class="flex-1 flex flex-col ml-64">
-            <?php include 'includes/header.php'; ?>
-
-            <main class="flex-1 p-6 overflow-y-auto">
+            <?php include 'includes/header.php'; ?>            <main class="flex-1 p-6 overflow-y-auto">
                 <div class="max-w-7xl mx-auto">
 
-                    <?php if (isset($tabelasNaoExistem)): ?>
-                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+                    <!-- Mensagens de sucesso/erro -->
+                    <?php if (isset($_SESSION['success'])): ?>
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
                         <div class="flex">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-triangle"></i>
+                                <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm">
-                                    O módulo financeiro precisa ser configurado primeiro.
-                                    <a href="setup_basico.php" class="font-medium underline">Clique aqui para configurar</a>
-                                </p>
+                                <p class="text-sm"><?php echo $_SESSION['success']; ?></p>
                             </div>
                         </div>
                     </div>
-                    <?php endif; ?>
+                    <?php unset($_SESSION['success']); endif; ?>                    <?php if (isset($_SESSION['error'])): ?>
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm"><?php echo $_SESSION['error']; ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php unset($_SESSION['error']); endif; ?>
 
                     <?php if ($action === 'listar'): ?>
                     <!-- Listagem de Boletos -->
@@ -167,17 +239,16 @@ $pageTitle = 'Boletos Bancários';
                                             <div class="text-sm text-gray-500">
                                                 <?php echo htmlspecialchars($boleto['cpf_pagador']); ?>
                                             </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        </td>                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 <?php
-                                                switch($boleto['tipo']) {
-                                                    case 'mensalidade': echo 'bg-blue-100 text-blue-800'; break;
+                                                switch($boleto['tipo_entidade']) {
+                                                    case 'aluno': echo 'bg-blue-100 text-blue-800'; break;
                                                     case 'polo': echo 'bg-purple-100 text-purple-800'; break;
                                                     default: echo 'bg-gray-100 text-gray-800';
                                                 }
                                                 ?>">
-                                                <?php echo ucfirst($boleto['tipo']); ?>
+                                                <?php echo ucfirst($boleto['tipo_entidade']); ?>
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -197,33 +268,121 @@ $pageTitle = 'Boletos Bancários';
                                                 ?>">
                                                 <?php echo ucfirst($boleto['status']); ?>
                                             </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        </td>                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <?php if (!empty($boleto['linha_digitavel'])): ?>
                                             <button onclick="mostrarLinhaDigitavel('<?php echo $boleto['linha_digitavel']; ?>')"
-                                                    class="text-green-600 hover:text-green-900 mr-3" title="Linha Digitável">
+                                                    class="text-green-600 hover:text-green-900 mr-2" title="Linha Digitável">
                                                 <i class="fas fa-barcode"></i>
                                             </button>
                                             <?php endif; ?>
 
-                                            <?php if (!empty($boleto['url_boleto'])): ?>
-                                            <a href="<?php echo $boleto['url_boleto']; ?>" target="_blank"
-                                               class="text-blue-600 hover:text-blue-900 mr-3" title="Visualizar Boleto">
+                                            <!-- PDF Visualizar/Baixar -->
+                                            <?php if (!empty($boleto['linha_digitavel']) || !empty($boleto['codigo_barras'])): ?>
+                                            <a href="boleto_pdf.php?id=<?php echo $boleto['id']; ?>&action=visualizar" target="_blank"
+                                               class="text-red-600 hover:text-red-900 mr-2" title="Visualizar PDF">
                                                 <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <a href="boleto_pdf.php?id=<?php echo $boleto['id']; ?>&action=download"
+                                               class="text-orange-600 hover:text-orange-900 mr-2" title="Baixar PDF">
+                                                <i class="fas fa-download"></i>
                                             </a>
                                             <?php endif; ?>
 
-                                            <button onclick="verDetalhes(<?php echo $boleto['id']; ?>)"
-                                                    class="text-indigo-600 hover:text-indigo-900" title="Detalhes">
+                                            <!-- URL do Itaú -->
+                                            <?php if (!empty($boleto['url_boleto']) && strpos($boleto['url_boleto'], 'itau.com.br') !== false): ?>
+                                            <a href="<?php echo $boleto['url_boleto']; ?>" target="_blank"
+                                               class="text-blue-600 hover:text-blue-900 mr-2" title="Ver no Site do Itaú">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                            <?php endif; ?>                                            <button onclick="verDetalhes(<?php echo $boleto['id']; ?>)"
+                                                    class="text-indigo-600 hover:text-indigo-900 mr-2" title="Detalhes">
                                                 <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button onclick="excluirBoleto(<?php echo $boleto['id']; ?>, '<?php echo addslashes($boleto['descricao']); ?>')"
+                                                    class="text-red-600 hover:text-red-900" title="Excluir Boleto">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
+                                    <?php endif; ?>                                </tbody>
                             </table>
                         </div>
+
+                        <!-- Paginação -->
+                        <?php if ($totalPages > 1): ?>
+                        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                <?php if ($page > 1): ?>
+                                <a href="?page=<?php echo $page - 1; ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Anterior
+                                </a>
+                                <?php endif; ?>
+                                <?php if ($page < $totalPages): ?>
+                                <a href="?page=<?php echo $page + 1; ?>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Próximo
+                                </a>
+                                <?php endif; ?>
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Mostrando
+                                        <span class="font-medium"><?php echo (($page - 1) * 20) + 1; ?></span>
+                                        até
+                                        <span class="font-medium"><?php echo min($page * 20, $totalRecords['total']); ?></span>
+                                        de
+                                        <span class="font-medium"><?php echo $totalRecords['total']; ?></span>
+                                        resultados
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <?php if ($page > 1): ?>
+                                        <a href="?page=<?php echo $page - 1; ?>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Anterior</span>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <?php endif; ?>
+
+                                        <?php
+                                        // Mostrar páginas
+                                        $start = max(1, $page - 2);
+                                        $end = min($totalPages, $page + 2);
+                                        
+                                        if ($start > 1): ?>
+                                        <a href="?page=1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
+                                        <?php if ($start > 2): ?>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                        <?php endif; ?>
+                                        <?php endif; ?>
+
+                                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                                        <a href="?page=<?php echo $i; ?>" 
+                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium <?php echo $i == $page ? 'bg-green-50 border-green-500 text-green-600' : 'bg-white text-gray-700 hover:bg-gray-50'; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                        <?php endfor; ?>
+
+                                        <?php if ($end < $totalPages): ?>
+                                        <?php if ($end < $totalPages - 1): ?>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                        <?php endif; ?>
+                                        <a href="?page=<?php echo $totalPages; ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"><?php echo $totalPages; ?></a>
+                                        <?php endif; ?>
+
+                                        <?php if ($page < $totalPages): ?>
+                                        <a href="?page=<?php echo $page + 1; ?>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Próximo</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                        <?php endif; ?>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <?php elseif ($action === 'novo'): ?>
@@ -411,9 +570,112 @@ $pageTitle = 'Boletos Bancários';
                     </div>
                     <?php endif; ?>
                 </div>
-            </main>
+            </main>        </div>
+    </div>
+
+    <!-- Modal para mostrar linha digitável -->
+    <div id="modal-linha-digitavel" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900">Linha Digitável</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="linha-digitavel-texto" class="text-sm text-gray-500 font-mono"></p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button onclick="copiarLinhaDigitavel()" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-green-600">
+                        Copiar
+                    </button>
+                    <button onclick="fecharModal()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600">
+                        Fechar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Funções para o modal
+        function mostrarLinhaDigitavel(linha) {
+            document.getElementById('linha-digitavel-texto').textContent = linha;
+            document.getElementById('modal-linha-digitavel').classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-linha-digitavel').classList.add('hidden');
+        }
+
+        function copiarLinhaDigitavel() {
+            const texto = document.getElementById('linha-digitavel-texto').textContent;
+            navigator.clipboard.writeText(texto).then(function() {
+                alert('Linha digitável copiada!');
+            });
+        }        function verDetalhes(id) {
+            // Implementar visualização de detalhes
+            alert('Funcionalidade de detalhes será implementada. ID: ' + id);
+        }
+
+        function excluirBoleto(id, descricao) {
+            if (confirm('Tem certeza que deseja excluir o boleto "' + descricao + '"?\n\nEsta ação não pode ser desfeita.')) {
+                // Criar um formulário para enviar a requisição POST
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'boletos.php';
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'excluir_boleto';
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'boleto_id';
+                idInput.value = id;
+                
+                form.appendChild(actionInput);
+                form.appendChild(idInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Função para alterar tipo de boleto
+        function alterarTipoBoleto() {
+            const tipo = document.getElementById('tipo-boleto').value;
+            const secaoAluno = document.getElementById('secao-aluno');
+            const secaoPolo = document.getElementById('secao-polo');
+            
+            // Esconde todas as seções
+            secaoAluno.classList.add('hidden');
+            secaoPolo.classList.add('hidden');
+            
+            // Mostra a seção apropriada
+            if (tipo === 'mensalidade') {
+                secaoAluno.classList.remove('hidden');
+                document.getElementById('referencia-id').value = '';
+            } else if (tipo === 'polo') {
+                secaoPolo.classList.remove('hidden');
+                document.getElementById('referencia-id').value = '';
+            }
+        }
+
+        function preencherDadosPolo() {
+            const select = document.getElementById('polo-select');
+            const option = select.options[select.selectedIndex];
+            
+            if (option.value) {
+                document.getElementById('referencia-id').value = option.value;
+                document.getElementById('nome-pagador').value = option.dataset.nome;
+                document.getElementById('descricao').value = 'Cobrança do polo: ' + option.dataset.nome;
+            }
+        }
+
+        function limparSelecaoAluno() {
+            document.getElementById('aluno-selecionado').classList.add('hidden');
+            document.getElementById('busca-aluno').value = '';
+            document.getElementById('aluno-id-hidden').value = '';
+            document.getElementById('referencia-id').value = '';
+        }
+    </script>
 
     <script src="js/financeiro.js"></script>
     <script src="js/boletos.js"></script>

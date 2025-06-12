@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Exclusão de Boletos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-red-600 text-white p-6">
+                <h1 class="text-3xl font-bold flex items-center">
+                    <i class="fas fa-bug mr-3"></i>
+                    Teste de Exclusão de Boletos
+                </h1>
+                <p class="text-red-100 mt-2">Diagnóstico de funcionamento da exclusão</p>
+            </div>
+            
+            <div class="p-6">
+                <div id="loading" class="text-center mb-6">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">Executando testes...</p>
+                </div>
+                
+                <div id="resultados" class="hidden space-y-4"></div>
+                
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="boletos.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>
+                        Ir para Boletos
+                    </a>
+                    <button onclick="executarTestes()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Executar Novamente
+                    </button>
+                    <a href="teste_completo_final.php" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center">
+                        <i class="fas fa-clipboard-check mr-2"></i>
+                        Teste Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function executarTestes() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('resultados').classList.add('hidden');
+            
+            fetch('teste_exclusao.php')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').classList.add('hidden');
+                    mostrarResultados(data);
+                })
+                .catch(error => {
+                    document.getElementById('loading').classList.add('hidden');
+                    mostrarErro('Erro ao executar testes: ' + error.message);
+                });
+        }
+        
+        function mostrarResultados(data) {
+            const container = document.getElementById('resultados');
+            container.innerHTML = '';
+            
+            if (data.status === 'erro') {
+                mostrarErro(data.mensagem);
+                return;
+            }
+            
+            let sucessos = 0;
+            let erros = 0;
+            let avisos = 0;
+            
+            data.testes.forEach(teste => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-4 rounded-lg border';
+                
+                let colorClass = '';
+                let iconClass = '';
+                
+                switch(teste.status) {
+                    case 'OK':
+                        colorClass = 'bg-green-50 border-green-200';
+                        iconClass = 'fas fa-check-circle text-green-600';
+                        sucessos++;
+                        break;
+                    case 'ERRO':
+                        colorClass = 'bg-red-50 border-red-200';
+                        iconClass = 'fas fa-times-circle text-red-600';
+                        erros++;
+                        break;
+                    case 'AVISO':
+                        colorClass = 'bg-yellow-50 border-yellow-200';
+                        iconClass = 'fas fa-exclamation-triangle text-yellow-600';
+                        avisos++;
+                        break;
+                }
+                
+                div.className += ' ' + colorClass;
+                
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="${iconClass} mr-3"></i>
+                        <div>
+                            <div class="font-medium">${teste.nome}</div>
+                            <div class="text-sm text-gray-600">${teste.mensagem}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Adiciona resumo
+            const resumo = document.createElement('div');
+            resumo.className = 'mt-6 p-4 bg-gray-50 rounded-lg';
+            resumo.innerHTML = `
+                <h3 class="text-lg font-bold mb-2">Resumo dos Testes</h3>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-green-100 p-3 rounded">
+                        <div class="text-2xl font-bold text-green-600">${sucessos}</div>
+                        <div class="text-green-800">Sucessos</div>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded">
+                        <div class="text-2xl font-bold text-yellow-600">${avisos}</div>
+                        <div class="text-yellow-800">Avisos</div>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded">
+                        <div class="text-2xl font-bold text-red-600">${erros}</div>
+                        <div class="text-red-800">Erros</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(resumo);
+            
+            container.classList.remove('hidden');
+        }
+        
+        function mostrarErro(mensagem) {
+            const container = document.getElementById('resultados');
+            container.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-times-circle text-red-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium text-red-800">Erro nos Testes</div>
+                            <div class="text-sm text-red-600">${mensagem}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.classList.remove('hidden');
+        }
+        
+        // Executa testes automaticamente quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            executarTestes();
+        });
+    </script>
+</body>
+</html>

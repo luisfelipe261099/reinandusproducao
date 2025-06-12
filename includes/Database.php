@@ -252,4 +252,37 @@ class Database {
     public function lastInsertId() {
         return $this->conn->lastInsertId();
     }
+
+    /**
+     * Prepara uma consulta SQL (método de compatibilidade)
+     * 
+     * @param string $sql A consulta SQL
+     * @return PDOStatement
+     */
+    public function prepare($sql) {
+        try {
+            error_log("Database::prepare - Preparing SQL: {$sql}");
+            $stmt = $this->conn->prepare($sql);
+            
+            if (!$stmt) {
+                $error = $this->conn->errorInfo();
+                error_log("Database::prepare - Prepare error: " . json_encode($error));
+                throw new PDOException("Prepare failed: " . $error[2]);
+            }
+            
+            return $stmt;
+        } catch (PDOException $e) {
+            error_log("Database::prepare - PDO Exception: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Obtém a conexão PDO diretamente (método de compatibilidade)
+     * 
+     * @return PDO
+     */
+    public function getPDO() {
+        return $this->conn;
+    }
 }
